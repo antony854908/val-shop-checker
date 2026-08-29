@@ -482,10 +482,6 @@ async function processTokenString(rawText, alertEl) {
       throw new Error(data.error || 'Token ไม่ถูกต้องหรือหมดอายุ');
     }
 
-    try {
-      localStorage.setItem('val_auth_token', cleanText);
-    } catch (e) {}
-
     // Success! Immediately fetch profile and load store
     const meRes = await apiFetch('/api/auth/me');
     const meData = await meRes.json();
@@ -600,46 +596,6 @@ async function checkAuth() {
       return true;
     }
   } catch (err) {}
-
-  // Auto-restore from saved token
-  const savedToken = localStorage.getItem('val_auth_token');
-  if (savedToken && savedToken.length > 20) {
-    try {
-      let accessToken = savedToken.trim();
-      let idToken = null;
-
-      if (accessToken.includes('access_token=')) {
-        const hash = accessToken.includes('#') ? accessToken.split('#')[1] : accessToken;
-        const params = new URLSearchParams(hash.includes('?') ? hash.split('?')[1] : hash);
-        accessToken = params.get('access_token') || accessToken;
-        idToken = params.get('id_token');
-      }
-
-      const res = await apiFetch('/api/auth/token-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessToken, idToken, region: 'auto' })
-      });
-
-      const data = await res.json();
-      if (data.sessionId) setStoredSid(data.sessionId);
-
-      if (data.ok) {
-        const meRes = await apiFetch('/api/auth/me');
-        const meData = await meRes.json();
-        if (meData.ok && meData.loggedIn) {
-          currentUser = meData.user;
-          renderUserHeader(meData.user);
-          await loadStore();
-          return true;
-        }
-      } else {
-        localStorage.removeItem('val_auth_token');
-      }
-    } catch (e) {
-      localStorage.removeItem('val_auth_token');
-    }
-  }
 
   showLoginView();
   return false;
@@ -859,10 +815,6 @@ tokenLoginForm?.addEventListener('submit', async (e) => {
       throw new Error(data.error || 'Token ไม่ถูกต้องหรือหมดอายุ');
     }
 
-    try {
-      localStorage.setItem('val_auth_token', raw);
-    } catch (e) {}
-
     const meRes = await apiFetch('/api/auth/me');
     const meData = await meRes.json();
     if (meData.ok && meData.loggedIn) {
@@ -890,7 +842,6 @@ async function loadStore() {
 
     if (!data.ok) {
       if (res.status === 401 || data.error?.includes('หมดอายุ') || data.error?.includes('เข้าสู่ระบบ')) {
-        try { localStorage.removeItem('val_auth_token'); } catch(e){}
         showLoginView();
         showAlert(loginAlert, 'เซสชันหมดอายุแล้ว กรุณาเข้าสู่ระบบใหม่อีกครั้ง');
         return;
@@ -1497,7 +1448,6 @@ btnLogout?.addEventListener('click', async () => {
   } catch (e) {}
   try {
     localStorage.removeItem('val_sid');
-    localStorage.removeItem('val_auth_token');
   } catch (e) {}
   showLoginView();
 });
@@ -2109,12 +2059,12 @@ function renderMatchesList(matches) {
     // Friendly & Enemy Rosters preview
     const friendlyRoster = (m.friendlyTeam || []).map(p => {
       const icon = p.agent?.displayIcon || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png';
-      return `<img src="${icon}" class="roster-mini-avatar ${p.isMe ? 'is-me' : ''}" title="${p.gameName}#${p.tagLine} (${p.agent?.displayName || 'Agent'})" alt="${p.gameName}">`;
+      return `<img src="${icon}" class="roster-mini-avatar ${p.isMe ? 'is-me' : ''}" title="${escapeHtml(p.gameName)}#${escapeHtml(p.tagLine)} (${escapeHtml(p.agent?.displayName || 'Agent')})" alt="${escapeHtml(p.gameName)}">`;
     }).join('');
 
     const enemyRoster = (m.enemyTeam || []).map(p => {
       const icon = p.agent?.displayIcon || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png';
-      return `<img src="${icon}" class="roster-mini-avatar" title="${p.gameName}#${p.tagLine} (${p.agent?.displayName || 'Agent'})" alt="${p.gameName}">`;
+      return `<img src="${icon}" class="roster-mini-avatar" title="${escapeHtml(p.gameName)}#${escapeHtml(p.tagLine)} (${escapeHtml(p.agent?.displayName || 'Agent')})" alt="${escapeHtml(p.gameName)}">`;
     }).join('');
 
     card.innerHTML = `
@@ -2237,10 +2187,10 @@ function openMatchScoreboard(match) {
             <img src="${agIcon}" alt="" class="player-cell-agent-img">
             <div>
               <div class="player-cell-name">
-                <span>${p.gameName}</span>
+                <span>${escapeHtml(p.gameName)}</span>
                 ${p.isMe ? '<span class="you-pill">คุณ</span>' : ''}
               </div>
-              <div class="player-cell-tag">#${p.tagLine}</div>
+              <div class="player-cell-tag">#${escapeHtml(p.tagLine)}</div>
             </div>
           </div>
         </td>
@@ -3150,16 +3100,16 @@ function renderSingleRoundDetail(round) {
     <div class="killfeed-row">
       <div class="killfeed-actor ${k.killerTeam === currentActiveMatch?.myTeamId ? 'friendly' : 'enemy'}">
         <img src="${k.killerAgent?.displayIcon || ''}" class="killfeed-agent-img" alt="">
-        <strong>${k.killerName}</strong>
+        <strong>${escapeHtml(k.killerName)}</strong>
       </div>
       <div class="killfeed-weapon-wrap">
-        ${k.weaponIcon ? `<img src="${k.weaponIcon}" class="killfeed-wp-icon" alt="${k.weaponName}">` : `<span>${k.weaponName}</span>`}
+        ${k.weaponIcon ? `<img src="${k.weaponIcon}" class="killfeed-wp-icon" alt="${escapeHtml(k.weaponName)}">` : `<span>${escapeHtml(k.weaponName)}</span>`}
         ${k.isHeadshot ? '<span class="headshot-badge">HEADSHOT</span>' : ''}
-        <span style="font-size:11px; color:var(--val-gray); margin-left:4px;">${k.roundTime}</span>
+        <span style="font-size:11px; color:var(--val-gray); margin-left:4px;">${escapeHtml(k.roundTime)}</span>
       </div>
       <div class="killfeed-actor ${k.victimTeam === currentActiveMatch?.myTeamId ? 'friendly' : 'enemy'}">
         <img src="${k.victimAgent?.displayIcon || ''}" class="killfeed-agent-img" alt="">
-        <strong>${k.victimName}</strong>
+        <strong>${escapeHtml(k.victimName)}</strong>
       </div>
     </div>
   `).join('') : '<div style="color:var(--val-gray); font-size:12px; text-align:center; padding:10px;">ไม่มีการคิลในรอบนี้</div>';

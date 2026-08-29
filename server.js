@@ -20,6 +20,8 @@ const {
 
 const app = express();
 
+const isProd = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
+
 // Disable X-Powered-By fingerprinting
 app.disable('x-powered-by');
 
@@ -32,9 +34,18 @@ app.use(helmet({
       scriptSrcAttr: ["'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
-      imgSrc: ["'self'", "data:", "blob:", "https:", "http:"],
-      mediaSrc: ["'self'", "blob:", "https:", "http:"],
-      connectSrc: ["'self'", "*"],
+      imgSrc: ["'self'", "data:", "blob:", "https:"],
+      mediaSrc: ["'self'", "blob:", "https:"],
+      connectSrc: [
+        "'self'",
+        "https://auth.riotgames.com",
+        "https://entitlements.auth.riotgames.com",
+        "https://*.pvp.net",
+        "https://riot-geo.pas.riotgames.com",
+        "https://valorant-api.com",
+        "https://media.valorant-api.com",
+        "https://www.overtopup.com"
+      ],
       frameAncestors: ["'none'"],
       baseUri: ["'self'"],
       formAction: ["'self'"],
@@ -50,8 +61,30 @@ app.use(helmet({
   referrerPolicy: { policy: 'no-referrer-when-downgrade' }
 }));
 
+// Allowed Origins for CORS with Credentials (Strict Whitelist)
+const allowedOriginPatterns = [
+  'https://val-shop-checker.vercel.app',
+  /^https:\/\/val-shop-checker.*\.vercel\.app$/,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  /^http:\/\/192\.168\.\d+\.\d+(:\d+)?$/,
+  /^http:\/\/10\.\d+\.\d+\.\d+(:\d+)?$/,
+  /^http:\/\/172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+(:\d+)?$/
+];
+
 app.use(cors({
-  origin: true,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const isAllowed = allowedOriginPatterns.some(pattern => {
+      if (pattern instanceof RegExp) return pattern.test(origin);
+      return pattern === origin;
+    });
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
   credentials: true,
   exposedHeaders: ['X-Val-Session']
 }));
@@ -88,7 +121,8 @@ function getSessionMiddleware(req, res, next) {
   if (!session) {
     session = sessionStore.createSession();
     res.cookie('val_sid', session.id, {
-      httpOnly: false,
+      httpOnly: true,
+      secure: isProd,
       sameSite: 'lax',
       path: '/',
       maxAge: config.SESSION_TTL_MS
@@ -511,7 +545,12 @@ app.post('/api/auth/logout', (req, res) => {
   if (req.valSession) {
     sessionStore.destroySession(req.valSession.id);
   }
-  res.clearCookie('val_sid', { path: '/' });
+  res.clearCookie('val_sid', {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: 'lax',
+    path: '/'
+  });
   res.json({ ok: true, message: 'ออกจากระบบเรียบร้อย' });
 });
 
