@@ -1150,86 +1150,9 @@ document.getElementById('btnMfaCancel')?.addEventListener('click', () => {
 // Form 2: Token / Social Login
 tokenLoginForm?.addEventListener('submit', async (e) => {
   e.preventDefault();
-  hideAlert(tokenAlert);
-
   const rawInput = document.getElementById('inputAccessToken');
-  const regionInput = document.getElementById('tokenRegion');
-
-  let raw = rawInput ? rawInput.value.trim() : '';
-  const region = regionInput ? regionInput.value : 'auto';
-
-  if (!raw) {
-    showAlert(tokenAlert, 'กรุณาวาง URL หรือ Access Token');
-    return;
-  }
-
-  if (raw.includes('%23') || raw.includes('%3D') || raw.includes('%26')) {
-    try { raw = decodeURIComponent(raw); } catch (e) {}
-  }
-
-  let accessToken = raw;
-  let idToken = null;
-
-  if (raw.includes('access_token=')) {
-    let paramStr = raw;
-    if (raw.includes('#')) {
-      paramStr = raw.split('#')[1];
-    } else if (raw.includes('?')) {
-      paramStr = raw.split('?')[1];
-    }
-    const params = new URLSearchParams(paramStr);
-    accessToken = params.get('access_token') || raw;
-    idToken = params.get('id_token');
-  } else if (raw.startsWith('eyJ') && raw.includes(' ')) {
-    const parts = raw.split(/\s+/);
-    accessToken = parts[0];
-    if (parts[1] && parts[1].startsWith('eyJ')) idToken = parts[1];
-  }
-
-  const submitBtn = document.getElementById('btnTokenSubmit');
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'กำลังตรวจสอบ Token...';
-  }
-
-  try {
-    const res = await apiFetch('/api/auth/token-login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accessToken, idToken, region })
-    });
-
-    const data = await res.json();
-    if (data.sessionId) {
-      setStoredSid(data.sessionId);
-    }
-    if (data.authPack) {
-      setStoredAuthPack(data.authPack);
-    } else if (data.auth) {
-      setStoredAuthPack(data.auth);
-    }
-
-    if (!data.ok) {
-      throw new Error(data.error || 'Token ไม่ถูกต้องหรือหมดอายุ');
-    }
-
-    const meRes = await apiFetch('/api/auth/me');
-    const meData = await meRes.json();
-    if (meData.ok && meData.loggedIn) {
-      currentUser = meData.user;
-      renderUserHeader(meData.user);
-      await loadStore();
-    } else {
-      await checkAuth();
-    }
-  } catch (err) {
-    showAlert(tokenAlert, err.message || 'เข้าสู่ระบบไม่สำเร็จ');
-  } finally {
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'เข้าสู่ระบบด้วย Token';
-    }
-  }
+  const raw = rawInput ? rawInput.value.trim() : '';
+  processTokenString(raw, tokenAlert);
 });
 
 // Load Storefront Data
