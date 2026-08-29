@@ -65,6 +65,27 @@ if (isWin) {
   const zipArchive = path.join(outDir, `${backupBaseName}.zip`);
   const tarArchive = path.join(outDir, `${backupBaseName}.tar.gz`);
 
+  // Auto-detect and import rclone.conf from Downloads/SD card if present
+  const termuxRcloneConf = path.join(process.env.HOME || '/data/data/com.termux/files/home', '.config/rclone/rclone.conf');
+  if (!fs.existsSync(termuxRcloneConf)) {
+    const candidateConfigs = [
+      '/storage/emulated/0/Download/rclone.conf',
+      '/storage/emulated/0/rclone.conf',
+      '/sdcard/Download/rclone.conf',
+      '/sdcard/rclone.conf'
+    ];
+    for (const cand of candidateConfigs) {
+      if (fs.existsSync(cand)) {
+        try {
+          fs.mkdirSync(path.dirname(termuxRcloneConf), { recursive: true });
+          fs.copyFileSync(cand, termuxRcloneConf);
+          console.log(`[Auto-Config] Imported rclone config from ${cand}`);
+          break;
+        } catch (e) {}
+      }
+    }
+  }
+
   console.log(`\n[1/2] Creating backup archives (${backupBaseName}.zip & .tar.gz)...`);
   try {
     // Create ZIP archive
@@ -79,14 +100,25 @@ if (isWin) {
   }
 
   console.log(`\n[2/2] Target Google Drive Folder: ${GDRIVE_FOLDER_URL}`);
+  let uploaded = false;
   try {
     execSync(`rclone copy "${zipArchive}" "gdrive,root_folder_id=${GDRIVE_FOLDER_ID}:" 2>/dev/null`, { stdio: 'inherit' });
     console.log(`[SUCCESS] Uploaded ${backupBaseName}.zip directly to Google Drive!`);
+    uploaded = true;
   } catch (e) {
+    try {
+      execSync(`rclone copy "${zipArchive}" gdrive:VALORANT-Backups/ 2>/dev/null`, { stdio: 'inherit' });
+      console.log(`[SUCCESS] Uploaded ${backupBaseName}.zip to gdrive:VALORANT-Backups/!`);
+      uploaded = true;
+    } catch (e2) {}
+  }
+
+  if (!uploaded) {
     console.log(`[INFO] Backup file is ready in your Download folder:`);
     console.log(`  -> ${zipArchive}`);
     console.log(`  -> ${tarArchive}`);
-    console.log(`\nOpen Google Drive folder link to upload:\n${GDRIVE_FOLDER_URL}`);
+    console.log(`\nTo link Google Drive once on Termux, run: ./setup-gdrive-termux.sh`);
+    console.log(`Or open folder in browser:\n${GDRIVE_FOLDER_URL}`);
   }
 
   console.log('\n============================================================');
