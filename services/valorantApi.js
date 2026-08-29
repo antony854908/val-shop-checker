@@ -581,12 +581,12 @@ class ValorantApiService {
             }
 
             const isEquipped = equippedMap.has(skinId) || 
-                              (skin.levels && skin.levels.some(l => equippedMap.has(l.uuid.toLowerCase())));
+                              (skin.levels && skin.levels.some(l => equippedMap.has((l.id || l.uuid || '').toLowerCase())));
 
             const equippedChromaId = equippedChromas.get(skinId);
             let activeDisplayIcon = skin.displayIcon;
             if (equippedChromaId && skin.chromas) {
-              const activeChr = skin.chromas.find(c => c.uuid.toLowerCase() === equippedChromaId);
+              const activeChr = skin.chromas.find(c => (c.id || c.uuid || '').toLowerCase() === equippedChromaId);
               if (activeChr && (activeChr.fullRender || activeChr.displayIcon)) {
                 activeDisplayIcon = activeChr.fullRender || activeChr.displayIcon;
               }
