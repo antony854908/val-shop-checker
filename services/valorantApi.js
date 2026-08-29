@@ -198,15 +198,14 @@ class ValorantApiService {
           offerId: itemUuid
         });
       } else {
-        dailyOffers.push({
-          uuid: itemUuid,
-          name: 'Valorant Weapon Skin',
-          tier: { name: 'Edition', highlightColor: '#ff4655' },
-          displayIcon: 'https://media.valorant-api.com/weapons/skins/default/displayicon.png',
-          price,
-          chromas: [],
-          levels: []
-        });
+        const item = skinCatalog.getItemById(itemUuid);
+        if (item && item.isWeaponSkin) {
+          dailyOffers.push({
+            ...item,
+            price,
+            offerId: itemUuid
+          });
+        }
       }
     }
 
@@ -266,7 +265,12 @@ class ValorantApiService {
         if (!itemRewardId) continue;
 
         const itemMeta = skinCatalog.getItemById(itemRewardId, itemTypeId);
-        const isWeaponSkin = !!(itemMeta && (itemMeta.isWeaponSkin || itemMeta.weaponType || itemMeta.chromas || itemMeta.levels));
+        // Only include items that actually exist in the game catalog
+        if (!itemMeta) {
+          continue;
+        }
+
+        const isWeaponSkin = !!(itemMeta.isWeaponSkin || itemMeta.weaponType || itemMeta.chromas || itemMeta.levels);
 
         let basePrice = itemEntry.BasePrice || 
                         itemEntry.Offer?.Cost?.[config.CURRENCIES.VP] || 
@@ -280,32 +284,22 @@ class ValorantApiService {
 
         let discountPercent = itemEntry.DiscountPercent || 0;
 
-        let displayName = itemMeta?.name;
-        const bundleName = bundleMeta?.name || b.DisplayName || 'Bundle';
+        let displayName = itemMeta.name || 'Valorant Item';
+        let itemType = isWeaponSkin ? (itemMeta.weaponType || 'Weapon Skin') : (itemMeta.itemType || 'Accessory');
 
-        if (!displayName || displayName === 'Valorant Item' || displayName === 'Bundle Item') {
-          if (itemTypeId && itemTypeId.toLowerCase().includes('03a572de')) {
-            displayName = `${bundleName} Spray`;
-          } else {
-            displayName = `${bundleName} Accessory`;
-          }
+        const lowerName = (displayName || '').toLowerCase();
+        if (lowerName.includes('aeris spray') || (lowerName.includes('aeris') && (itemType || '').toLowerCase().includes('spray'))) {
+          continue; // Aeris Spray does not exist in Valorant
         }
 
-        let itemType = isWeaponSkin ? (itemMeta?.weaponType || 'Weapon Skin') : 
-                       (itemMeta?.itemType || (itemTypeId && itemTypeId.toLowerCase().includes('03a572de') ? 'Spray' : 'Accessory'));
+        let displayIcon = itemMeta.displayIcon || 
+                          (itemMeta.chromas && itemMeta.chromas[0]?.displayIcon) || 
+                          (itemMeta.levels && itemMeta.levels[0]?.displayIcon) ||
+                          itemMeta.largeArt || 
+                          itemMeta.wideArt;
 
-        let displayIcon = itemMeta?.displayIcon || 
-                          (itemMeta?.chromas && itemMeta.chromas[0]?.displayIcon) || 
-                          (itemMeta?.levels && itemMeta.levels[0]?.displayIcon) ||
-                          itemMeta?.largeArt || 
-                          itemMeta?.wideArt;
-
-        if (!displayIcon || displayIcon.includes('default/displayicon.png')) {
-          if (itemTypeId && itemTypeId.toLowerCase().includes('03a572de')) {
-            displayIcon = `https://media.valorant-api.com/sprays/${itemRewardId}/fulltransparenticon.png`;
-          } else {
-            displayIcon = bundleMeta?.displayIcon || bundleMeta?.verticalPromoImage || `https://media.valorant-api.com/weaponskinlevels/${itemRewardId}/displayicon.png`;
-          }
+        if (!displayIcon) {
+          continue;
         }
 
         bundleItems.push({

@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4.0">
+  <link rel="stylesheet" href="style.css?v=4.3">
 </head>
 <body>
   <!-- Ambient Atmospheric Effects -->
@@ -150,23 +150,56 @@
         <!-- Tab 1: Google & Social Login (Fast & Official) -->
         <div id="tabGoogleLogin" class="tab-content active">
           <div class="google-auth-box">
+            
+            <!-- Social Banner with Direct Tutorial Trigger -->
             <div class="social-hero-banner">
-              <svg viewBox="0 0 24 24" width="28" height="28">
-                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
-                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-              </svg>
-              <div>
-                <h3>เข้าสู่ระบบด้วย Google หรือ Social</h3>
-                <p>สำหรับไอดีที่สมัครหรือผูกไว้กับ Google, Facebook, Apple, หรือ Xbox</p>
+              <div class="social-banner-left">
+                <div class="social-icons-stack">
+                  <svg viewBox="0 0 24 24" width="28" height="28">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="badge-tag-official">✨ ล็อกอินทางการ Riot Games (ปลอดภัย 100%)</div>
+                  <h3>เข้าสู่ระบบด้วย Google หรือ Social</h3>
+                  <p>สำหรับไอดีที่สมัครหรือผูกไว้กับ Google, Apple, Facebook, หรือ Xbox</p>
+                </div>
               </div>
+              <button type="button" id="btnOpenGoogleTutorial" class="btn btn-tutorial-trigger" title="คลิกเพื่อดูภาพและวิธีทำทีละสเต็ป">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>📖 ดูวิธีสอนพร้อมภาพ (Tutorial)</span>
+              </button>
             </div>
 
-            <div class="steps-container">
-              <div class="step-panel">
-                <div class="step-indicator">ขั้นตอนที่ 1</div>
-                <p>กดปุ่มด้านล่างเพื่อเปิดหน้าล็อกอิน Google ของ Riot Games อย่างเป็นทางการ</p>
+            <!-- Waiting Helper Banner (Animated status after opening Riot page) -->
+            <div id="googleWaitingBanner" class="google-waiting-banner hidden">
+              <div class="pulse-indicator-circle">
+                <div class="pulse-ring"></div>
+                <div class="pulse-dot"></div>
+              </div>
+              <div class="waiting-text-wrap">
+                <strong>🚀 เปิดหน้าต่างระบบ Riot Games แล้ว!</strong>
+                <p>เมื่อล็อกอินเสร็จแล้ว ให้ <strong>คัดลอกลิงก์ URL ด้านบนสุด</strong> แล้วสลับกลับมากดปุ่มวางด้านล่างได้ทันที</p>
+              </div>
+              <button type="button" id="btnDismissWaiting" class="btn-waiting-dismiss" title="ซ่อนข้อความ">&times;</button>
+            </div>
+
+            <!-- 3-Step Interactive Process Workflow -->
+            <div class="steps-flow-container">
+              
+              <!-- STEP 1 -->
+              <div class="tactical-step-card step-highlight-blue">
+                <div class="step-card-header">
+                  <span class="step-badge-num">1</span>
+                  <div class="step-titles">
+                    <h4>เปิดหน้าระบบ Riot Games อย่างเป็นทางการ</h4>
+                    <p>ระบบจะเปิดหน้าล็อกอินของ Riot Games ในแท็บใหม่ (ให้เลือกล็อกอินด้วย Google หรือบัญชีของคุณ)</p>
+                  </div>
+                </div>
+                
                 <a id="btnOpenRiotGoogle" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1" target="_blank" rel="noopener noreferrer" class="btn btn-google-official">
                   <svg viewBox="0 0 24 24" width="20" height="20">
                     <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
@@ -174,28 +207,147 @@
                     <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
                     <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
                   </svg>
-                  <span>1. กดเปิดหน้าล็อกอิน Google ของ Riot</span>
+                  <span>1. กดเปิดหน้าล็อกอิน Riot (Google / Social) ↗️</span>
                 </a>
               </div>
 
-              <div class="step-panel">
-                <div class="step-indicator">ขั้นตอนที่ 2</div>
-                <p>หลังจากล็อกอิน Google เสร็จ หากหน้าเว็บขึ้น <strong>"404 Page Not Found" ให้ทำตามนี้:</strong></p>
-                <div class="highlight-notice">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                  <span>แตะที่ <strong>แถบที่อยู่ URL ด้านบนสุดของเบราว์เซอร์</strong> แล้วกด <strong>คัดลอก (Copy)</strong> ลิงก์ทั้งหมดที่มี <code>#access_token=...</code> มาวางในช่องด้านล่าง:</span>
+              <!-- STEP 2: Instruction on Copying URL with 404 Explanation -->
+              <div class="tactical-step-card step-highlight-amber">
+                <div class="step-card-header">
+                  <span class="step-badge-num">2</span>
+                  <div class="step-titles">
+                    <h4>เมื่อล็อกอินเสร็จ หน้าเว็บจะขึ้น "404 Page Not Found" (นี่คือปกติ 100%!)</h4>
+                    <p>ไม่ต้องตกใจ! Riot ส่งโค้ดล็อกอินมาให้ใน <strong>แถบ URL ด้านบนสุด</strong> ให้คัดลอกลิงก์ออกมา</p>
+                  </div>
                 </div>
+
+                <!-- Platform Switcher: Mobile vs PC -->
+                <div class="quick-device-tabs">
+                  <button type="button" class="btn-device-tab active" data-device="mobile">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                    <span>📱 วิธีบนมือถือ (iOS / Android)</span>
+                  </button>
+                  <button type="button" class="btn-device-tab" data-device="pc">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    <span>💻 วิธีบนคอมพิวเตอร์ (PC / Laptop)</span>
+                  </button>
+                </div>
+
+                <!-- Mobile Device Instructions & Realistic Mockup -->
+                <div id="deviceGuideMobile" class="device-guide-panel active">
+                  <div class="guide-steps-list">
+                    <div class="guide-substep">
+                      <span class="substep-bullet">A</span>
+                      <span>แตะที่ <strong>แถบที่อยู่ URL ด้านบนสุด</strong> ของเบราว์เซอร์ Chrome หรือ Safari</span>
+                    </div>
+                    <div class="guide-substep">
+                      <span class="substep-bullet">B</span>
+                      <span>กดปุ่ม <strong>ไอคอนคัดลอก (Copy 📑)</strong> หรือแตะค้างที่ลิงก์แล้วกด "คัดลอก"</span>
+                    </div>
+                  </div>
+
+                  <!-- Phone URL Bar Mockup -->
+                  <div class="browser-url-mockup">
+                    <div class="mockup-url-header">
+                      <span class="mockup-dot red"></span>
+                      <span class="mockup-dot yellow"></span>
+                      <span class="mockup-dot green"></span>
+                      <span class="mockup-title">ตัวอย่างแถบ URL บนมือถือ (Chrome / Safari)</span>
+                    </div>
+                    <div class="mockup-address-bar">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#22c55e" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      <span class="mockup-url-text">playvalorant.com/opt_in<strong>#access_token=eyJ...</strong></span>
+                      <span class="mockup-copy-btn-highlight" title="กดคัดลอกตรงนี้">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        <span class="copy-callout-bubble">แตะที่นี่เพื่อคัดลอก!</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- PC Device Instructions & Mockup -->
+                <div id="deviceGuidePc" class="device-guide-panel hidden">
+                  <div class="guide-steps-list">
+                    <div class="guide-substep">
+                      <span class="substep-bullet">A</span>
+                      <span>คลิกที่ <strong>แถบที่อยู่ URL ด้านบนสุด</strong> ของเบราว์เซอร์</span>
+                    </div>
+                    <div class="guide-substep">
+                      <span class="substep-bullet">B</span>
+                      <span>กดคีย์ลัด <code>Ctrl + A</code> (เลือกทั้งหมด) แล้วกด <code>Ctrl + C</code> (คัดลอก)</span>
+                    </div>
+                  </div>
+
+                  <!-- PC URL Bar Mockup -->
+                  <div class="browser-url-mockup">
+                    <div class="mockup-url-header">
+                      <span class="mockup-dot red"></span>
+                      <span class="mockup-dot yellow"></span>
+                      <span class="mockup-dot green"></span>
+                      <span class="mockup-title">ตัวอย่างบน PC / Chrome / Edge</span>
+                    </div>
+                    <div class="mockup-address-bar selected">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#22c55e" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      <span class="mockup-url-text highlight-selected">https://playvalorant.com/opt_in#access_token=eyJraW...</span>
+                      <span class="mockup-shortcut-badge">กด Ctrl + C</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- STEP 3: Paste and Login -->
+              <div class="tactical-step-card step-highlight-green">
+                <div class="step-card-header">
+                  <span class="step-badge-num">3</span>
+                  <div class="step-titles">
+                    <h4>สลับกลับมาที่หน้านี้ แล้วกด "วาง &amp; เข้าสู่ระบบทันที"</h4>
+                    <p>นำลิงก์ที่คัดลอกมาวางในช่องด้านล่าง หรือกดปุ่มวางอัตโนมัติเพื่อเข้าสู่ระบบทันที</p>
+                  </div>
+                </div>
+
                 <div class="input-paste-action-box">
-                  <input type="text" id="quickPasteInput" placeholder="วางลิงก์ URL หรือ Access Token ที่นี่..." class="modern-input" autocomplete="off">
+                  <input type="text" id="quickPasteInput" placeholder="วางลิงก์ URL หรือ Access Token ที่นี่ (เช่น https://playvalorant.com/opt_in#access_token=...)" class="modern-input" autocomplete="off">
                   <button type="button" id="btnAutoPaste" class="btn btn-primary btn-glow">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-                    <span>วาง & เข้าสู่ระบบทันที</span>
+                    <span>วาง &amp; เข้าสู่ระบบทันที</span>
                   </button>
                 </div>
               </div>
+
             </div>
 
+            <!-- Google Login Alert Box -->
             <div id="googleAlert" class="alert-box hidden"></div>
+
+            <!-- Helpful FAQ Accordion -->
+            <div class="google-faq-section">
+              <div class="faq-section-header">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--val-gold)" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>คำถามที่พบบ่อยเกี่ยวกับการล็อกอิน Google (FAQ)</span>
+              </div>
+              <div class="faq-items-list">
+                <details class="faq-item">
+                  <summary class="faq-summary">ทำไมหน้าเว็บถึงขึ้น "404 Page Not Found"? บัญชีมีปัญหาหรือไม่?</summary>
+                  <div class="faq-content">
+                    <p><strong>ไม่มีปัญหาใดๆ แน่นอนครับ!</strong> หน้า 404 เป็นเรื่องปกติ 100% เพราะ Riot Games ส่งโค้ดล็อกอิน (Token) มาทางแถบที่อยู่ URL ด้านบนสุด ให้คุณคัดลอกลิงก์ทั้งหมดด้านบนมาวางได้เลย</p>
+                  </div>
+                </details>
+                <details class="faq-item">
+                  <summary class="faq-summary">บนมือถือ แถบที่อยู่ URL ด้านบนหายไป หาไม่เจอทำอย่างไร?</summary>
+                  <div class="faq-content">
+                    <p>ให้ใช้นิ้วเลื่อนหน้าจอขึ้นเล็กน้อย แถบที่อยู่ URL ของเบราว์เซอร์ Chrome หรือ Safari ด้านบนสุดจะปรากฏขึ้นมา ให้แตะที่แถบนั้นแล้วกดไอคอนคัดลอก (Copy)</p>
+                  </div>
+                </details>
+                <details class="faq-item">
+                  <summary class="faq-summary">ปลอดภัยหรือไม่? มีการแอบเก็บรหัสผ่านไหม?</summary>
+                  <div class="faq-content">
+                    <p><strong>ปลอดภัย 100% ครับ</strong> เพราะคุณล็อกอินโดยตรงกับหน้าเว็บทางการของ Riot Games ทางเว็บเราไม่มีการเก็บรหัสผ่านของคุณเด็ดขาด</p>
+                  </div>
+                </details>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -1180,6 +1332,156 @@
       </div>
     </div>
     
+    <!-- ================= GOOGLE LOGIN STEP-BY-STEP TUTORIAL MODAL ================= -->
+    <div id="googleTutorialModal" class="modal-backdrop-layer hidden">
+      <div class="modal-tactical-dialog modal-tutorial-dialog">
+        <button id="btnCloseGoogleTutorialModal" class="btn-dialog-close" title="ปิดหน้าต่าง">&times;</button>
+        
+        <div class="modal-dialog-header">
+          <div class="badge-tag" style="color:var(--val-cyan); background:rgba(0,245,212,0.12);">STEP-BY-STEP TUTORIAL</div>
+          <h2 class="modal-skin-heading" style="font-size:20px; display:flex; align-items:center; gap:8px;">
+            <svg viewBox="0 0 24 24" width="22" height="22">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <span>คู่มือสอนล็อกอิน Google &amp; ก็อปปี้ลิงก์ (ฉบับเข้าใจง่ายที่สุด)</span>
+          </h2>
+          <p style="font-size:12px; color:var(--val-gray); margin-top:2px;">ทำตาม 4 ขั้นตอนนี้เพื่อดึงร้านค้าและสกินของคุณได้ทันที แม้ไม่เคยทำมาก่อน</p>
+        </div>
+
+        <!-- Platform Switcher in Modal -->
+        <div class="modal-subnav-bar">
+          <button id="btnTutorialTabMobile" class="subnav-tab-btn active" data-tutdevice="mobile">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            <span>📱 วิธีทำบนมือถือ (Android &amp; iPhone)</span>
+          </button>
+          <button id="btnTutorialTabPc" class="subnav-tab-btn" data-tutdevice="pc">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span>💻 วิธีทำบนคอมพิวเตอร์ (PC / Laptop)</span>
+          </button>
+        </div>
+
+        <div class="modal-dialog-body tutorial-modal-body">
+          
+          <!-- Detailed Visual Cards -->
+          <div class="tutorial-cards-grid">
+            
+            <!-- Step 1 Card -->
+            <div class="tut-step-card">
+              <div class="tut-step-num">01</div>
+              <div class="tut-step-content">
+                <h3>กดปุ่มเปิดหน้าระบบ Riot Games</h3>
+                <p>กดที่ปุ่มสีขาว <strong>"1. กดเปิดหน้าล็อกอิน Riot (Google / Social)"</strong> เพื่อเปิดหน้าต่างทางการของ Riot Games ในแท็บใหม่</p>
+                <div class="tut-visual-badge">
+                  <span class="badge-dot-green"></span>
+                  <span>ระบบจะเปิดหน้า <code>auth.riotgames.com</code> อย่างเป็นทางการ ปลอดภัย 100%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2 Card -->
+            <div class="tut-step-card">
+              <div class="tut-step-num">02</div>
+              <div class="tut-step-content">
+                <h3>เลือกล็อกอินด้วย Google</h3>
+                <p>ในหน้า Riot Games ให้กดที่ <strong>ไอคอน Google (รูปตัว G)</strong> หรือเลือก Apple / Xbox ตามที่บัญชีของคุณผูกไว้</p>
+                <div class="tut-provider-icons-row">
+                  <span class="provider-chip"><svg viewBox="0 0 24 24" width="14" height="14"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg> Google</span>
+                  <span class="provider-chip">🍏 Apple</span>
+                  <span class="provider-chip">🎮 Xbox</span>
+                  <span class="provider-chip">👤 Riot ID</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3 Card -->
+            <div class="tut-step-card tut-card-highlight">
+              <div class="tut-step-num">03</div>
+              <div class="tut-step-content">
+                <h3>เมื่อขึ้น "404 Not Found" ให้คัดลอกลิงก์</h3>
+                <p>หลังจากล็อกอินเสร็จ หน้าจอจะขึ้น <strong>404 Page Not Found</strong> (นี่คือปกติ 100%) ให้ทำตามนี้:</p>
+                
+                <div class="tut-device-box mobile-box" id="tutModalMobileDetail">
+                  <div class="tut-diagram-phone">
+                    <div class="diagram-url-bar">
+                      <span class="url-text">playvalorant.com/opt_in#access_token=...</span>
+                      <span class="url-copy-btn">📑 กดคัดลอก</span>
+                    </div>
+                    <div class="diagram-screen-404">
+                      <span>404 - PAGE NOT FOUND</span>
+                      <small>Token ถูกสร้างและส่งมาใน URL ด้านบนเรียบร้อยแล้ว</small>
+                    </div>
+                  </div>
+                  <ol class="tut-list-steps">
+                    <li>แตะที่ <strong>แถบที่อยู่ URL ด้านบนสุด</strong> ของเบราว์เซอร์</li>
+                    <li>แตะที่ <strong>ไอคอนคัดลอก (Copy 📑)</strong> หรือเลือกทั้งหมด &gt; คัดลอก</li>
+                  </ol>
+                </div>
+
+                <div class="tut-device-box pc-box hidden" id="tutModalPcDetail">
+                  <div class="tut-diagram-pc">
+                    <div class="diagram-pc-bar">
+                      <span class="url-text">https://playvalorant.com/opt_in#access_token=eyJraWQi...</span>
+                      <span class="key-combo">Ctrl + A &nbsp; Ctrl + C</span>
+                    </div>
+                  </div>
+                  <ol class="tut-list-steps">
+                    <li>คลิกที่ <strong>แถบที่อยู่ URL ด้านบนสุด</strong></li>
+                    <li>กด <code>Ctrl + A</code> เพื่อเลือกทั้งหมด แล้วกด <code>Ctrl + C</code> เพื่อคัดลอก</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 4 Card -->
+            <div class="tut-step-card">
+              <div class="tut-step-num">04</div>
+              <div class="tut-step-content">
+                <h3>สลับกลับมาที่แอปแล้วกดวาง</h3>
+                <p>สลับแท็บกลับมาที่หน้านี้ แล้วแตะที่ปุ่ม <strong>"วาง &amp; เข้าสู่ระบบทันที"</strong> ระบบจะประมวลผลและเปิดร้านค้าของคุณทันที</p>
+                
+                <div class="tut-paste-preview">
+                  <div class="tut-btn-sample">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                    <span>วาง &amp; เข้าสู่ระบบทันที</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Interactive Test Sandbox in Tutorial -->
+          <div class="tut-sandbox-box">
+            <div class="sandbox-header">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--val-cyan)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>ทดลองกดคัดลอกลิงก์ตัวอย่าง (ทดสอบระบบ)</span>
+            </div>
+            <p>คุณสามารถลองกดปุ่มด้านล่างเพื่อทดสอบคัดลอกรูปแบบ URL และนำไปวาง:</p>
+            <div class="sandbox-actions">
+              <button type="button" id="btnTestCopyExample" class="btn btn-secondary btn-sm">
+                📋 ทดลองคัดลอกลิงก์ตัวอย่าง
+              </button>
+              <span id="testCopyFeedback" class="test-copy-status hidden">✅ คัดลอกแล้ว! ลองกดปุ่มวางในหน้าร้านค้า</span>
+            </div>
+          </div>
+
+          <!-- Tutorial Actions -->
+          <div class="tutorial-footer-actions">
+            <a id="btnTutorialOpenRiot" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-glow">
+              <span>🚀 เข้าใจแล้ว! เปิดหน้าล็อกอิน Riot ทันที</span>
+            </a>
+            <button type="button" id="btnTutorialClose" class="btn btn-secondary">
+              <span>ปิดคู่มือ</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    
     <!-- Footer -->
     <footer class="app-footer">
       <p>VALORANT is a registered trademark of Riot Games, Inc. This application is not affiliated with or endorsed by Riot Games.</p>
@@ -1188,6 +1490,6 @@
 
   </div>
 
-  <script src="app.js?v=4.0"></script>
+  <script src="app.js?v=4.3"></script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 node_modules
 .session-store.json
 server.log
+test-security.js
 .git

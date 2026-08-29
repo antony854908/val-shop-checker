@@ -410,17 +410,148 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
+// Google & Device Tutorial Navigation
+document.querySelectorAll('.btn-device-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.btn-device-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const device = btn.dataset.device;
+    const mobilePanel = document.getElementById('deviceGuideMobile');
+    const pcPanel = document.getElementById('deviceGuidePc');
+    if (device === 'mobile') {
+      mobilePanel?.classList.remove('hidden');
+      mobilePanel?.classList.add('active');
+      pcPanel?.classList.add('hidden');
+      pcPanel?.classList.remove('active');
+    } else {
+      pcPanel?.classList.remove('hidden');
+      pcPanel?.classList.add('active');
+      mobilePanel?.classList.add('hidden');
+      mobilePanel?.classList.remove('active');
+    }
+  });
+});
+
+// Google Tutorial Modal Controls
+const googleTutorialModal = document.getElementById('googleTutorialModal');
+const btnOpenGoogleTutorial = document.getElementById('btnOpenGoogleTutorial');
+const btnCloseGoogleTutorialModal = document.getElementById('btnCloseGoogleTutorialModal');
+const btnTutorialClose = document.getElementById('btnTutorialClose');
+const btnTutorialOpenRiot = document.getElementById('btnTutorialOpenRiot');
+const btnTutorialTabMobile = document.getElementById('btnTutorialTabMobile');
+const btnTutorialTabPc = document.getElementById('btnTutorialTabPc');
+const tutModalMobileDetail = document.getElementById('tutModalMobileDetail');
+const tutModalPcDetail = document.getElementById('tutModalPcDetail');
+const btnTestCopyExample = document.getElementById('btnTestCopyExample');
+const testCopyFeedback = document.getElementById('testCopyFeedback');
+
+window.openGoogleTutorialModal = function() {
+  playTacticalAudio('open');
+  if (googleTutorialModal) googleTutorialModal.classList.remove('hidden');
+};
+
+function closeGoogleTutorialModal() {
+  playTacticalAudio('click');
+  if (googleTutorialModal) googleTutorialModal.classList.add('hidden');
+}
+
+btnOpenGoogleTutorial?.addEventListener('click', window.openGoogleTutorialModal);
+btnCloseGoogleTutorialModal?.addEventListener('click', closeGoogleTutorialModal);
+btnTutorialClose?.addEventListener('click', closeGoogleTutorialModal);
+googleTutorialModal?.addEventListener('click', (e) => {
+  if (e.target === googleTutorialModal) closeGoogleTutorialModal();
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && googleTutorialModal && !googleTutorialModal.classList.contains('hidden')) {
+    closeGoogleTutorialModal();
+  }
+});
+
+btnTutorialTabMobile?.addEventListener('click', () => {
+  btnTutorialTabMobile.classList.add('active');
+  btnTutorialTabPc?.classList.remove('active');
+  tutModalMobileDetail?.classList.remove('hidden');
+  tutModalPcDetail?.classList.add('hidden');
+});
+
+btnTutorialTabPc?.addEventListener('click', () => {
+  btnTutorialTabPc.classList.add('active');
+  btnTutorialTabMobile?.classList.remove('active');
+  tutModalPcDetail?.classList.remove('hidden');
+  tutModalMobileDetail?.classList.add('hidden');
+});
+
+btnTestCopyExample?.addEventListener('click', async () => {
+  const exampleUrl = 'https://playvalorant.com/opt_in#access_token=eyJraWQiOiJyZXNldCIsImFsZyI6IlJTMjU2In0.SAMPLE_TOKEN_DEMO&scope=account%20openid&iss=https%3A%2F%2Fauth.riotgames.com';
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(exampleUrl);
+    }
+    if (testCopyFeedback) {
+      testCopyFeedback.classList.remove('hidden');
+      setTimeout(() => testCopyFeedback?.classList.add('hidden'), 4000);
+    }
+    if (quickPasteInput) quickPasteInput.value = exampleUrl;
+    playTacticalAudio('click');
+  } catch (e) {}
+});
+
 // Google Quick Paste & Login Handler
 const quickPasteInput = document.getElementById('quickPasteInput');
 const btnAutoPaste = document.getElementById('btnAutoPaste');
 const googleAlert = document.getElementById('googleAlert');
+const btnOpenRiotGoogle = document.getElementById('btnOpenRiotGoogle');
+const googleWaitingBanner = document.getElementById('googleWaitingBanner');
+const btnDismissWaiting = document.getElementById('btnDismissWaiting');
+
+let isWaitingForGoogleLink = false;
+
+function activateGoogleWaitingState() {
+  isWaitingForGoogleLink = true;
+  if (googleWaitingBanner) googleWaitingBanner.classList.remove('hidden');
+  if (quickPasteInput) {
+    quickPasteInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    quickPasteInput.focus();
+  }
+}
+
+btnOpenRiotGoogle?.addEventListener('click', () => {
+  activateGoogleWaitingState();
+});
+
+btnTutorialOpenRiot?.addEventListener('click', () => {
+  closeGoogleTutorialModal();
+  activateGoogleWaitingState();
+});
+
+btnDismissWaiting?.addEventListener('click', () => {
+  if (googleWaitingBanner) googleWaitingBanner.classList.add('hidden');
+  isWaitingForGoogleLink = false;
+});
+
+window.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible' && isWaitingForGoogleLink) {
+    if (quickPasteInput && !quickPasteInput.value.trim()) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const clipText = await navigator.clipboard.readText();
+          if (clipText && (clipText.includes('access_token=') || clipText.startsWith('eyJ'))) {
+            quickPasteInput.value = clipText.trim();
+            processTokenString(clipText.trim(), googleAlert);
+          }
+        }
+      } catch (e) {}
+    }
+  }
+});
 
 async function processTokenString(rawText, alertEl) {
   const alertTarget = alertEl || googleAlert || document.getElementById('loginAlert') || document.getElementById('tokenAlert');
   let cleanText = (rawText || '').trim();
 
   if (!cleanText) {
-    showAlert(alertTarget, 'กรุณาวาง URL หรือ Access Token');
+    showAlert(alertTarget, 'กรุณาวาง URL หรือ Access Token ที่คัดลอกมา');
     return;
   }
 
@@ -456,7 +587,7 @@ async function processTokenString(rawText, alertEl) {
   if (idToken) idToken = idToken.trim();
 
   if (!accessToken || accessToken.length < 20) {
-    showAlert(alertTarget, 'ไม่พบ Access Token ที่ถูกต้อง กรุณาตรวจสอบลิงก์อีกครั้ง');
+    showAlert(alertTarget, '⚠️ ไม่พบ Access Token ที่ถูกต้องในข้อความที่วาง <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">📖 คลิกที่นี่เพื่อดูภาพวิธีก็อปปี้ลิงก์ที่ถูกต้อง</a>');
     return;
   }
 
@@ -493,7 +624,7 @@ async function processTokenString(rawText, alertEl) {
       await checkAuth();
     }
   } catch (err) {
-    showAlert(alertTarget, err.message || 'เข้าสู่ระบบไม่สำเร็จ');
+    showAlert(alertTarget, (err.message || 'เข้าสู่ระบบไม่สำเร็จ') + ' <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">📖 ดูภาพสอนวิธีคัดลอกลิงก์ใหม่</a>');
   } finally {
     if (btnAutoPaste) {
       btnAutoPaste.disabled = false;
@@ -541,7 +672,11 @@ document.getElementById('togglePassword')?.addEventListener('click', () => {
 // Show Alert Utility
 function showAlert(el, msg, type = 'error') {
   if (!el) return;
-  el.textContent = msg;
+  if (typeof msg === 'string' && msg.includes('<')) {
+    el.innerHTML = msg;
+  } else {
+    el.textContent = msg;
+  }
   el.className = 'alert-box ' + type;
   el.classList.remove('hidden');
   if (type === 'error') {
@@ -867,12 +1002,18 @@ function renderDailyShop(skins) {
   if (!container) return;
   container.innerHTML = '';
 
-  if (!skins || skins.length === 0) {
+  const validSkins = (skins || []).filter(s => {
+    const name = (s.name || '').trim().toLowerCase();
+    if (!name || name === 'valorant weapon skin' || name.includes('spray') || name.includes('aeris spray')) return false;
+    return true;
+  });
+
+  if (validSkins.length === 0) {
     container.innerHTML = '<div class="empty-msg">ไม่พบสกินประจำวัน กรุณาลองรีเฟรชใหม่อีกครั้ง</div>';
     return;
   }
 
-  skins.forEach((skin, idx) => {
+  validSkins.forEach((skin, idx) => {
     const tierColor = skin.tier?.highlightColor || '#ff4655';
     const card = document.createElement('div');
     card.className = 'skin-card';
@@ -914,7 +1055,7 @@ function renderDailyShop(skins) {
             <span>${(skin.price || 0).toLocaleString()}</span>
             <span class="skin-thb-quick-tag" title="เปรียบเทียบราคาเติมเงินจริงทุกร้าน" data-vp="${skin.price || 0}">~${Math.round((skin.price || 0) * 0.262)} ฿ 🏷️</span>
           </div>
-          <button class="btn btn-primary btn-sm btn-inspect">ดูเอฟเฟกต์ & สี</button>
+          <button class="btn btn-primary btn-sm btn-inspect"><span>ดูเอฟเฟกต์ & สี</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
       </div>
     `;
@@ -926,29 +1067,130 @@ function renderDailyShop(skins) {
   });
 }
 
+// Universal Item Fallback SVG Generator
+window.generateItemFallbackSvg = function(itemName, itemType) {
+  const safeName = (itemName || 'ITEM').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const typeStr = ((itemType || '') + ' ' + (itemName || '')).toLowerCase();
+  
+  if (typeStr.includes('spray')) {
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+      <defs>
+        <linearGradient id="spBg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#181424"/>
+          <stop offset="100%" stop-color="#0E0C16"/>
+        </linearGradient>
+        <linearGradient id="spNeon" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FF4655"/>
+          <stop offset="50%" stop-color="#D946EF"/>
+          <stop offset="100%" stop-color="#00F5D4"/>
+        </linearGradient>
+        <radialGradient id="spGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#D946EF" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#D946EF" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="300" height="300" rx="16" fill="url(#spBg)" stroke="rgba(217,70,239,0.4)" stroke-width="2"/>
+      <circle cx="150" cy="130" r="100" fill="url(#spGlow)"/>
+      <circle cx="150" cy="120" r="68" fill="none" stroke="url(#spNeon)" stroke-width="2.5" stroke-dasharray="6 6"/>
+      <g transform="translate(115, 68)" fill="none" stroke="url(#spNeon)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M25 5 L45 5 L45 15 L25 15 Z" fill="rgba(217,70,239,0.25)"/>
+        <path d="M15 15 L55 15 L55 90 C55 98 15 98 15 90 Z" fill="rgba(255,70,85,0.15)"/>
+        <line x1="35" y1="5" x2="35" y2="0"/>
+        <path d="M35 0 C25 -5 15 -10 5 -5" stroke="#00F5D4" stroke-width="2" stroke-dasharray="2 3"/>
+        <circle cx="35" cy="50" r="14" fill="url(#spNeon)"/>
+      </g>
+      <rect x="20" y="215" width="260" height="60" rx="8" fill="rgba(0,0,0,0.65)" stroke="rgba(255,255,255,0.12)"/>
+      <text x="150" y="238" dominant-baseline="middle" text-anchor="middle" fill="#00F5D4" font-family="sans-serif" font-size="10.5" font-weight="bold" letter-spacing="2">VALORANT SPRAY</text>
+      <text x="150" y="258" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-family="sans-serif" font-size="13.5" font-weight="bold">${safeName}</text>
+    </svg>`);
+  }
+  
+  if (typeStr.includes('buddy')) {
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+      <defs>
+        <linearGradient id="bdBg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#1A202C"/>
+          <stop offset="100%" stop-color="#0F131A"/>
+        </linearGradient>
+        <linearGradient id="bdGold" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#F5D36C"/>
+          <stop offset="100%" stop-color="#FF9F1C"/>
+        </linearGradient>
+      </defs>
+      <rect width="300" height="300" rx="16" fill="url(#bdBg)" stroke="rgba(245,211,108,0.3)" stroke-width="2"/>
+      <circle cx="150" cy="125" r="70" fill="none" stroke="url(#bdGold)" stroke-width="2" stroke-dasharray="4 4"/>
+      <g transform="translate(125, 75)" fill="none" stroke="url(#bdGold)" stroke-width="2.5">
+        <circle cx="25" cy="20" r="14"/>
+        <path d="M25 34 L25 55"/>
+        <path d="M10 55 L40 55 L35 90 L15 90 Z" fill="rgba(245,211,108,0.2)"/>
+      </g>
+      <rect x="20" y="215" width="260" height="60" rx="8" fill="rgba(0,0,0,0.65)" stroke="rgba(255,255,255,0.12)"/>
+      <text x="150" y="238" dominant-baseline="middle" text-anchor="middle" fill="#F5D36C" font-family="sans-serif" font-size="10.5" font-weight="bold" letter-spacing="2">GUN BUDDY</text>
+      <text x="150" y="258" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-family="sans-serif" font-size="13.5" font-weight="bold">${safeName}</text>
+    </svg>`);
+  }
+
+  if (typeStr.includes('card')) {
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="340" viewBox="0 0 240 340">
+      <defs>
+        <linearGradient id="cdBg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#141926"/>
+          <stop offset="100%" stop-color="#0B0E17"/>
+        </linearGradient>
+      </defs>
+      <rect width="240" height="340" rx="12" fill="url(#cdBg)" stroke="rgba(0,245,212,0.3)" stroke-width="2"/>
+      <rect x="15" y="15" width="210" height="230" rx="8" fill="#182032" stroke="rgba(255,255,255,0.08)"/>
+      <path d="M120 70 L170 150 L70 150 Z" fill="rgba(0,245,212,0.15)" stroke="#00F5D4" stroke-width="2"/>
+      <circle cx="120" cy="120" r="18" fill="#00F5D4"/>
+      <rect x="15" y="260" width="210" height="65" rx="6" fill="rgba(0,0,0,0.6)" stroke="rgba(255,255,255,0.1)"/>
+      <text x="120" y="282" dominant-baseline="middle" text-anchor="middle" fill="#00F5D4" font-family="sans-serif" font-size="10" font-weight="bold" letter-spacing="1.5">PLAYER CARD</text>
+      <text x="120" y="304" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-family="sans-serif" font-size="13" font-weight="bold">${safeName}</text>
+    </svg>`);
+  }
+
+  return 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
+};
+
 // Bundle Image Error Fallback Handler
-window.handleBundleImgError = function(img, itemType, uuid) {
-  if (!img || !uuid) return;
+window.handleBundleImgError = function(img, itemType, uuid, itemName) {
+  if (!img) return;
   const currentStep = parseInt(img.dataset.errStep || '0', 10);
   img.dataset.errStep = (currentStep + 1).toString();
 
-  const fallbackUrls = [
-    'https://media.valorant-api.com/weaponskinlevels/' + uuid + '/displayicon.png',
-    'https://media.valorant-api.com/weaponskinchromas/' + uuid + '/fullrender.png',
-    'https://media.valorant-api.com/buddylevels/' + uuid + '/displayicon.png',
-    'https://media.valorant-api.com/buddies/' + uuid + '/displayicon.png',
-    'https://media.valorant-api.com/playercards/' + uuid + '/largeart.png',
-    'https://media.valorant-api.com/playercards/' + uuid + '/displayicon.png',
-    'https://media.valorant-api.com/sprays/' + uuid + '/fulltransparenticon.png',
-    'https://media.valorant-api.com/sprays/' + uuid + '/displayicon.png',
-    'https://media.valorant-api.com/weapons/skins/default/displayicon.png'
-  ];
+  const typeStr = ((itemType || '') + ' ' + (itemName || '')).toLowerCase();
+  let fallbackUrls = [];
+
+  if (typeStr.includes('spray')) {
+    fallbackUrls = [
+      'https://media.valorant-api.com/sprays/' + uuid + '/fulltransparenticon.png',
+      'https://media.valorant-api.com/sprays/' + uuid + '/displayicon.png',
+      'https://media.valorant-api.com/sprays/' + uuid + '/animationpng.png',
+      'https://media.valorant-api.com/sprays/' + uuid + '/fullicon.png'
+    ];
+  } else if (typeStr.includes('buddy')) {
+    fallbackUrls = [
+      'https://media.valorant-api.com/buddylevels/' + uuid + '/displayicon.png',
+      'https://media.valorant-api.com/buddies/' + uuid + '/displayicon.png'
+    ];
+  } else if (typeStr.includes('card')) {
+    fallbackUrls = [
+      'https://media.valorant-api.com/playercards/' + uuid + '/largeart.png',
+      'https://media.valorant-api.com/playercards/' + uuid + '/displayicon.png',
+      'https://media.valorant-api.com/playercards/' + uuid + '/smallart.png'
+    ];
+  } else {
+    fallbackUrls = [
+      'https://media.valorant-api.com/weaponskinlevels/' + uuid + '/displayicon.png',
+      'https://media.valorant-api.com/weaponskinchromas/' + uuid + '/fullrender.png',
+      'https://media.valorant-api.com/weaponskinchromas/' + uuid + '/displayicon.png'
+    ];
+  }
 
   if (currentStep < fallbackUrls.length) {
     img.src = fallbackUrls[currentStep];
   } else {
     img.onerror = null;
-    img.src = 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
+    img.src = window.generateItemFallbackSvg(itemName || 'Valorant Item', itemType || 'Accessory');
   }
 };
 
@@ -1007,7 +1249,15 @@ function renderBundles(bundles) {
     const itemsRow = document.createElement('div');
     itemsRow.className = 'bundle-items-row';
 
-    b.items.forEach(item => {
+    const validItems = b.items.filter(item => {
+      const name = (item.name || '').trim().toLowerCase();
+      const type = (item.itemType || '').toLowerCase();
+      if (!name || name === 'valorant item' || name === 'bundle item') return false;
+      if (name.includes('aeris spray') || (name.includes('aeris') && type.includes('spray'))) return false;
+      return true;
+    });
+
+    validItems.forEach(item => {
       const s = item.skin;
       const isSkin = !!(item.isWeaponSkin || (s && (s.chromas || s.levels || s.weaponType)));
       const itemName = item.name || s?.name || 'Bundle Item';
@@ -1021,7 +1271,7 @@ function renderBundles(bundles) {
       miniItem.style.cursor = 'pointer';
       miniItem.innerHTML = `
         <div class="bundle-mini-img-wrap">
-          <img src="${itemIcon}" alt="${itemName}" loading="lazy" data-err-step="0">
+          <img src="${itemIcon}" alt="${itemName}" loading="lazy" data-err-step="0" onerror="window.handleBundleImgError(this, '${(item.itemType || 'Item').replace(/'/g, "\\'")}', '${item.uuid}', '${(itemName).replace(/'/g, "\\'")}')">
         </div>
         <div class="bundle-mini-name" title="${itemName}">${itemName}</div>
         <div class="bundle-mini-type">${itemBadge}</div>
@@ -1103,7 +1353,7 @@ function renderNightMarket(nm) {
             <span style="color:var(--val-gold)">${offer.discountedPrice.toLocaleString()}</span>
             <span class="skin-thb-quick-tag" title="เปรียบเทียบราคาเติมเงินจริงทุกร้าน" data-vp="${offer.discountedPrice || 0}">~${Math.round((offer.discountedPrice || 0) * 0.262)} ฿ 🏷️</span>
           </div>
-          <button class="btn btn-primary btn-sm btn-inspect">ดูสกิน & สี</button>
+          <button class="btn btn-primary btn-sm btn-inspect"><span>ดูสกิน & สี</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
       </div>
     `;
@@ -1188,8 +1438,14 @@ function openSkinModal(skin) {
 
   // Default In-Game HD Weapon Artwork Render
   const imgEl = document.getElementById('modalSkinImg');
-  const defaultImg = skin.largeArt || skin.displayIcon || skin.chromas?.[0]?.fullRender || skin.chromas?.[0]?.displayIcon || 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
-  if (imgEl) imgEl.src = defaultImg;
+  const defaultImg = skin.largeArt || skin.displayIcon || skin.chromas?.[0]?.fullRender || skin.chromas?.[0]?.displayIcon || window.generateItemFallbackSvg(skin.name, skin.itemType);
+  if (imgEl) {
+    imgEl.src = defaultImg;
+    imgEl.onerror = function() {
+      imgEl.onerror = null;
+      imgEl.src = window.generateItemFallbackSvg(skin.name, skin.itemType || 'Accessory');
+    };
+  }
 
   // Set spotlight color matching skin tier
   const spotlight = document.getElementById('inspectSpotlight');
@@ -1756,7 +2012,7 @@ function renderCatalogItems(skins) {
         <div class="skin-name" title="${skin.name}">${skin.name}</div>
         <div class="skin-meta-row">
           <span style="font-size:12px; color:var(--val-gray); font-weight:500;">${skin.weaponType || 'Weapon'}</span>
-          <button class="btn btn-primary btn-sm btn-inspect">ดูเอฟเฟกต์ & สี</button>
+          <button class="btn btn-primary btn-sm btn-inspect"><span>ดูเอฟเฟกต์ & สี</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
       </div>
     `;

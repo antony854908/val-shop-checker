@@ -77,9 +77,30 @@ A comprehensive security audit and hardening process was performed on the `val-s
 
 ---
 
+### [SEC-007] AES-256-GCM Encryption at Rest for Persistent Sessions
+- **Severity:** High
+- **Location:** `services/sessionStore.js` (lines 8-54)
+- **Impact Statement:** Persistent session tokens written to storage in plaintext could be intercepted if disk files are inspected.
+- **Implemented Fix:**
+  - Integrated cryptographic Authenticated Encryption (`AES-256-GCM`) with standard 96-bit random IVs and integrity authentication tags derived from `SESSION_SECRET`.
+  - Automatically encrypts session data before disk flush and authenticates ciphertext on restore.
+
+---
+
+### [SEC-008] Reverse-Proxy Aware Secure Client IP Extraction
+- **Severity:** Medium
+- **Location:** `server.js` (line 19), `services/securityGuard.js` (lines 45-60)
+- **Impact Statement:** Reverse proxies or CDNs (e.g. Cloudflare, Nginx) could cause rate limiters to group all incoming users under a single internal proxy IP.
+- **Implemented Fix:**
+  - Configured `app.set('trust proxy', 1)`.
+  - Implemented `getClientIp()` extracting validated client IPs from headers (`CF-Connecting-IP`, `X-Real-IP`, `X-Forwarded-For`) with socket remote address fallback.
+
+---
+
 ## Verification & Testing
 
 - Syntax checks: **PASSED** (0 errors across `server.js`, `services/*.js`, `public/*.js`)
 - Unit and endpoint tests: **PASSED**
 - Rate limiting test: **PASSED**
+- AES-256-GCM Encrypted persistence: **ACTIVE & VERIFIED**
 - Zero-leak memory session persistence: **ACTIVE**

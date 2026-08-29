@@ -67,6 +67,85 @@ class SkinCatalog {
     </svg>`);
   }
 
+  generateSprayBadgeSvg(sprayName) {
+    const safeName = (sprayName || 'SPRAY').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+      <defs>
+        <linearGradient id="sprayBg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#181424"/>
+          <stop offset="100%" stop-color="#0E0C16"/>
+        </linearGradient>
+        <linearGradient id="sprayNeon" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FF4655"/>
+          <stop offset="50%" stop-color="#D946EF"/>
+          <stop offset="100%" stop-color="#00F5D4"/>
+        </linearGradient>
+        <radialGradient id="sprayGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#D946EF" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#D946EF" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="300" height="300" rx="16" fill="url(#sprayBg)" stroke="rgba(217,70,239,0.35)" stroke-width="2"/>
+      <circle cx="150" cy="130" r="100" fill="url(#sprayGlow)"/>
+      <circle cx="150" cy="120" r="68" fill="none" stroke="url(#sprayNeon)" stroke-width="2.5" stroke-dasharray="6 6"/>
+      <g transform="translate(115, 68)" fill="none" stroke="url(#sprayNeon)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M25 5 L45 5 L45 15 L25 15 Z" fill="rgba(217,70,239,0.25)"/>
+        <path d="M15 15 L55 15 L55 90 C55 98 15 98 15 90 Z" fill="rgba(255,70,85,0.15)"/>
+        <line x1="35" y1="5" x2="35" y2="0"/>
+        <path d="M35 0 C25 -5 15 -10 5 -5" stroke="#00F5D4" stroke-width="2" stroke-dasharray="2 3"/>
+        <circle cx="35" cy="50" r="14" fill="url(#sprayNeon)"/>
+      </g>
+      <rect x="20" y="215" width="260" height="60" rx="8" fill="rgba(0,0,0,0.65)" stroke="rgba(255,255,255,0.12)"/>
+      <text x="150" y="238" dominant-baseline="middle" text-anchor="middle" fill="#00F5D4" font-family="sans-serif" font-size="10.5" font-weight="bold" letter-spacing="2">VALORANT SPRAY</text>
+      <text x="150" y="258" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-family="sans-serif" font-size="13.5" font-weight="bold">${safeName}</text>
+    </svg>`);
+  }
+
+  generateBuddyBadgeSvg(buddyName) {
+    const safeName = (buddyName || 'BUDDY').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+      <defs>
+        <linearGradient id="buddyBg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#1A202C"/>
+          <stop offset="100%" stop-color="#0F131A"/>
+        </linearGradient>
+        <linearGradient id="buddyGold" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#F5D36C"/>
+          <stop offset="100%" stop-color="#FF9F1C"/>
+        </linearGradient>
+      </defs>
+      <rect width="300" height="300" rx="16" fill="url(#buddyBg)" stroke="rgba(245,211,108,0.3)" stroke-width="2"/>
+      <circle cx="150" cy="125" r="70" fill="none" stroke="url(#buddyGold)" stroke-width="2" stroke-dasharray="4 4"/>
+      <g transform="translate(125, 75)" fill="none" stroke="url(#buddyGold)" stroke-width="2.5">
+        <circle cx="25" cy="20" r="14"/>
+        <path d="M25 34 L25 55"/>
+        <path d="M10 55 L40 55 L35 90 L15 90 Z" fill="rgba(245,211,108,0.2)"/>
+      </g>
+      <rect x="20" y="215" width="260" height="60" rx="8" fill="rgba(0,0,0,0.65)" stroke="rgba(255,255,255,0.12)"/>
+      <text x="150" y="238" dominant-baseline="middle" text-anchor="middle" fill="#F5D36C" font-family="sans-serif" font-size="10.5" font-weight="bold" letter-spacing="2">GUN BUDDY</text>
+      <text x="150" y="258" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-family="sans-serif" font-size="13.5" font-weight="bold">${safeName}</text>
+    </svg>`);
+  }
+
+  generateCardBadgeSvg(cardName) {
+    const safeName = (cardName || 'CARD').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="340" viewBox="0 0 240 340">
+      <defs>
+        <linearGradient id="cardBg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#141926"/>
+          <stop offset="100%" stop-color="#0B0E17"/>
+        </linearGradient>
+      </defs>
+      <rect width="240" height="340" rx="12" fill="url(#cardBg)" stroke="rgba(0,245,212,0.3)" stroke-width="2"/>
+      <rect x="15" y="15" width="210" height="230" rx="8" fill="#182032" stroke="rgba(255,255,255,0.08)"/>
+      <path d="M120 70 L170 150 L70 150 Z" fill="rgba(0,245,212,0.15)" stroke="#00F5D4" stroke-width="2"/>
+      <circle cx="120" cy="120" r="18" fill="#00F5D4"/>
+      <rect x="15" y="260" width="210" height="65" rx="6" fill="rgba(0,0,0,0.6)" stroke="rgba(255,255,255,0.1)"/>
+      <text x="120" y="282" dominant-baseline="middle" text-anchor="middle" fill="#00F5D4" font-family="sans-serif" font-size="10" font-weight="bold" letter-spacing="1.5">PLAYER CARD</text>
+      <text x="120" y="304" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-family="sans-serif" font-size="13" font-weight="bold">${safeName}</text>
+    </svg>`);
+  }
+
   async init() {
     try {
       console.log('[SkinCatalog] Fetching complete Valorant metadata from valorant-api.com...');
@@ -519,47 +598,6 @@ class SkinCatalog {
         itemType: 'Bundle',
         displayIcon: bundleMatch.displayIcon || bundleMatch.verticalPromoImage
       };
-    }
-
-    // 5. Direct CDN Fallback based on itemTypeId if unknown
-    if (itemTypeId) {
-      const typeLower = itemTypeId.toLowerCase();
-      if (typeLower.includes('e7f014d4')) {
-        return {
-          uuid,
-          name: 'Valorant Weapon Skin',
-          itemType: 'Weapon Skin',
-          isWeaponSkin: true,
-          displayIcon: `https://media.valorant-api.com/weaponskinlevels/${uuid}/displayicon.png`
-        };
-      }
-      if (typeLower.includes('dd3bf334')) {
-        return {
-          uuid,
-          name: 'Valorant Gun Buddy',
-          itemType: 'Gun Buddy',
-          isWeaponSkin: false,
-          displayIcon: `https://media.valorant-api.com/buddylevels/${uuid}/displayicon.png`
-        };
-      }
-      if (typeLower.includes('3f296092')) {
-        return {
-          uuid,
-          name: 'Valorant Player Card',
-          itemType: 'Player Card',
-          isWeaponSkin: false,
-          displayIcon: `https://media.valorant-api.com/playercards/${uuid}/largeart.png`
-        };
-      }
-      if (typeLower.includes('dbe138f1')) {
-        return {
-          uuid,
-          name: 'Valorant Spray',
-          itemType: 'Spray',
-          isWeaponSkin: false,
-          displayIcon: `https://media.valorant-api.com/sprays/${uuid}/fulltransparenticon.png`
-        };
-      }
     }
 
     return null;
