@@ -955,21 +955,50 @@ function renderUserHeader(user) {
   loginSection?.classList.add('hidden');
   if (currentAppMode === 'store') {
     storeSection?.classList.remove('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
     careerSection?.classList.add('hidden');
     agentsSection?.classList.add('hidden');
     catalogSection?.classList.add('hidden');
+  } else if (currentAppMode === 'inventory') {
+    inventorySection?.classList.remove('hidden');
+    storeSection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
+    careerSection?.classList.add('hidden');
+    agentsSection?.classList.add('hidden');
+    catalogSection?.classList.add('hidden');
+    loadPlayerInventory();
+  } else if (currentAppMode === 'crosshairs') {
+    crosshairsSection?.classList.remove('hidden');
+    storeSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    careerSection?.classList.add('hidden');
+    agentsSection?.classList.add('hidden');
+    catalogSection?.classList.add('hidden');
+    loadProCrosshairs();
   } else if (currentAppMode === 'career') {
     careerSection?.classList.remove('hidden');
     storeSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
     agentsSection?.classList.add('hidden');
     catalogSection?.classList.add('hidden');
     loadCareer();
   } else if (currentAppMode === 'agents') {
     agentsSection?.classList.remove('hidden');
     storeSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
     careerSection?.classList.add('hidden');
     catalogSection?.classList.add('hidden');
     loadAgentsEncyclopedia();
+  } else if (currentAppMode === 'catalog') {
+    catalogSection?.classList.remove('hidden');
+    storeSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
+    careerSection?.classList.add('hidden');
+    agentsSection?.classList.add('hidden');
   }
 }
 
@@ -977,8 +1006,9 @@ function showLoginView() {
   currentUser = null;
   userHeader?.classList.add('hidden');
   storeSection?.classList.add('hidden');
+  inventorySection?.classList.add('hidden');
   careerSection?.classList.add('hidden');
-  if (currentAppMode === 'store' || currentAppMode === 'career') {
+  if (currentAppMode === 'store' || currentAppMode === 'career' || currentAppMode === 'inventory') {
     loginSection?.classList.remove('hidden');
   }
   mfaBox?.classList.add('hidden');

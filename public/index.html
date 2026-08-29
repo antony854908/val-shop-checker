@@ -145,6 +145,22 @@
           <p class="hero-desc">ดูสกินที่สุ่มขายในไอดีของคุณ ยอดเงินคงเหลือ และตรวจสอบเอฟเฟกต์/Finisher</p>
         </div>
 
+        <!-- Quick Non-Login Feature Jump Strip -->
+        <div class="guest-features-strip" style="display:flex; justify-content:center; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-pill" onclick="switchAppMode('catalog')" style="font-size:12px; padding:6px 14px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/></svg>
+            <span>ดูคลังสกิน 1,380+ สกิน (ไม่ต้องล็อกอิน)</span>
+          </button>
+          <button type="button" class="btn btn-pill" onclick="switchAppMode('crosshairs')" style="font-size:12px; padding:6px 14px; background:rgba(0,245,212,0.08); border:1px solid rgba(0,245,212,0.25); color:var(--val-cyan);">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><circle cx="12" cy="12" r="2"/></svg>
+            <span>ดูเป้าเล็งโปรเพลเยอร์ 16 คน (ไม่ต้องล็อกอิน)</span>
+          </button>
+          <button type="button" class="btn btn-pill" onclick="switchAppMode('agents')" style="font-size:12px; padding:6px 14px; background:rgba(255,70,85,0.08); border:1px solid rgba(255,70,85,0.25); color:var(--val-red);">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>ดูโมเดล 3D Agents 29+ ตัว (ไม่ต้องล็อกอิน)</span>
+          </button>
+        </div>
+
         <!-- Login Method Navigation -->
         <div class="login-method-nav">
           <button class="tab-btn active" data-tab="google-login">
