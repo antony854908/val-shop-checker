@@ -3319,63 +3319,131 @@ body {
   border-radius: 4px;
 }
 
-/* Best Agent Showcase Body */
+/* Best Agent 3D Model Showcase Body */
 .best-agent-hero {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
-.best-agent-portrait-wrap {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  border: 2px solid var(--val-gold);
-  box-shadow: 0 0 16px rgba(245, 211, 108, 0.3);
+.best-agent-portrait-stage {
+  width: 115px;
+  height: 155px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--val-gold);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.85), 0 0 22px rgba(245, 211, 108, 0.35);
   overflow: hidden;
-  background: radial-gradient(circle, rgba(245, 211, 108, 0.2) 0%, #000 80%);
+  background: radial-gradient(ellipse at 50% 30%, rgba(245, 211, 108, 0.28) 0%, rgba(14, 19, 30, 0.98) 85%);
+  position: relative;
   flex-shrink: 0;
 }
 
-.best-agent-portrait {
+.best-agent-3d-model {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.1);
+  object-position: top center;
+  transform: scale(1.15) translateY(2px);
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.95));
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.best-agent-meta h3 {
-  font-family: var(--font-heading);
-  font-size: 20px;
+.best-agent-hero:hover .best-agent-3d-model {
+  transform: scale(1.22) translateY(0);
+}
+
+.agent-role-corner-badge {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  font-size: 9px;
   font-weight: 800;
-  color: #fff;
-  letter-spacing: 1px;
-}
-
-.best-agent-role {
-  font-size: 11px;
-  color: var(--val-cyan);
-  font-weight: 600;
+  color: var(--val-gold);
+  padding: 2px 4px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
+  text-transform: uppercase;
+  backdrop-filter: blur(4px);
+  letter-spacing: 0.5px;
+}
+
+.agent-role-corner-badge.cyan {
+  color: var(--val-cyan);
+  border-color: rgba(0, 245, 212, 0.3);
+}
+
+.best-agent-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.best-agent-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.agent-title-large {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1.5px;
+  line-height: 1;
+}
+
+.agent-mastery-tag {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--val-gold);
+  background: rgba(245, 211, 108, 0.15);
+  border: 1px solid rgba(245, 211, 108, 0.4);
+  padding: 1px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+
+.best-agent-subtitle {
+  font-size: 11.5px;
+  color: var(--val-gray);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot-sep {
+  color: rgba(255, 255, 255, 0.2);
 }
 
 .best-agent-stats-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 14px;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 10px;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.agent-mini-stat-card {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
+  padding: 6px 8px;
   text-align: center;
 }
 
 .mini-stat-lbl {
-  font-size: 10px;
+  font-size: 9.5px;
   color: var(--val-gray);
   display: block;
+  font-weight: 600;
 }
 
 .mini-stat-val {
@@ -3385,52 +3453,96 @@ body {
   color: #fff;
 }
 
-/* Playstyle Recommendation Body */
+/* Playstyle Recommendation 3D Body */
 .playstyle-desc-box {
   font-size: 12px;
   color: #c4d2e0;
   line-height: 1.5;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
-.recommended-agent-banner {
-  background: linear-gradient(90deg, rgba(0, 245, 212, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%);
-  border: 1px solid rgba(0, 245, 212, 0.25);
+.recommended-agent-hero-card {
+  background: linear-gradient(135deg, rgba(0, 245, 212, 0.1) 0%, rgba(17, 22, 34, 0.95) 100%);
+  border: 1px solid rgba(0, 245, 212, 0.35);
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 245, 212, 0.15);
+  transition: all 0.25s ease;
 }
 
-.recom-portrait {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--val-cyan);
-  box-shadow: 0 0 10px var(--val-cyan-glow);
+.recommended-agent-hero-card:hover {
+  border-color: var(--val-cyan);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.85), 0 0 24px rgba(0, 245, 212, 0.35);
+}
+
+.recom-model-stage {
+  width: 95px;
+  height: 135px;
+  border-radius: 6px;
+  border: 1px solid var(--val-cyan);
+  background: radial-gradient(ellipse at 50% 30%, rgba(0, 245, 212, 0.25) 0%, rgba(14, 19, 30, 0.98) 85%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 20px var(--val-cyan-glow);
+  position: relative;
+  overflow: hidden;
   flex-shrink: 0;
 }
 
-.recom-info strong {
-  font-family: var(--font-heading);
-  font-size: 16px;
-  color: #fff;
+.recom-3d-model {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transform: scale(1.15) translateY(2px);
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.95));
+  transition: transform 0.35s ease;
+}
+
+.recommended-agent-hero-card:hover .recom-3d-model {
+  transform: scale(1.22) translateY(0);
+}
+
+.recom-info-details {
+  flex: 1;
+}
+
+.recom-badge-top {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--val-cyan);
   letter-spacing: 0.5px;
-  display: block;
+  margin-bottom: 2px;
 }
 
-.recom-info p {
-  font-size: 11px;
-  color: #b0c4de;
-  margin-top: 2px;
+.recom-agent-name {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1px;
+  line-height: 1.1;
+  margin-bottom: 4px;
 }
 
-/* Agent Mastery List */
+.recom-strategy-advice {
+  font-size: 11.5px;
+  color: #b0c8e2;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.recom-action-hint {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--val-gold);
+}
+
+/* Agent Mastery Cards Grid */
 .agents-perf-table-wrap {
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 8px;
   padding: 12px 14px;
 }
@@ -3441,80 +3553,106 @@ body {
   color: var(--val-gray);
   letter-spacing: 1px;
   margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .agents-perf-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 10px;
 }
 
-.ai-mode-filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.filter-hint-txt {
-  font-size: 11px;
-  color: var(--val-gray);
-  font-weight: 600;
-}
-
-.ai-pills-wrap {
-  display: flex;
-  gap: 4px;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 2px;
-  border-radius: 6px;
+.agent-perf-card {
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.ai-pill {
-  background: transparent;
-  border: none;
-  color: var(--val-gray);
-  font-size: 11px;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.ai-pill:hover {
-  color: #fff;
-}
-
-.ai-pill.active {
-  background: var(--val-gold);
-  color: #0b0e14;
-  font-weight: 700;
-}
-
-.ai-feature-card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-}
-
-.agent-perf-item {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
-  padding: 8px 10px;
+  border-radius: 8px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.agent-perf-item:hover {
-  background: rgba(0, 245, 212, 0.08);
+.agent-perf-card:hover {
+  background: linear-gradient(90deg, rgba(0, 245, 212, 0.12) 0%, rgba(0, 0, 0, 0.4) 100%);
   border-color: var(--val-cyan);
-  transform: translateX(3px);
+  transform: translateY(-2px) translateX(2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), 0 0 14px rgba(0, 245, 212, 0.25);
+}
+
+.agent-perf-thumb-box {
+  width: 54px;
+  height: 68px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 245, 212, 0.35);
+  background: radial-gradient(circle, rgba(0, 245, 212, 0.15) 0%, #080B10 90%);
+  flex-shrink: 0;
+}
+
+.agent-perf-3d-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transform: scale(1.15);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.85));
+  transition: transform 0.25s ease;
+}
+
+.agent-perf-card:hover .agent-perf-3d-img {
+  transform: scale(1.22);
+}
+
+.agent-perf-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agent-perf-name {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ag-name-txt {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.ag-wr-badge {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 800;
+  color: #00f5d4;
+  background: rgba(0, 245, 212, 0.12);
+  border: 1px solid rgba(0, 245, 212, 0.3);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.agent-perf-role-tag {
+  font-size: 10px;
+  color: var(--val-gray);
+  font-weight: 600;
+}
+
+.agent-perf-sub {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  color: #b0c8e2;
+  margin-top: 2px;
 }
 
 /* ==========================================================

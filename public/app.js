@@ -3215,30 +3215,37 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
 
     bestAgentBox.innerHTML = `
       <div class="best-agent-hero">
-        <div class="best-agent-portrait-wrap">
-          <img src="${portrait}" class="best-agent-portrait" alt="${agentName}">
+        <div class="best-agent-portrait-stage">
+          <img src="${portrait}" class="best-agent-3d-model" alt="${agentName}" loading="lazy">
+          <div class="agent-role-corner-badge">
+            ${fullBest.roleIcon ? `<img src="${fullBest.roleIcon}" alt="" width="11" height="11">` : ''}
+            <span>${agentRole}</span>
+          </div>
         </div>
         <div class="best-agent-meta">
-          <h3>${agentName}</h3>
-          <span class="best-agent-role">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polygon points="12 8 8 12 12 16 16 12 12 8"/></svg>
-            <span>${agentRole}</span>
-          </span>
-          <div style="font-size:11px; color:var(--val-gray); margin-top:2px;">เล่นไป ${bestAgent.games} แมตช์ (${bestAgent.wins} ชนะ)</div>
-        </div>
-      </div>
-      <div class="best-agent-stats-row">
-        <div>
-          <span class="mini-stat-lbl">อัตราชนะ</span>
-          <span class="mini-stat-val accent-green">${bestAgent.winRate}%</span>
-        </div>
-        <div>
-          <span class="mini-stat-lbl">K/D RATIO</span>
-          <span class="mini-stat-val accent-cyan">${bestAgent.kd}</span>
-        </div>
-        <div>
-          <span class="mini-stat-lbl">ACS เฉลี่ย</span>
-          <span class="mini-stat-val accent-gold">${bestAgent.acs}</span>
+          <div class="best-agent-title-row">
+            <h3 class="agent-title-large">${agentName}</h3>
+            <span class="agent-mastery-tag">👑 MVP AGENT</span>
+          </div>
+          <div class="best-agent-subtitle">
+            <span>ลงเล่นไป <strong>${bestAgent.games}</strong> แมตช์</span>
+            <span class="dot-sep">•</span>
+            <span class="accent-green">ชนะ <strong>${bestAgent.wins}</strong> แมตช์</span>
+          </div>
+          <div class="best-agent-stats-row">
+            <div class="agent-mini-stat-card">
+              <span class="mini-stat-lbl">อัตราชนะ</span>
+              <span class="mini-stat-val accent-green">${bestAgent.winRate}%</span>
+            </div>
+            <div class="agent-mini-stat-card">
+              <span class="mini-stat-lbl">K/D RATIO</span>
+              <span class="mini-stat-val accent-cyan">${bestAgent.kd}</span>
+            </div>
+            <div class="agent-mini-stat-card">
+              <span class="mini-stat-lbl">ACS เฉลี่ย</span>
+              <span class="mini-stat-val accent-gold">${bestAgent.acs}</span>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -3296,11 +3303,19 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
 
   playstyleBox.innerHTML = `
     <div class="playstyle-desc-box">${playstyleDesc}</div>
-    <div class="recommended-agent-banner">
-      <img src="${recomImg}" class="recom-portrait" alt="${recomName}">
-      <div class="recom-info">
-        <strong>แนะนำตัวละคร: ${recomName} (${fullRecom.role || recomRole})</strong>
-        <p>${recomAdvice}</p>
+    <div class="recommended-agent-hero-card">
+      <div class="recom-model-stage">
+        <img src="${recomImg}" class="recom-3d-model" alt="${recomName}" loading="lazy">
+        <div class="agent-role-corner-badge cyan">
+          ${fullRecom.roleIcon ? `<img src="${fullRecom.roleIcon}" alt="" width="11" height="11">` : ''}
+          <span>${fullRecom.role || recomRole}</span>
+        </div>
+      </div>
+      <div class="recom-info-details">
+        <div class="recom-badge-top">⚡ AI แนะนำตัวละครที่เข้ากับสไตล์ของคุณ:</div>
+        <h3 class="recom-agent-name">${recomName}</h3>
+        <p class="recom-strategy-advice">${recomAdvice}</p>
+        <div class="recom-action-hint">🔍 แตะเพื่อดูเทคนิค &amp; สกิลของ ${recomName} ↗️</div>
       </div>
     </div>
   `;
@@ -3316,21 +3331,23 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
     agentResults.forEach(agData => {
       const fullAg = getFullAgentData(agData.agent);
       const item = document.createElement('div');
-      item.className = 'agent-perf-item';
+      item.className = 'agent-perf-card';
       item.title = `คลิกเพื่อดูสถิติเจาะลึกและสกิลของ ${fullAg.displayName}`;
-      const icon = fullAg.displayIcon || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png';
+      const portrait = fullAg.fullPortrait || fullAg.displayIcon || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png';
       
       item.innerHTML = `
-        <img src="${icon}" class="agent-perf-img" alt="">
+        <div class="agent-perf-thumb-box">
+          <img src="${portrait}" class="agent-perf-3d-img" alt="${fullAg.displayName}" loading="lazy">
+        </div>
         <div class="agent-perf-details">
           <div class="agent-perf-name">
-            <span>${fullAg.displayName || 'Agent'}</span>
-            <span class="accent-green">${agData.winRate}% WR</span>
+            <span class="ag-name-txt">${fullAg.displayName || 'Agent'}</span>
+            <span class="ag-wr-badge">${agData.winRate}% WR</span>
           </div>
+          <div class="agent-perf-role-tag">${(fullAg.role || 'Agent').toUpperCase()} • ${agData.games} แมตช์</div>
           <div class="agent-perf-sub">
-            <span>${agData.games} แมตช์</span>
-            <span>K/D: <strong>${agData.kd}</strong></span>
-            <span>ACS: <strong>${agData.acs}</strong></span>
+            <span>K/D: <strong class="accent-cyan">${agData.kd}</strong></span>
+            <span>ACS: <strong class="accent-gold">${agData.acs}</strong></span>
           </div>
         </div>
       `;
