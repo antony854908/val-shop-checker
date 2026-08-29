@@ -69,6 +69,7 @@ async function apiFetch(url, options = {}) {
 // ==========================================================
 let audioCtx = null;
 let soundEnabled = true;
+let userHasInteracted = false;
 try {
   const savedSound = localStorage.getItem('val_sound_enabled');
   if (savedSound !== null) soundEnabled = savedSound === 'true';
@@ -77,19 +78,57 @@ try {
 let replayAudioMuted = false;
 
 function initAudioContext() {
-  if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioCtx && audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
+  if (!userHasInteracted) return;
+  try {
+    if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+  } catch (e) {}
 }
 
-// Auto unlock audio on any first user gesture
-['click', 'touchstart', 'keydown'].forEach(evt => {
+// Auto unlock audio on first user interaction
+['pointerdown', 'click', 'touchstart', 'keydown'].forEach(evt => {
   window.addEventListener(evt, () => {
+    userHasInteracted = true;
     initAudioContext();
   }, { once: true, passive: true });
+});
+
+// Global Image Error Handler (Clean CSP-compliant fallback)
+document.addEventListener('error', (e) => {
+  if (e.target && e.target.tagName === 'IMG') {
+    const img = e.target;
+    if (img.classList.contains('skin-tier-icon') || img.classList.contains('role-mini-icon') || img.classList.contains('chroma-swatch-img') || img.classList.contains('tier-tag-icon')) {
+      img.style.display = 'none';
+    } else if (img.classList.contains('main-preview-render') || img.closest('.skin-image-box') || img.classList.contains('bundle-mini-img-wrap')) {
+      if (!img.dataset.hasFallback) {
+        img.dataset.hasFallback = '1';
+        img.src = 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
+      }
+    }
+  }
+}, true);
+
+// Global Delegated Click for Compare Tags
+document.addEventListener('click', (e) => {
+  const quickTag = e.target.closest('.skin-thb-quick-tag');
+  if (quickTag && quickTag.dataset.vp) {
+    e.stopPropagation();
+    const vp = parseInt(quickTag.dataset.vp, 10);
+    if (vp) window.openVpCompareModal(vp);
+    return;
+  }
+
+  const bundleBtn = e.target.closest('.btn-bundle-calc');
+  if (bundleBtn && bundleBtn.dataset.vp) {
+    e.stopPropagation();
+    const vp = parseInt(bundleBtn.dataset.vp, 10);
+    if (vp) window.openVpCompareModal(vp);
+    return;
+  }
 });
 
 // Synthesizer for Authentic Lubed Linear Red Switch Keypress
@@ -162,12 +201,12 @@ function playRedSwitchKey(now, pitch = 360, deepness = 1.0, volume = 0.35, isSpa
 }
 
 function playTacticalAudio(type) {
-  if (!soundEnabled) return;
+  if (!soundEnabled || !userHasInteracted) return;
   if (replayAudioMuted && (type === 'headshot' || type === 'kill' || type === 'plant')) return;
 
   try {
     initAudioContext();
-    if (!audioCtx) return;
+    if (!audioCtx || audioCtx.state !== 'running') return;
     const now = audioCtx.currentTime;
 
     if (type === 'click') {
@@ -902,7 +941,7 @@ function renderDailyShop(skins) {
 
       <div class="skin-card-header">
         <div class="skin-tier-info">
-          ${skin.tier?.displayIcon ? `<img src="${skin.tier.displayIcon}" alt="" class="skin-tier-icon" onerror="this.style.display='none'">` : ''}
+          ${skin.tier?.displayIcon ? `<img src="${skin.tier.displayIcon}" alt="" class="skin-tier-icon">` : ''}
           <span class="skin-tier-name">${skin.tier?.name || 'Edition'}</span>
         </div>
         <div class="skin-features-badge">
@@ -912,7 +951,7 @@ function renderDailyShop(skins) {
       </div>
 
       <div class="skin-image-box">
-        <img src="${safeIcon}" alt="${skin.name}" loading="lazy" onerror="this.src='https://media.valorant-api.com/weapons/skins/default/displayicon.png'">
+        <img src="${safeIcon}" alt="${skin.name}" loading="lazy">
       </div>
 
       <div class="skin-card-footer">
@@ -922,7 +961,7 @@ function renderDailyShop(skins) {
           <div class="skin-price-tag">
             <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
             <span>${(skin.price || 0).toLocaleString()}</span>
-            <span class="skin-thb-quick-tag" title="เปรียบเทียบราคาเติมเงินจริงทุกร้าน" onclick="event.stopPropagation(); window.openVpCompareModal(${skin.price || 0});">~${Math.round((skin.price || 0) * 0.262)} ฿ 🏷️</span>
+            <span class="skin-thb-quick-tag" title="เปรียบเทียบราคาเติมเงินจริงทุกร้าน" data-vp="${skin.price || 0}">~${Math.round((skin.price || 0) * 0.262)} ฿ 🏷️</span>
           </div>
           <button class="btn btn-primary btn-sm btn-inspect">ดูเอฟเฟกต์ & สี</button>
         </div>
@@ -988,7 +1027,7 @@ function renderBundles(bundles) {
   const heroDiv = document.createElement('div');
   heroDiv.className = 'bundle-hero';
   heroDiv.innerHTML = `
-    <img src="${heroImage}" alt="${b.name}" onerror="this.style.display='none'">
+    <img src="${heroImage}" alt="${b.name}">
     <div class="bundle-overlay">
       <div class="bundle-info">
         <h3>${b.name}</h3>
@@ -1004,7 +1043,7 @@ function renderBundles(bundles) {
             <span>เติม OverTopup: <strong>~${overEst.toLocaleString()} ฿</strong></span>
             ${savings > 0 ? `<span class="bundle-savings-tag">ประหยัด ${savings.toLocaleString()} ฿</span>` : ''}
           </div>
-          <button class="btn btn-bundle-calc" onclick="event.stopPropagation(); window.openVpCompareModal(${bundlePrice});" title="เปิดระบบคำนวณแพ็กเกจ OverTopup สำหรับบันเดิลนี้">
+          <button class="btn btn-bundle-calc" data-vp="${bundlePrice}" title="เปิดระบบคำนวณแพ็กเกจ OverTopup สำหรับบันเดิลนี้">
             <span>⚡ เทียบราคา OverTopup</span>
           </button>
         ` : ''}
@@ -1031,7 +1070,7 @@ function renderBundles(bundles) {
       miniItem.style.cursor = 'pointer';
       miniItem.innerHTML = `
         <div class="bundle-mini-img-wrap">
-          <img src="${itemIcon}" alt="${itemName}" loading="lazy" data-err-step="0" onerror="handleBundleImgError(this, '${item.itemType || ''}', '${item.uuid}')">
+          <img src="${itemIcon}" alt="${itemName}" loading="lazy" data-err-step="0">
         </div>
         <div class="bundle-mini-name" title="${itemName}">${itemName}</div>
         <div class="bundle-mini-type">${itemBadge}</div>
@@ -1040,7 +1079,7 @@ function renderBundles(bundles) {
           <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
           <span>${itemPrice.toLocaleString()}</span>
           ${itemPrice > 0 ? `
-            <span class="skin-thb-quick-tag" title="เทียบราคาเติมเงิน OverTopup สำหรับชิ้นนี้" onclick="event.stopPropagation(); window.openVpCompareModal(${itemPrice});">
+            <span class="skin-thb-quick-tag" title="เทียบราคาเติมเงิน OverTopup สำหรับชิ้นนี้" data-vp="${itemPrice}">
               ~${Math.round(itemPrice * 0.238)} ฿ ⚡
             </span>
           ` : ''}
@@ -1100,7 +1139,7 @@ function renderNightMarket(nm) {
       </div>
 
       <div class="skin-image-box">
-        <img src="${safeIcon}" alt="${offer.name}" onerror="this.src='https://media.valorant-api.com/weapons/skins/default/displayicon.png'">
+        <img src="${safeIcon}" alt="${offer.name}">
       </div>
 
       <div class="skin-card-footer">
@@ -1111,7 +1150,7 @@ function renderNightMarket(nm) {
             <span class="original-price">${offer.originalPrice.toLocaleString()}</span>
             <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
             <span style="color:var(--val-gold)">${offer.discountedPrice.toLocaleString()}</span>
-            <span class="skin-thb-quick-tag" title="เปรียบเทียบราคาเติมเงินจริงทุกร้าน" onclick="event.stopPropagation(); window.openVpCompareModal(${offer.discountedPrice || 0});">~${Math.round((offer.discountedPrice || 0) * 0.262)} ฿ 🏷️</span>
+            <span class="skin-thb-quick-tag" title="เปรียบเทียบราคาเติมเงินจริงทุกร้าน" data-vp="${offer.discountedPrice || 0}">~${Math.round((offer.discountedPrice || 0) * 0.262)} ฿ 🏷️</span>
           </div>
           <button class="btn btn-primary btn-sm btn-inspect">ดูสกิน & สี</button>
         </div>
@@ -1750,7 +1789,7 @@ function renderCatalogItems(skins) {
 
       <div class="skin-card-header">
         <div class="skin-tier-info">
-          ${skin.tier?.displayIcon ? `<img src="${skin.tier.displayIcon}" alt="" class="skin-tier-icon" onerror="this.style.display='none'">` : ''}
+          ${skin.tier?.displayIcon ? `<img src="${skin.tier.displayIcon}" alt="" class="skin-tier-icon">` : ''}
           <span class="skin-tier-name">${skin.tier?.name || 'Edition'}</span>
         </div>
         <div class="skin-features-badge">
@@ -1760,7 +1799,7 @@ function renderCatalogItems(skins) {
       </div>
 
       <div class="skin-image-box">
-        <img src="${safeIcon}" alt="${skin.name}" loading="lazy" onerror="this.src='https://media.valorant-api.com/weapons/skins/default/displayicon.png'">
+        <img src="${safeIcon}" alt="${skin.name}" loading="lazy">
       </div>
 
       <div class="skin-card-footer">
@@ -1868,13 +1907,13 @@ function renderAllAgentsGrid(agents) {
     const diff = ag.difficulty || 'ปานกลาง';
 
     const abilitiesPreview = (ag.abilities || []).map(ab => `
-      <img src="${ab.displayIcon || ''}" class="agent-ability-mini-icon" title="${ab.slot}: ${ab.displayName}" alt="${ab.displayName}" onerror="this.style.display='none'">
+      <img src="${ab.displayIcon || ''}" class="agent-ability-mini-icon" title="${ab.slot}: ${ab.displayName}" alt="${ab.displayName}">
     `).join('');
 
     card.innerHTML = `
       <div class="agent-catalog-card-header">
         <div class="agent-role-pill">
-          ${ag.roleIcon ? `<img src="${ag.roleIcon}" alt="" class="role-mini-icon" onerror="this.style.display='none'">` : ''}
+          ${ag.roleIcon ? `<img src="${ag.roleIcon}" alt="" class="role-mini-icon">` : ''}
           <span>${ag.role || 'AGENT'}</span>
         </div>
         <span class="agent-match-badge ${matchClass}">
@@ -1884,7 +1923,7 @@ function renderAllAgentsGrid(agents) {
       </div>
 
       <div class="agent-card-portrait-wrap">
-        <img src="${portrait}" alt="${ag.displayName}" class="agent-card-portrait" loading="lazy" onerror="this.src='https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png'">
+        <img src="${portrait}" alt="${ag.displayName}" class="agent-card-portrait" loading="lazy">
       </div>
 
       <div>
@@ -2082,7 +2121,7 @@ function renderMatchesList(matches) {
       <div class="outcome-indicator-bar"></div>
 
       <div class="match-agent-box">
-        <img src="${agentIcon}" alt="${agentName}" class="match-agent-avatar" onerror="this.src='https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png'">
+        <img src="${agentIcon}" alt="${agentName}" class="match-agent-avatar">
         <span class="match-agent-name">${agentName}</span>
       </div>
 
@@ -2195,7 +2234,7 @@ function openMatchScoreboard(match) {
       tr.innerHTML = `
         <td>
           <div class="player-cell-info">
-            <img src="${agIcon}" alt="" class="player-cell-agent-img" onerror="this.src='https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png'">
+            <img src="${agIcon}" alt="" class="player-cell-agent-img">
             <div>
               <div class="player-cell-name">
                 <span>${p.gameName}</span>
@@ -2662,7 +2701,7 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
     bestAgentBox.innerHTML = `
       <div class="best-agent-hero">
         <div class="best-agent-portrait-wrap">
-          <img src="${portrait}" class="best-agent-portrait" alt="${agentName}" onerror="this.src='https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png'">
+          <img src="${portrait}" class="best-agent-portrait" alt="${agentName}">
         </div>
         <div class="best-agent-meta">
           <h3>${agentName}</h3>
@@ -2743,7 +2782,7 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
   playstyleBox.innerHTML = `
     <div class="playstyle-desc-box">${playstyleDesc}</div>
     <div class="recommended-agent-banner">
-      <img src="${recomImg}" class="recom-portrait" alt="${recomName}" onerror="this.src='https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png'">
+      <img src="${recomImg}" class="recom-portrait" alt="${recomName}">
       <div class="recom-info">
         <strong>แนะนำตัวละคร: ${recomName} (${fullRecom.role || recomRole})</strong>
         <p>${recomAdvice}</p>
@@ -2767,7 +2806,7 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
       const icon = fullAg.displayIcon || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png';
       
       item.innerHTML = `
-        <img src="${icon}" class="agent-perf-img" alt="" onerror="this.src='https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png'">
+        <img src="${icon}" class="agent-perf-img" alt="">
         <div class="agent-perf-details">
           <div class="agent-perf-name">
             <span>${fullAg.displayName || 'Agent'}</span>
