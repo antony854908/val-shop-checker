@@ -23,7 +23,7 @@ const app = express();
 // Disable X-Powered-By fingerprinting
 app.disable('x-powered-by');
 
-// Security middleware - Helmet & Strict CSP
+// Security middleware - Helmet & Open Image/Media CSP
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -31,9 +31,9 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https://media.valorant-api.com", "https://valorant.dyn.riotcdn.net", "https://*.riotcdn.net", "https://www.overtopup.com"],
-      mediaSrc: ["'self'", "https://valorant.dyn.riotcdn.net", "https://*.riotcdn.net", "https://*.riotgames.com"],
-      connectSrc: ["'self'", "https://auth.riotgames.com", "https://entitlements.auth.riotgames.com", "https://*.pvp.net", "https://valorant-api.com", "https://www.overtopup.com"],
+      imgSrc: ["'self'", "data:", "blob:", "https:", "http:"],
+      mediaSrc: ["'self'", "blob:", "https:", "http:"],
+      connectSrc: ["'self'", "*"],
       frameAncestors: ["'none'"],
       baseUri: ["'self'"],
       formAction: ["'self'"],
@@ -41,10 +41,12 @@ app.use(helmet({
     }
   },
   hsts: false,
+  crossOriginResourcePolicy: false,
   crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
   xContentTypeOptions: true,
   xFrameOptions: { action: 'deny' },
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+  referrerPolicy: { policy: 'no-referrer-when-downgrade' }
 }));
 
 app.use(cors({
