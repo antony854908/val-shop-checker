@@ -5,3 +5,4 @@ server.log
 .DS_Store
 .vercel
 *.log
+.env*
