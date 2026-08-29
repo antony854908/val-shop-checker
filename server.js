@@ -96,7 +96,15 @@ app.use(cors({
 app.use(cookieParser(config.SESSION_SECRET));
 app.use(express.json({ limit: '256kb' }));
 app.use(express.urlencoded({ limit: '256kb', extended: false }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html') || filePath.endsWith('sw.js')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }
+}));
 
 // Ensure skin catalog is initialized (supports both serverless & standalone)
 app.use(async (req, res, next) => {
