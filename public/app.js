@@ -1375,6 +1375,7 @@ function renderBundles(bundles) {
       const itemBadge = isSkin ? (item.itemType || 'สกินปืน') : (item.itemType || 'ไอเทม');
       const actionText = isSkin ? '<span class="bundle-inspect-hint">กดดูเอฟเฟกต์ & สี</span>' : '<span class="bundle-inspect-hint">แตะเพื่อดูรูปภาพ HD</span>';
       const itemPrice = item.discountedPrice || item.basePrice || 0;
+      const opt = window.calculateOptimalOverTopup(itemPrice);
 
       const miniItem = document.createElement('div');
       miniItem.className = 'bundle-mini-item';
@@ -1390,7 +1391,7 @@ function renderBundles(bundles) {
           <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
           <span>${itemPrice.toLocaleString()}</span>
           ${itemPrice > 0 ? `
-            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")} ⚡</span>
+            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${itemPrice}">${opt.shortTag || ("~" + Math.round(itemPrice * 0.238) + " ฿")} ⚡</span>
           ` : ''}
         </div>
       `;
@@ -1434,6 +1435,8 @@ function renderNightMarket(nm) {
     card.style.animationDelay = (idx * 0.08) + 's';
     const safeIcon = offer.displayIcon || 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
     const starred = isWishlisted(offer.uuid);
+    const skinPrice = offer.discountedPrice || 0;
+    const opt = window.calculateOptimalOverTopup(skinPrice);
 
     card.innerHTML = `
       <button class="btn-wishlist-star ${starred ? 'starred' : ''}" data-uuid="${offer.uuid.toLowerCase()}" title="${starred ? 'อยู่ในรายการที่อยากได้' : 'เพิ่มในรายการที่อยากได้'}">
