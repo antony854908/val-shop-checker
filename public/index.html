@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4.3">
+  <link rel="stylesheet" href="style.css?v=4.4">
 </head>
 <body>
   <!-- Ambient Atmospheric Effects -->
@@ -891,20 +891,30 @@
           </div>
 
           <!-- Skin Real Money & Top-Up Store Comparison Quick Bar -->
+          <!-- OverTopup Package Recommendation Card for this Skin -->
           <div class="skin-price-comparison-bar" id="modalSkinPriceCompareBar">
             <div class="skin-price-compare-info">
               <div class="skin-price-compare-title">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--val-gold)" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                <span>ประมาณการเงินจริง (THB) & ร้านที่เติมถูกสุด:</span>
+                <span class="overtopup-bolt-icon">⚡</span>
+                <span id="modalOverTopupHeaderTitle">คำนวณแพ็กเกจ OverTopup ที่ต้องเติมสำหรับปืนนี้:</span>
               </div>
               <div class="skin-price-compare-values" id="modalSkinPriceCompareVal">
-                <span class="compare-thb-highlight" id="modalSkinThbEst">~435 - 532 ฿</span>
-                <span class="compare-cheapest-store" id="modalSkinCheapestStore">🏆 ร้านเติมเกมชั้นนำ (~12% OFF)</span>
+                <div class="overtopup-combo-badge" id="modalSkinOverTopupCombo">1x แพ็กเกจ 2,050 VP (489 ฿)</div>
+                <div class="overtopup-metric-pills">
+                  <span class="pill-vp-gain" id="modalSkinVpGain">💎 ได้รับ 2,050 VP</span>
+                  <span class="pill-vp-leftover" id="modalSkinVpLeftover">✨ เหลือ +275 VP ในไอดี</span>
+                  <span class="pill-savings" id="modalSkinSavingsTag">⚡ ประหยัด ~111 ฿ จากเติมในเกม</span>
+                </div>
               </div>
             </div>
-            <button id="btnInspectCompareStores" class="btn btn-gold-subtle btn-xs" title="เปิดระบบเปรียบเทียบทุกร้าน">
-              <span>🔍 เทียบร้านเติมถูกสุด</span>
-            </button>
+            <div class="skin-price-compare-actions">
+              <a id="btnDirectOverTopupLink" href="https://www.overtopup.com/th/game-topup/valorant" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm btn-glow" title="เปิดหน้าเว็บ OverTopup เพื่อเติมเงินทันที">
+                <span>⚡ ไปเติมที่ OverTopup (overtopup.com) ↗️</span>
+              </a>
+              <button id="btnInspectCompareStores" class="btn btn-secondary btn-sm" title="เปิดระบบเปรียบเทียบทุกแพ็กเกจ">
+                <span>📊 ดูตารางราคาทุกแพ็ก</span>
+              </button>
+            </div>
           </div>
 
           <!-- Chromas / Color Variants Selector -->
@@ -1490,6 +1500,6 @@
 
   </div>
 
-  <script src="app.js?v=4.3"></script>
+  <script src="app.js?v=4.4"></script>
 </body>
 </html>

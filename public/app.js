@@ -996,6 +996,114 @@ async function loadStore() {
   }
 }
 
+// Live OverTopup Packages Matrix & Dynamic Programming Solver
+const OVERTOPUP_PACKAGES = [
+  { vp: 475, price: 123, tag: "475 VP" },
+  { vp: 1000, price: 246, tag: "1,000 VP" },
+  { vp: 1475, price: 368, tag: "1,475 VP" },
+  { vp: 2050, price: 489, tag: "2,050 VP" },
+  { vp: 2525, price: 616, tag: "2,525 VP" },
+  { vp: 3050, price: 737, tag: "3,050 VP" },
+  { vp: 3650, price: 866, tag: "3,650 VP" },
+  { vp: 4100, price: 977, tag: "4,100 VP" },
+  { vp: 4125, price: 991, tag: "4,125 VP" },
+  { vp: 4650, price: 1112, tag: "4,650 VP" },
+  { vp: 5350, price: 1241, tag: "5,350 VP" },
+  { vp: 5825, price: 1361, tag: "5,825 VP" },
+  { vp: 6350, price: 1487, tag: "6,350 VP" },
+  { vp: 6825, price: 1607, tag: "6,825 VP" },
+  { vp: 7150, price: 1709, tag: "7,150 VP" },
+  { vp: 7400, price: 1732, tag: "7,400 VP" },
+  { vp: 7875, price: 1852, tag: "7,875 VP" },
+  { vp: 8200, price: 1959, tag: "8,200 VP" },
+  { vp: 8400, price: 1978, tag: "8,400 VP" },
+  { vp: 8750, price: 2089, tag: "8,750 VP" },
+  { vp: 9000, price: 2107, tag: "9,000 VP" },
+  { vp: 9800, price: 2334, tag: "9,800 VP" },
+  { vp: 11000, price: 2482, tag: "11,000 VP" },
+  { vp: 12000, price: 2733, tag: "12,000 VP" },
+  { vp: 13050, price: 2978, tag: "13,050 VP" },
+  { vp: 14650, price: 3353, tag: "14,650 VP" },
+  { vp: 16350, price: 3733, tag: "16,350 VP" },
+  { vp: 22000, price: 4964, tag: "22,000 VP" }
+];
+
+window.calculateOptimalOverTopup = function(targetVp) {
+  if (!targetVp || targetVp <= 0) {
+    return { totalPrice: 0, totalVp: 0, leftoverVp: 0, comboText: "", shortTag: "", comboList: [] };
+  }
+  const pkgs = [...OVERTOPUP_PACKAGES].sort((a, b) => a.price - b.price);
+  const searchLimit = targetVp + 22000 + 100;
+  const dp = new Array(searchLimit + 1);
+  dp[0] = { cost: 0, prevV: -1, pkgIndex: -1 };
+
+  for (let v = 0; v <= searchLimit; v++) {
+    if (!dp[v]) continue;
+    for (let i = 0; i < pkgs.length; i++) {
+      const nextV = v + pkgs[i].vp;
+      if (nextV > searchLimit) continue;
+      const nextCost = dp[v].cost + pkgs[i].price;
+      if (!dp[nextV] || nextCost < dp[nextV].cost) {
+        dp[nextV] = { cost: nextCost, prevV: v, pkgIndex: i };
+      }
+    }
+  }
+
+  let bestV = -1;
+  let minCost = Infinity;
+  for (let v = targetVp; v <= searchLimit; v++) {
+    if (dp[v] && dp[v].cost < minCost) {
+      minCost = dp[v].cost;
+      bestV = v;
+    } else if (dp[v] && dp[v].cost === minCost && (bestV === -1 || v > bestV)) {
+      bestV = v;
+    }
+  }
+
+  if (bestV === -1 || minCost === Infinity) {
+    const largest = pkgs[pkgs.length - 1];
+    const count = Math.ceil(targetVp / largest.vp);
+    return {
+      totalPrice: count * largest.price,
+      totalVp: count * largest.vp,
+      leftoverVp: (count * largest.vp) - targetVp,
+      comboText: `${count}x แพ็ก ${largest.tag} (${(count * largest.price).toLocaleString()}฿)`,
+      shortTag: `${count}x ${largest.tag} (${(count * largest.price).toLocaleString()}฿)`,
+      comboList: [{ count, pkg: largest }]
+    };
+  }
+
+  const counts = {};
+  let curr = bestV;
+  while (curr > 0 && dp[curr] && dp[curr].pkgIndex !== -1) {
+    const idx = dp[curr].pkgIndex;
+    counts[idx] = (counts[idx] || 0) + 1;
+    curr = dp[curr].prevV;
+  }
+
+  const comboList = [];
+  for (const idx in counts) {
+    comboList.push({
+      pkg: pkgs[idx],
+      count: counts[idx],
+      subtotalPrice: counts[idx] * pkgs[idx].price,
+      subtotalVp: counts[idx] * pkgs[idx].vp
+    });
+  }
+  comboList.sort((a, b) => b.pkg.vp - a.pkg.vp);
+  const comboText = comboList.map(c => `${c.count}x แพ็ก ${c.pkg.tag} (${c.subtotalPrice.toLocaleString()}฿)`).join(" + ");
+  const shortTag = comboList.map(c => `${c.count}x ${c.pkg.tag}`).join("+") + ` (${minCost.toLocaleString()}฿)`;
+
+  return {
+    totalPrice: minCost,
+    totalVp: bestV,
+    leftoverVp: bestV - targetVp,
+    comboText,
+    shortTag,
+    comboList
+  };
+};
+
 // Render Daily 4 Skins
 function renderDailyShop(skins) {
   const container = document.getElementById('dailySkinsGrid');
@@ -1014,6 +1122,8 @@ function renderDailyShop(skins) {
   }
 
   validSkins.forEach((skin, idx) => {
+    const skinPrice = skin.price || 0;
+    const opt = window.calculateOptimalOverTopup(skinPrice);
     const tierColor = skin.tier?.highlightColor || '#ff4655';
     const card = document.createElement('div');
     card.className = 'skin-card';
@@ -1053,7 +1163,7 @@ function renderDailyShop(skins) {
           <div class="skin-price-tag">
             <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
             <span>${(skin.price || 0).toLocaleString()}</span>
-            <span class="skin-thb-quick-tag" title="เปรียบเทียบราคาเติมเงินจริงทุกร้าน" data-vp="${skin.price || 0}">~${Math.round((skin.price || 0) * 0.262)} ฿ 🏷️</span>
+            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")} ⚡</span>
           </div>
           <button class="btn btn-primary btn-sm btn-inspect"><span>ดูเอฟเฟกต์ & สี</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
@@ -1280,9 +1390,7 @@ function renderBundles(bundles) {
           <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
           <span>${itemPrice.toLocaleString()}</span>
           ${itemPrice > 0 ? `
-            <span class="skin-thb-quick-tag" title="เทียบราคาเติมเงิน OverTopup สำหรับชิ้นนี้" data-vp="${itemPrice}">
-              ~${Math.round(itemPrice * 0.238)} ฿ ⚡
-            </span>
+            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")} ⚡</span>
           ` : ''}
         </div>
       `;
@@ -1351,7 +1459,7 @@ function renderNightMarket(nm) {
             <span class="original-price">${offer.originalPrice.toLocaleString()}</span>
             <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
             <span style="color:var(--val-gold)">${offer.discountedPrice.toLocaleString()}</span>
-            <span class="skin-thb-quick-tag" title="เปรียบเทียบราคาเติมเงินจริงทุกร้าน" data-vp="${offer.discountedPrice || 0}">~${Math.round((offer.discountedPrice || 0) * 0.262)} ฿ 🏷️</span>
+            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")} ⚡</span>
           </div>
           <button class="btn btn-primary btn-sm btn-inspect"><span>ดูสกิน & สี</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
@@ -1420,12 +1528,31 @@ function openSkinModal(skin) {
   const cheapestStoreEl = document.getElementById('modalSkinCheapestStore');
   const btnInspectCompare = document.getElementById('btnInspectCompareStores');
 
-  if (displayPrice && displayPrice > 0 && compareBar && thbEstEl) {
-    const minThb = Math.round(displayPrice * 0.262);
-    const maxThb = Math.round(displayPrice * 0.300);
-    thbEstEl.textContent = `~${minThb.toLocaleString()} - ${maxThb.toLocaleString()} ฿`;
-    if (cheapestStoreEl) cheapestStoreEl.textContent = '🏆 ร้านเติมเกมชั้นนำ (~12% OFF)';
-    compareBar.classList.remove('hidden');
+  if (displayPrice && displayPrice > 0 && compareBar) {
+    const opt = window.calculateOptimalOverTopup(displayPrice);
+    const inGameEstimate = Math.round(displayPrice * 0.300);
+    const savings = Math.max(0, inGameEstimate - opt.totalPrice);
+
+    const comboBadgeEl = document.getElementById("modalSkinOverTopupCombo");
+    const vpGainEl = document.getElementById("modalSkinVpGain");
+    const vpLeftoverEl = document.getElementById("modalSkinVpLeftover");
+    const savingsEl = document.getElementById("modalSkinSavingsTag");
+
+    if (comboBadgeEl) comboBadgeEl.textContent = opt.comboText || `${opt.totalPrice.toLocaleString()} ฿`;
+    if (vpGainEl) vpGainEl.textContent = `💎 ได้รับ ${opt.totalVp.toLocaleString()} VP`;
+    if (vpLeftoverEl) {
+      if (opt.leftoverVp > 0) {
+        vpLeftoverEl.textContent = `✨ เหลือ +${opt.leftoverVp.toLocaleString()} VP ในไอดี`;
+        vpLeftoverEl.style.display = "inline-flex";
+      } else {
+        vpLeftoverEl.style.display = "none";
+      }
+    }
+    if (savingsEl) {
+      savingsEl.textContent = savings > 0 ? `⚡ ประหยัดได้ ~${savings.toLocaleString()} ฿` : "⚡ เรทคุ้มกว่าเติมตรงในเกม";
+    }
+
+    compareBar.classList.remove("hidden");
     if (btnInspectCompare) {
       btnInspectCompare.onclick = (e) => {
         e.stopPropagation();
@@ -1433,7 +1560,7 @@ function openSkinModal(skin) {
       };
     }
   } else if (compareBar) {
-    compareBar.classList.add('hidden');
+    compareBar.classList.add("hidden");
   }
 
   // Default In-Game HD Weapon Artwork Render

@@ -256,9 +256,54 @@ function getPriceMatrix() {
   return matrix;
 }
 
+/**
+ * Fetch and sync live packages from https://www.overtopup.com/th/game-topup/valorant
+ */
+async function syncLivePackages() {
+  try {
+    const res = await fetch('https://www.overtopup.com/th/game-topup/valorant', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+    if (!res.ok) return false;
+    const html = await res.text();
+    const regex = /<input[^>]*data-price="([^"]+)"[^>]*>[\s\S]*?<div class="title">([^<]+)<\/div>[\s\S]*?<div class="h5[^>]*>฿?([^<]+)<\/div>/g;
+    const pkgs = [];
+    let m;
+    while ((m = regex.exec(html)) !== null) {
+      const rawVp = m[2].replace(/[^\d]/g, '');
+      const vp = parseInt(rawVp, 10);
+      const price = parseFloat(m[1].replace(/,/g, ''));
+      if (vp && price) {
+        pkgs.push({
+          vp,
+          price,
+          bonusVp: 0,
+          tag: m[2].trim()
+        });
+      }
+    }
+    if (pkgs.length > 0) {
+      pkgs.sort((a, b) => a.vp - b.vp);
+      STORES.overtopup.packages = pkgs;
+      STORES.overtopup.lastSynced = Date.now();
+      console.log(`[VpPricing] Synced ${pkgs.length} live packages from overtopup.com`);
+      return true;
+    }
+  } catch (err) {
+    console.warn('[VpPricing] Live sync warning (using built-in 28 packages):', err.message);
+  }
+  return false;
+}
+
+// Initial live sync
+syncLivePackages().catch(() => {});
+
 module.exports = {
   STORES,
   solveOptimalCombination,
   compareAllStores,
-  getPriceMatrix
+  getPriceMatrix,
+  syncLivePackages
 };
