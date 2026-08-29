@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#FF4655">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ValStore">
+  <title>VALORANT Store & Skin Inspector HD</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/assets/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=4.0">
+</head>
+<body>
+  <!-- Ambient Atmospheric Effects -->
+  <div class="ambient-glow glow-red"></div>
+  <div class="ambient-glow glow-cyan"></div>
+  <div class="ambient-grid"></div>
+
+  <!-- App Wrapper -->
+  <div class="app-container">
+    
+    <!-- Header Navigation -->
+    <header class="app-header">
+      <div class="brand-area">
+        <div class="brand-logo">
+          <svg viewBox="0 0 100 100" class="val-logo-svg">
+            <polygon points="10,12 50,88 40,88 0,12" fill="#FF4655" />
+            <polygon points="60,12 100,12 100,88 90,88 90,32 60,88 50,88" fill="#ECE8E1" />
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <h1>VALORANT <span class="accent-text">STORE</span></h1>
+          <p class="brand-tagline">ร้านค้ารายวัน & คลังสกินปืนพร้อมดูวิดีโอ Finisher HD</p>
+        </div>
+        <button id="btnOpenVpCalc" class="btn btn-pill btn-calc" title="ระบบเปรียบเทียบราคาเงินจริงกับ VP ร้านไหนเติมถูกสุด">
+          <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" width="14" height="14">
+          <span>🏷️ เทียบราคาเติม VP (OverTopup)</span>
+        </button>
+        <button id="btnToggleSoundEffects" class="btn btn-pill btn-sound-toggle" title="เปิด/ปิดเสียงเอฟเฟกต์ (SFX)">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" class="icon-sound-on"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" class="icon-sound-off hidden"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+          <span class="sound-toggle-label">เสียง SFX</span>
+        </button>
+        <button id="btnInstallPwa" class="btn btn-pill btn-pwa hidden">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>ติดตั้งแอป</span>
+        </button>
+      </div>
+
+      <!-- Mode Switcher Tabs -->
+      <nav class="mode-switcher-bar">
+        <button id="btnTabStore" class="mode-tab-btn active">
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          </span>
+          <span class="tab-label">ร้านค้าไอดี (Store)</span>
+        </button>
+        <button id="btnTabCareer" class="mode-tab-btn">
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          </span>
+          <span class="tab-label">ประวัติการเล่น (Career)</span>
+        </button>
+        <button id="btnTabAgents" class="mode-tab-btn">
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+          <span class="tab-label">ตัวละครทั้งหมด (Agents)</span>
+        </button>
+        <button id="btnTabCatalog" class="mode-tab-btn">
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+          </span>
+          <span class="tab-label">คลังสกิน 1,380+ (Catalog)</span>
+        </button>
+      </nav>
+
+      <!-- User Profile Header (When Logged In) -->
+      <div id="userHeader" class="user-header hidden">
+        <div class="user-profile-info">
+          <div class="user-lvl-pill" id="userLevel">LVL 1</div>
+          <div class="user-name-box">
+            <span class="user-gamename" id="userName">Agent</span>
+            <span class="user-tagline" id="userTag">#VAL</span>
+            <span class="user-shard-badge" id="userRegion">AP</span>
+          </div>
+        </div>
+
+        <div class="wallet-display">
+          <div class="wallet-chip vp-chip" title="Valorant Points">
+            <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="cur-icon">
+            <span id="walletVp" class="cur-val">0</span>
+          </div>
+          <div class="wallet-chip rp-chip" title="Radianite Points">
+            <img src="https://media.valorant-api.com/currencies/e59aa87c-4cbf-517a-5983-6e81511be9b7/largeicon.png" alt="RP" class="cur-icon">
+            <span id="walletRp" class="cur-val">0</span>
+          </div>
+          <div class="wallet-chip kc-chip" title="Kingdom Credits">
+            <img src="https://media.valorant-api.com/currencies/85ca954a-41f2-ce94-9b45-8ca3dd39a00d/largeicon.png" alt="KC" class="cur-icon">
+            <span id="walletKc" class="cur-val">0</span>
+          </div>
+        </div>
+
+        <div class="header-action-btns">
+          <button id="btnRefreshShop" class="btn btn-circle" title="รีเฟรชร้านค้า">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+            </svg>
+          </button>
+          <button id="btnLogout" class="btn btn-outline-danger btn-sm">
+            ออกจากระบบ
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content-flow">
+
+      <!-- ================= LOGIN SECTION ================= -->
+      <section id="loginSection" class="section-card login-card-hero">
+        <div class="card-hero-header">
+          <div class="badge-tag">AUTHENTICATION</div>
+          <h2>เข้าสู่ระบบ VALORANT STORE</h2>
+          <p class="hero-desc">ดูสกินที่สุ่มขายในไอดีของคุณ ยอดเงินคงเหลือ และตรวจสอบเอฟเฟกต์/Finisher</p>
+        </div>
+
+        <!-- Login Method Navigation -->
+        <div class="login-method-nav">
+          <button class="tab-btn active" data-tab="google-login">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+            <span>Google / Social Login</span>
+          </button>
+          <button class="tab-btn" data-tab="riot-login">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Riot Username & Password</span>
+          </button>
+          <button class="tab-btn" data-tab="token-login">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span>วาง Token / URL</span>
+          </button>
+        </div>
+
+        <!-- Tab 1: Google & Social Login (Fast & Official) -->
+        <div id="tabGoogleLogin" class="tab-content active">
+          <div class="google-auth-box">
+            <div class="social-hero-banner">
+              <svg viewBox="0 0 24 24" width="28" height="28">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              <div>
+                <h3>เข้าสู่ระบบด้วย Google หรือ Social</h3>
+                <p>สำหรับไอดีที่สมัครหรือผูกไว้กับ Google, Facebook, Apple, หรือ Xbox</p>
+              </div>
+            </div>
+
+            <div class="steps-container">
+              <div class="step-panel">
+                <div class="step-indicator">ขั้นตอนที่ 1</div>
+                <p>กดปุ่มด้านล่างเพื่อเปิดหน้าล็อกอิน Google ของ Riot Games อย่างเป็นทางการ</p>
+                <a id="btnOpenRiotGoogle" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1" target="_blank" rel="noopener noreferrer" class="btn btn-google-official">
+                  <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                  </svg>
+                  <span>1. กดเปิดหน้าล็อกอิน Google ของ Riot</span>
+                </a>
+              </div>
+
+              <div class="step-panel">
+                <div class="step-indicator">ขั้นตอนที่ 2</div>
+                <p>หลังจากล็อกอิน Google เสร็จ หากหน้าเว็บขึ้น <strong>"404 Page Not Found" ให้ทำตามนี้:</strong></p>
+                <div class="highlight-notice">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  <span>แตะที่ <strong>แถบที่อยู่ URL ด้านบนสุดของเบราว์เซอร์</strong> แล้วกด <strong>คัดลอก (Copy)</strong> ลิงก์ทั้งหมดที่มี <code>#access_token=...</code> มาวางในช่องด้านล่าง:</span>
+                </div>
+                <div class="input-paste-action-box">
+                  <input type="text" id="quickPasteInput" placeholder="วางลิงก์ URL หรือ Access Token ที่นี่..." class="modern-input" autocomplete="off">
+                  <button type="button" id="btnAutoPaste" class="btn btn-primary btn-glow">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                    <span>วาง & เข้าสู่ระบบทันที</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="googleAlert" class="alert-box hidden"></div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Standard Riot Login -->
+        <div id="tabRiotLogin" class="tab-content hidden">
+          <form id="riotLoginForm" class="modern-form">
+            <div class="form-row">
+              <label for="loginUsername">Riot ID / Username (ชื่อผู้ใช้)</label>
+              <input type="text" id="loginUsername" placeholder="กรอกชื่อผู้ใช้ Riot Games" required autocomplete="username" class="modern-input">
+            </div>
+
+            <div class="form-row">
+              <label for="loginPassword">Password (รหัสผ่าน)</label>
+              <div class="password-input-group">
+                <input type="password" id="loginPassword" placeholder="กรอกรหัสผ่าน" required autocomplete="current-password" class="modern-input">
+                <button type="button" id="togglePassword" class="btn-pwd-eye" title="แสดง/ซ่อนรหัส">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label for="loginRegion">เซิร์ฟเวอร์ (Region)</label>
+              <select id="loginRegion" class="modern-select">
+                <option value="ap" selected>Asia Pacific (AP / ไทย / เอเชีย)</option>
+                <option value="na">North America (NA)</option>
+                <option value="eu">Europe (EU)</option>
+                <option value="kr">Korea (KR)</option>
+                <option value="latam">Latin America (LATAM)</option>
+                <option value="br">Brazil (BR)</option>
+              </select>
+            </div>
+
+            <div id="loginAlert" class="alert-box hidden"></div>
+
+            <button type="submit" id="btnLoginSubmit" class="btn btn-primary btn-block btn-glow">
+              <span class="btn-text">เข้าสู่ระบบ (LOGIN)</span>
+              <span class="spinner hidden"></span>
+            </button>
+          </form>
+        </div>
+
+        <!-- 2FA Modal / Box within Login -->
+        <div id="mfaBox" class="mfa-box hidden">
+          <div class="mfa-header-area">
+            <div style="display:flex; align-items:center; gap:8px; justify-content:center; margin-bottom:4px;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--val-cyan)" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <h3 style="margin:0;">ยืนยันตัวตนสองชั้น (2FA Verification)</h3>
+            </div>
+            <p id="mfaDesc">กรุณากรอกรหัส 6 หลักที่ได้รับทางอีเมลหรือแอป Authenticator</p>
+          </div>
+          <form id="mfaForm" class="modern-form">
+            <div class="form-row">
+              <input type="text" id="mfaCode" class="modern-input mfa-center-input" placeholder="000000" maxlength="8" autocomplete="one-time-code" required>
+            </div>
+            <div id="mfaAlert" class="alert-box hidden"></div>
+            <div class="form-actions-split">
+              <button type="submit" id="btnMfaSubmit" class="btn btn-primary">ยืนยันรหัส 2FA</button>
+              <button type="button" id="btnMfaCancel" class="btn btn-secondary">ยกเลิก</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tab 3: Token / Social / Manual Ingestion -->
+        <div id="tabTokenLogin" class="tab-content hidden">
+          <div class="social-guide-box">
+            <p>คุณสามารถคัดลอก Access Token หรือ URL เต็มที่ได้จากการล็อกอิน Riot แล้วนำมาวางได้ทันที:</p>
+          </div>
+
+          <form id="tokenLoginForm" class="modern-form">
+            <div class="form-row">
+              <label for="inputAccessToken">Access Token หรือ URL เต็ม</label>
+              <textarea id="inputAccessToken" rows="3" placeholder="วาง Access Token หรือ URL ที่คัดลอกมา" class="modern-input" required></textarea>
+            </div>
+
+            <div class="form-row">
+              <label for="tokenRegion">เซิร์ฟเวอร์ (Region)</label>
+              <select id="tokenRegion" class="modern-select">
+                <option value="ap" selected>Asia Pacific (AP / ไทย)</option>
+                <option value="na">North America (NA)</option>
+                <option value="eu">Europe (EU)</option>
+                <option value="kr">Korea (KR)</option>
+              </select>
+            </div>
+
+            <div id="tokenAlert" class="alert-box hidden"></div>
+
+            <button type="submit" id="btnTokenSubmit" class="btn btn-primary btn-block btn-glow">
+              เข้าสู่ระบบด้วย Token
+            </button>
+          </form>
+        </div>
+
+        <!-- Security Features Banner -->
+        <div class="security-features-row">
+          <div class="sec-badge">
+            <span class="sec-icon">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--val-cyan)" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <span class="sec-text">เข้ารหัส TLS ตรงกับ Riot Games</span>
+          </div>
+          <div class="sec-badge">
+            <span class="sec-icon">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--val-gold)" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            <span class="sec-text">Persistent Session จดจำไอดีถาวร</span>
+          </div>
+          <div class="sec-badge">
+            <span class="sec-icon">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--val-red)" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </span>
+            <span class="sec-text">ไม่เก็บรหัสผ่าน ปลอดภัย 100%</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= STOREFRONT DASHBOARD ================= -->
+      <section id="storeSection" class="store-dashboard-view hidden">
+        
+        <!-- Daily Store Banner -->
+        <div class="dashboard-header-bar">
+          <div class="dash-title">
+            <h2>
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--val-red)" stroke-width="2.2" class="section-title-svg"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>ร้านค้าประจำวัน (DAILY OFFERS)</span>
+            </h2>
+            <p>สกินที่สุ่มขายในไอดีของคุณวันนี้ (คลิกการ์ดเพื่อเปิดดูเอฟเฟกต์, สี Chromas, และวิดีโอ Finisher)</p>
+          </div>
+          <div class="dash-timer-card">
+            <span class="timer-tag">รีเซ็ตในอีก</span>
+            <span id="dailyTimer" class="timer-digits">--:--:--</span>
+          </div>
+        </div>
+
+        <!-- Daily 4 Skins Grid -->
+        <div id="dailySkinsGrid" class="skins-card-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Night Market Section (Conditional) -->
+        <div id="nightMarketContainer" class="night-market-wrapper hidden">
+          <div class="dashboard-header-bar nm-header-bar">
+            <div class="dash-title">
+              <h2>
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--val-gold)" stroke-width="2.2" class="section-title-svg"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <span>ตลาดกาลกิณี (NIGHT MARKET)</span>
+              </h2>
+              <p>สกินลดราคาพิเศษเฉพาะบัญชีคุณ</p>
+            </div>
+            <div class="dash-timer-card nm-timer-card">
+              <span class="timer-tag">หมดเวลาใน</span>
+              <span id="nmTimer" class="timer-digits">--:--:--</span>
+            </div>
+          </div>
+          <div id="nightMarketGrid" class="skins-card-grid nm-card-grid"></div>
+        </div>
+
+        <!-- Featured Bundle Section -->
+        <div id="bundleContainer" class="featured-bundle-wrapper">
+          <div class="dashboard-header-bar bundle-header-bar">
+            <div class="dash-title">
+              <h2>
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--val-cyan)" stroke-width="2.2" class="section-title-svg"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                <span>ชุดรวมสกินเด่น (FEATURED BUNDLE)</span>
+              </h2>
+              <p>คอลเลกชันสกินและไอเทมพิเศษประจำแพตช์ (คลิกไอเทมเพื่อดูเอฟเฟกต์/รูปภาพ HD)</p>
+            </div>
+            <div class="dash-timer-card">
+              <span class="timer-tag">ระยะเวลาคงเหลือ</span>
+              <span id="bundleTimer" class="timer-digits">--:--:--</span>
+            </div>
+          </div>
+          <div id="bundleContent" class="bundle-display-card">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= CAREER & MATCH HISTORY SECTION ================= -->
+      <section id="careerSection" class="career-dashboard-view hidden">
+        
+        <!-- Player Rank & Career Summary Card -->
+        <div class="career-summary-card">
+          <div class="career-rank-col">
+            <div class="rank-badge-wrap">
+              <img id="careerRankIcon" src="https://media.valorant-api.com/competitivetiers/03621f52-342b-cf4e-4f86-9350a49c6d04/0/largeicon.png" alt="Rank" class="career-rank-img">
+            </div>
+            <div class="rank-text-info">
+              <span class="rank-tagline">CURRENT RANK</span>
+              <h3 id="careerRankName" class="career-rank-title">UNRANKED</h3>
+              <div class="rr-bar-container">
+                <div class="rr-bar-fill" id="careerRrBar" style="width: 0%;"></div>
+              </div>
+              <div class="rr-text-row">
+                <span id="careerRrText" class="rr-pts">0 / 100 RR</span>
+                <span id="careerPeakRank" class="peak-rank-tag">Peak: Unranked</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="career-stats-summary-grid">
+            <div class="career-stat-box">
+              <span class="stat-label">แมตช์ล่าสุด</span>
+              <span id="careerTotalGames" class="stat-val">--</span>
+            </div>
+            <div class="career-stat-box">
+              <span class="stat-label">อัตราชนะ (Win Rate)</span>
+              <span id="careerWinRate" class="stat-val accent-green">--%</span>
+            </div>
+            <div class="career-stat-box">
+              <span class="stat-label">K/D Ratio เฉลี่ย</span>
+              <span id="careerAvgKd" class="stat-val accent-cyan">--</span>
+            </div>
+            <div class="career-stat-box">
+              <span class="stat-label">คะแนนต่อรอบ (ACS)</span>
+              <span id="careerAvgAcs" class="stat-val accent-gold">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Playstyle & Best Agent Analysis Card -->
+        <div id="careerAiAnalysisSection" class="career-ai-analysis-card">
+          <div class="ai-header-row">
+            <div class="ai-badge-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--val-gold)" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span>AI AGENT & PLAYSTYLE COACH</span>
+            </div>
+            
+            <!-- Analysis Mode Filters -->
+            <div class="ai-mode-filter-bar">
+              <span class="filter-hint-txt">วิเคราะห์เฉพาะโหมด:</span>
+              <div class="ai-pills-wrap" id="aiModePills">
+                <button class="ai-pill active" data-aimode="">ทุกโหมด (All)</button>
+                <button class="ai-pill" data-aimode="competitive">จัดอันดับ (Competitive)</button>
+                <button class="ai-pill" data-aimode="unrated">ทั่วไป (Unrated)</button>
+                <button class="ai-pill" data-aimode="swiftplay">Swiftplay</button>
+                <button class="ai-pill" data-aimode="deathmatch">Deathmatch</button>
+                <button class="ai-pill" data-aimode="hurm">Team Deathmatch</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ai-analysis-grid">
+            <!-- 1. Best Performing Agent Card -->
+            <div class="ai-feature-card best-agent-card" id="bestAgentCardClickable" style="cursor: pointer;" title="คลิกเพื่อดูสถิติเจาะลึกและคำแนะนำตัวละครนี้">
+              <div class="card-inner-top">
+                <span class="feat-tag best-tag">ตัวละครที่คุณเล่นดีที่สุด (MVP AGENT)</span>
+                <span id="bestAgentTierPill" class="tier-pill tier-s">S+ TIER</span>
+              </div>
+              <div class="best-agent-body" id="bestAgentBody">
+                <div class="loading-mini-txt">กำลังวิเคราะห์สถิติตัวละคร...</div>
+              </div>
+            </div>
+
+            <!-- 2. Playstyle Diagnosis & Recommendation Card -->
+            <div class="ai-feature-card playstyle-recom-card" id="recomAgentCardClickable" style="cursor: pointer;" title="คลิกเพื่อดูสถิติและวิธีเล่นตัวละครแนะนำ">
+              <div class="card-inner-top">
+                <span class="feat-tag playstyle-tag">การวิเคราะห์สไตล์ & แนะนำตัวละคร</span>
+                <span id="playstyleTypeBadge" class="playstyle-pill">ANALYZING</span>
+              </div>
+              <div class="playstyle-body" id="playstyleBody">
+                <div class="loading-mini-txt">กำลังวิเคราะห์สไตล์การเล่น...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. All Played Agents Performance Breakdown -->
+          <div class="agents-perf-table-wrap">
+            <div class="perf-table-title">
+              <span>สรุปสถิติแยกตามตัวละครที่เคยเล่น (AGENT MASTERY)</span>
+              <span style="font-size:10px; color:var(--val-cyan); font-weight:500;">(แตะที่ตัวละครใดก็ได้เพื่อดูสถิติเจาะลึก & สกิล)</span>
+            </div>
+            <div id="agentsPerfList" class="agents-perf-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Mode Filter Pills & Refresh -->
+        <div class="career-filter-bar">
+          <div class="category-pills-scroller" id="careerQueuePills">
+            <button class="cat-pill active" data-queue="">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4m-2-2v4m10-2h.01m-3 0h.01"/></svg>
+              <span>ทุกโหมด (All)</span>
+            </button>
+            <button class="cat-pill" data-queue="competitive">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span>จัดอันดับ (Competitive)</span>
+            </button>
+            <button class="cat-pill" data-queue="unrated">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              <span>ทั่วไป (Unrated)</span>
+            </button>
+            <button class="cat-pill" data-queue="swiftplay">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>Swiftplay</span>
+            </button>
+            <button class="cat-pill" data-queue="deathmatch">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="10" r="2"/><circle cx="15" cy="10" r="2"/><path d="M12 2a8 8 0 0 0-8 8c0 3 2 5.5 4 7v3h8v-3c2-1.5 4-4 4-7a8 8 0 0 0-8-8z"/></svg>
+              <span>Deathmatch</span>
+            </button>
+            <button class="cat-pill" data-queue="hurm">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span>Team Deathmatch</span>
+            </button>
+          </div>
+          <button id="btnRefreshMatches" class="btn btn-secondary btn-sm" title="รีเฟรชประวัติการเล่น">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+            <span>รีเฟรชประวัติ</span>
+          </button>
+        </div>
+
+        <!-- Match History Cards List -->
+        <div id="matchesContainer" class="matches-list-container">
+          <div class="loading-msg" style="text-align: center; padding: 40px; color: var(--val-gray);">
+            กำลังดึงประวัติการเล่นจาก Riot...
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ALL AGENTS ENCYCLOPEDIA SECTION ================= -->
+      <section id="agentsSection" class="agents-dashboard-view hidden">
+        <div class="dashboard-header-bar">
+          <div class="dash-title">
+            <h2>
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--val-gold)" stroke-width="2.2" class="section-title-svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>สารานุกรมตัวละครทั้งหมดในเกม (AGENTS ENCYCLOPEDIA)</span>
+            </h2>
+            <p>สำรวจตัวละครครบทุกตัว 29+ ตัว เช็คราคาปลดล็อก สกิลความสามารถ วิเคราะห์ความเข้ากันได้กับสไตล์คุณ และดูวิธีเล่นระดับโปร</p>
+          </div>
+          <div class="catalog-badge-counter">
+            <span id="agentsTotalCount" class="counter-badge">ทั้งหมด 29 ตัวละคร</span>
+          </div>
+        </div>
+
+        <!-- Role Filter Pills -->
+        <div class="category-pills-scroller" id="agentRolePills">
+          <button class="cat-pill active" data-role="all">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>ทั้งหมด (All Roles)</span>
+          </button>
+          <button class="cat-pill" data-role="Duelist">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+            <span>Duelist (สายบุก)</span>
+          </button>
+          <button class="cat-pill" data-role="Initiator">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+            <span>Initiator (สายเปิด)</span>
+          </button>
+          <button class="cat-pill" data-role="Controller">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z"/></svg>
+            <span>Controller (สายควัน)</span>
+          </button>
+          <button class="cat-pill" data-role="Sentinel">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Sentinel (สายคุม)</span>
+          </button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="catalog-filter-bar">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" class="search-icon-svg">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="agentSearchInput" placeholder="ค้นหาชื่อตัวละคร (เช่น Jett, Reyna, Omen, Cypher, Gekko, Clove, Sova, Iso...)" class="search-input-field">
+            <button id="btnClearAgentSearch" class="btn-search-clear hidden">&times;</button>
+          </div>
+        </div>
+
+        <!-- All Agents Grid -->
+        <div id="allAgentsGrid" class="all-agents-catalog-grid">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ================= ALL SKINS CATALOG SECTION ================= -->
+      <section id="catalogSection" class="catalog-dashboard-view hidden">
+        <div class="dashboard-header-bar">
+          <div class="dash-title">
+            <h2>
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--val-cyan)" stroke-width="2.2" class="section-title-svg"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+              <span>คลังสกินปืนทั้งหมดในเกม (WEAPON ENCYCLOPEDIA)</span>
+            </h2>
+            <p>สำรวจสกินปืนครบทุกกระบอกกว่า 1,380+ สกิน ดูไอคอนชัด HD เปลี่ยนสี Chromas ทุกแบบ และเปิดดูคลิปวิดีโอ VFX / Finisher</p>
+          </div>
+          <div class="catalog-badge-counter">
+            <span id="catalogTotalCount" class="counter-badge">กำลังโหลด...</span>
+          </div>
+        </div>
+
+        <!-- Weapon Category Filter Pills -->
+        <div class="category-pills-scroller" id="categoryPills">
+          <button class="cat-pill active" data-category="all">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>ทั้งหมด (All)</span>
+          </button>
+          <button class="cat-pill" data-category="wishlist">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="var(--val-gold)" stroke="var(--val-gold)" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>ที่อยากได้ (Wishlist)</span>
+          </button>
+          <button class="cat-pill" data-category="Rifle">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+            <span>ปืนไรเฟิล (Rifles)</span>
+          </button>
+          <button class="cat-pill" data-category="Sidearm">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h16v4H4zM4 12l2 8h4l-1-8"/></svg>
+            <span>ปืนพก (Sidearms)</span>
+          </button>
+          <button class="cat-pill" data-category="Sniper">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+            <span>สไนเปอร์ (Snipers)</span>
+          </button>
+          <button class="cat-pill" data-category="SMG">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>ปืนกลเบา (SMGs)</span>
+          </button>
+          <button class="cat-pill" data-category="Shotgun">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="17" cy="12" r="2"/></svg>
+            <span>ลูกซอง (Shotguns)</span>
+          </button>
+          <button class="cat-pill" data-category="Heavy">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
+            <span>ปืนกลหนัก (Heavy)</span>
+          </button>
+          <button class="cat-pill" data-category="Melee">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/></svg>
+            <span>มีด/อาวุธประชิด (Melee)</span>
+          </button>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="catalog-filter-bar">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" class="search-icon-svg">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="catalogSearchInput" placeholder="ค้นหาชื่อสกินปืน (เช่น Prime, Reaver, Kuronami, Evori, Vandal, Bandit...)" class="search-input-field">
+            <button id="btnClearSearch" class="btn-search-clear hidden">&times;</button>
+          </div>
+
+          <div class="dropdown-filter-group">
+            <select id="filterWeapon" class="modern-select">
+              <option value="all">ปืนทุกชนิด (All Weapons)</option>
+              <!-- Populated dynamically by JS -->
+            </select>
+
+            <select id="filterTier" class="modern-select">
+              <option value="all">ทุกระดับเทียร์ (All Tiers)</option>
+              <option value="Ultra">Ultra Edition (สีทอง)</option>
+              <option value="Exclusive">Exclusive Edition (สีส้ม)</option>
+              <option value="Premium">Premium Edition (สีม่วง)</option>
+              <option value="Deluxe">Deluxe Edition (สีเขียว)</option>
+              <option value="Select">Select Edition (สีฟ้า)</option>
+              <option value="Standard">Standard / อื่นๆ</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Catalog Skins Grid -->
+        <div id="catalogSkinsGrid" class="skins-card-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Load More Button -->
+        <div class="pagination-area">
+          <button id="btnLoadMoreSkins" class="btn btn-secondary btn-glow">
+            โหลดสกินเพิ่มเติม...
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ================= SKIN INSPECTOR MODAL ================= -->
+    <div id="skinModal" class="modal-backdrop-layer hidden">
+      <div class="modal-tactical-dialog">
+        <button id="btnCloseModal" class="btn-dialog-close" title="ปิดหน้าต่าง">&times;</button>
+        
+        <div class="modal-dialog-header">
+          <div class="modal-tier-tag" id="modalTierBadge">
+            <img id="modalTierIcon" src="" alt="Tier" class="tier-tag-icon" onerror="this.classList.add('hidden')">
+            <span id="modalTierName">Premium Edition</span>
+          </div>
+          <h2 id="modalSkinName" class="modal-skin-heading">Prime Vandal</h2>
+          <div class="modal-price-display" id="modalSkinPrice">
+            <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="modal-vp-icon">
+            <span id="modalPriceVal">1,775</span> VP
+          </div>
+        </div>
+
+        <div class="modal-dialog-body">
+          <!-- Media Showcase (Render Image & Video Player) -->
+          <div class="media-showcase-panel">
+            <div id="imagePreviewBox" class="preview-box image-view-active">
+              <div class="tactical-inspect-stage" id="tacticalInspectStage">
+                <div class="inspect-backdrop-grid"></div>
+                <div class="inspect-spotlight" id="inspectSpotlight"></div>
+                <div class="inspect-weapon-3d-wrap" id="inspectWeaponWrap">
+                  <img id="modalSkinImg" src="" alt="Skin Display" class="main-preview-render in-game-render" onerror="this.src='https://media.valorant-api.com/weapons/skins/default/displayicon.png'">
+                  <div class="inspect-hologram-sheen" id="inspectSheen"></div>
+                </div>
+                <div class="inspect-shadow-plane"></div>
+                <div class="turntable-hint-badge" id="turntableHint">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                  <span>โชว์รูมสกินแท้จากเกม (เลื่อนเมาส์/สัมผัสเพื่อขยับ 3D)</span>
+                </div>
+              </div>
+            </div>
+            
+            <div id="videoPreviewBox" class="preview-box video-view-box hidden">
+              <video id="modalVideoPlayer" playsinline loop preload="auto" class="embedded-video-player">
+                <source src="" type="video/mp4">
+                เบราว์เซอร์ของคุณไม่รองรับการเล่นวิดีโอ
+              </video>
+              <div class="video-custom-controls">
+                <button id="btnToggleSound" class="btn-video-ctrl" title="เปิด/ปิดเสียง">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                  <span id="btnToggleSoundText">เปิดเสียง</span>
+                </button>
+                <button id="btnTogglePlay" class="btn-video-ctrl" title="เล่น/หยุด">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                  <span id="btnTogglePlayText">หยุด</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="media-switcher-tabs">
+              <button id="btnShowImage" class="btn-switch-tab active">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>รูปภาพสกิน (HD Render)</span>
+              </button>
+              <button id="btnShowVideo" class="btn-switch-tab">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span>วิดีโอเอฟเฟกต์ (VFX & Finisher)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Skin Real Money & Top-Up Store Comparison Quick Bar -->
+          <div class="skin-price-comparison-bar" id="modalSkinPriceCompareBar">
+            <div class="skin-price-compare-info">
+              <div class="skin-price-compare-title">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--val-gold)" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span>ประมาณการเงินจริง (THB) & ร้านที่เติมถูกสุด:</span>
+              </div>
+              <div class="skin-price-compare-values" id="modalSkinPriceCompareVal">
+                <span class="compare-thb-highlight" id="modalSkinThbEst">~435 - 532 ฿</span>
+                <span class="compare-cheapest-store" id="modalSkinCheapestStore">🏆 ร้านเติมเกมชั้นนำ (~12% OFF)</span>
+              </div>
+            </div>
+            <button id="btnInspectCompareStores" class="btn btn-gold-subtle btn-xs" title="เปิดระบบเปรียบเทียบทุกร้าน">
+              <span>🔍 เทียบร้านเติมถูกสุด</span>
+            </button>
+          </div>
+
+          <!-- Chromas / Color Variants Selector -->
+          <div class="inspector-control-section">
+            <div class="inspector-section-header">
+              <h4>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--val-cyan)" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z"/></svg>
+                <span>สีและลวดลาย (COLOR VARIANTS / CHROMAS)</span>
+              </h4>
+              <span id="selectedChromaName" class="active-selection-label">Base</span>
+            </div>
+            <div id="chromasContainer" class="chromas-flex-grid">
+              <!-- Swatches generated by JS -->
+            </div>
+          </div>
+
+          <!-- Levels / VFX / Finisher Selector -->
+          <div class="inspector-control-section">
+            <div class="inspector-section-header">
+              <h4>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--val-gold)" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span>เลเวลและเอฟเฟกต์ (EFFECT LEVELS & FINISHER)</span>
+              </h4>
+              <span id="selectedLevelName" class="active-selection-label">Level 1</span>
+            </div>
+            <div id="levelsContainer" class="levels-flex-grid">
+              <!-- Level cards generated by JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= MATCH SCOREBOARD & REPLAY ANALYSIS MODAL ================= -->
+    <div id="matchModal" class="modal-backdrop-layer hidden">
+      <div class="modal-tactical-dialog modal-scoreboard-dialog">
+        <button id="btnCloseMatchModal" class="btn-dialog-close" title="ปิดหน้าต่าง">&times;</button>
+        
+        <div class="modal-dialog-header scoreboard-header">
+          <div class="match-meta-head">
+            <span id="modalMatchQueue" class="match-mode-badge">COMPETITIVE</span>
+            <span id="modalMatchMap" class="match-map-name">ASCENT</span>
+            <span id="modalMatchDate" class="match-date-tag">--</span>
+          </div>
+          <div class="match-outcome-display">
+            <h2 id="modalMatchOutcome" class="outcome-title outcome-win">VICTORY</h2>
+            <div id="modalMatchScore" class="outcome-score">13 - 8</div>
+          </div>
+        </div>
+
+        <!-- Match Modal Sub-navigation Tabs -->
+        <div class="modal-subnav-bar">
+          <button id="btnTabMatchScoreboard" class="subnav-tab-btn active" data-subtab="scoreboard">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            <span>ตารางคะแนน 10 ผู้เล่น</span>
+          </button>
+          <button id="btnTabMatchRounds" class="subnav-tab-btn" data-subtab="rounds">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>ไทม์ไลน์รายรอบ (Round Timeline)</span>
+          </button>
+          <button id="btnTabMatchStats" class="subnav-tab-btn" data-subtab="stats">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <span>สถิติเจาะลึก (Combat & Econ)</span>
+          </button>
+        </div>
+
+        <div class="modal-dialog-body scoreboard-body">
+          
+          <!-- Subtab 1: Full 10-Player Scoreboard -->
+          <div id="subtabScoreboardContent" class="subtab-content-panel active">
+            <div class="scoreboard-table-wrap">
+              <table class="scoreboard-table">
+                <thead>
+                  <tr>
+                    <th>ผู้เล่น / ตัวละคร</th>
+                    <th>แรงก์</th>
+                    <th>ACS</th>
+                    <th>K / D / A</th>
+                    <th>KD</th>
+                    <th>ADR</th>
+                    <th>HS%</th>
+                    <th>ปืนหลัก</th>
+                    <th>คะแนนรวม</th>
+                  </tr>
+                </thead>
+                <tbody id="modalScoreboardRows">
+                  <!-- Scoreboard rows populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Subtab 2: 2D Interactive Map Replay & Round Timeline -->
+          <div id="subtabRoundsContent" class="subtab-content-panel hidden">
+            <div class="rounds-timeline-header">
+              <h4>เลือกรอบการแข่งขัน (ROUND SELECTOR)</h4>
+              <div id="roundsPillsList" class="rounds-pills-scroller">
+                <!-- Round pills generated by JS -->
+              </div>
+            </div>
+
+            <!-- Replay Layout: 2D Map Canvas + Round Details -->
+            <div class="replay-main-grid">
+              
+              <!-- 2D Minimap Canvas Player -->
+              <div class="minimap-replay-container">
+                <!-- Live Replay HUD Bar -->
+                <div class="replay-hud-bar">
+                  <div class="hud-team hud-team-friendly">
+                    <span class="hud-dot dot-friendly"></span>
+                    <span id="hudFriendlyAlive" class="hud-count">5 ALIVE</span>
+                  </div>
+
+                  <div class="hud-center-clock">
+                    <span id="hudRoundTimer" class="hud-timer">0:00</span>
+                    <div id="hudSpikeIndicator" class="hud-spike-status hidden">
+                      <span class="spike-icon-dot"></span>
+                      <span id="hudSpikeCountdown">45.0s</span>
+                    </div>
+                  </div>
+
+                  <div class="hud-team hud-team-enemy">
+                    <span id="hudEnemyAlive" class="hud-count">5 ALIVE</span>
+                    <span class="hud-dot dot-enemy"></span>
+                  </div>
+                </div>
+
+                <div class="minimap-canvas-wrapper" id="minimapCanvasWrap">
+                  <img id="replayMinimapImg" src="" alt="Minimap" class="minimap-bg-img">
+                  <div id="replayMarkersLayer" class="minimap-markers-layer"></div>
+                  <svg id="replayTracerSvg" class="minimap-tracer-layer"></svg>
+                </div>
+
+                <!-- Replay Player Controls Bar -->
+                <div class="replay-controls-bar">
+                  <button id="btnPlayReplay" class="btn btn-primary btn-sm btn-replay-ctrl">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    <span id="btnPlayReplayText">เล่น 2D Replay</span>
+                  </button>
+                  <button id="btnResetReplay" class="btn btn-secondary btn-sm" title="รีเซ็ตเวลา">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+                  </button>
+                  <button id="btnToggleReplayAudio" class="btn btn-secondary btn-sm" title="เปิด/ปิดเสียงเอฟเฟกต์">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                  </button>
+                  
+                  <div class="replay-progress-wrap">
+                    <input type="range" id="replayTimeSlider" min="0" max="100" value="0" class="replay-slider">
+                    <span id="replayTimeDisplay" class="replay-time-txt">0:00</span>
+                  </div>
+
+                  <select id="replaySpeedSelect" class="modern-select replay-speed-select">
+                    <option value="1">1.0x</option>
+                    <option value="2" selected>2.0x</option>
+                    <option value="4">4.0x</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Round Events & Killfeed Box -->
+              <div id="activeRoundDetailBox" class="round-detail-card">
+                <!-- Populated by JS -->
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Subtab 3: Combat Analytics & Video Note -->
+          <div id="subtabStatsContent" class="subtab-content-panel hidden">
+            <div id="advancedStatsGrid" class="advanced-stats-grid">
+              <!-- Populated by JS -->
+            </div>
+
+            <!-- Replay Info Note Banner -->
+            <div class="replay-info-banner">
+              <div class="replay-banner-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--val-cyan)" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              </div>
+              <div class="replay-banner-text">
+                <strong>ข้อมูลวิดีโอและการรีเพลย์ (Match Timeline & Replay)</strong>
+                <p>Riot Games บันทึกข้อมูลเหตุการณ์ยิง ดาเมจ การกู้สไปก์ และอาวุธที่ใช้ในแต่ละรอบอย่างละเอียดแบบ Round-by-Round (หากต้องการดูวิดีโอเอฟเฟกต์ Finisher และ VFX ของสกินปืน สามารถคลิกดูได้ในคลังสกิน)</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= AGENT DEEP-DIVE DOSSIER MODAL ================= -->
+    <div id="agentModal" class="modal-backdrop-layer hidden">
+      <div class="modal-tactical-dialog modal-agent-dialog">
+        <button id="btnCloseAgentModal" class="btn-dialog-close" title="ปิดหน้าต่าง">&times;</button>
+        
+        <div class="agent-modal-hero" id="agentModalHero">
+          <div class="agent-modal-portrait-box">
+            <img id="agentModalImg" src="" alt="Agent" class="agent-modal-main-img" onerror="this.src='https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png'">
+          </div>
+          <div class="agent-modal-titles">
+            <div class="agent-role-pill" id="agentModalRole">
+              <img id="agentModalRoleIcon" src="" alt="" class="role-mini-icon" onerror="this.style.display='none'">
+              <span id="agentModalRoleText">DUELIST</span>
+            </div>
+            <h2 id="agentModalName" class="agent-modal-heading">JETT</h2>
+            <div class="agent-modal-tier-badge" id="agentModalTier">
+              <span id="agentModalTierText" class="tier-pill tier-s">S+ TIER (PERFORMANCE: 95/100)</span>
+            </div>
+            <p id="agentModalDesc" class="agent-modal-desc">คำอธิบายตัวละคร...</p>
+          </div>
+        </div>
+
+        <div class="agent-modal-body">
+          <h4 class="modal-sub-heading">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--val-cyan)" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            <span>สถิติการเล่นจริงของคุณกับตัวละครนี้</span>
+          </h4>
+          
+          <div class="agent-combat-metrics-grid" id="agentModalMetricsGrid">
+            <!-- Populated by JS -->
+          </div>
+
+          <h4 class="modal-sub-heading" style="margin-top:16px;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--val-gold)" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>สกิลประจำตัว & เทคนิคการเล่น (ABILITIES & STRATEGY)</span>
+          </h4>
+
+          <div class="agent-abilities-grid" id="agentModalAbilitiesGrid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= VP TO THB & OVERTOPUP PRICE COMPARATOR MODAL ================= -->
+    <div id="vpCalcModal" class="modal-backdrop-layer hidden">
+      <div class="modal-tactical-dialog modal-calc-dialog">
+        <button id="btnCloseVpCalcModal" class="btn-dialog-close" title="ปิดหน้าต่าง">&times;</button>
+        
+        <div class="modal-dialog-header">
+          <div class="badge-tag" style="color:var(--val-cyan); background:rgba(0,245,212,0.12);">OVERTOPUP.COM VP COMPARISON & SAVINGS</div>
+          <h2 class="modal-skin-heading" style="font-size:20px; display:flex; align-items:center; gap:8px;">
+            <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" width="22" height="22" alt="VP">
+            <span>เปรียบเทียบราคาเติม OverTopup vs เติมตรงในเกม</span>
+          </h2>
+          <p style="font-size:12px; color:var(--val-gray); margin-top:2px;">คำนวณเรทราคาจริงจาก <a href="https://www.overtopup.com/th/game-topup/valorant" target="_blank" style="color:var(--val-cyan); text-decoration:underline;">overtopup.com</a> เทียบกับราคาทางการในเกม</p>
+        </div>
+
+        <!-- Mode Switcher Subtabs in Modal -->
+        <div class="modal-subnav-bar">
+          <button id="btnVpModeOptimizer" class="subnav-tab-btn active" data-vpmode="optimizer">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <span>🎯 คำนวณแพ็กเกจ OverTopup ที่ประหยัดที่สุด</span>
+          </button>
+          <button id="btnVpModeMatrix" class="subnav-tab-btn" data-vpmode="matrix">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+            <span>📊 ตารางราคา OverTopup ทุกแพ็กเกจ (28 แพ็ก)</span>
+          </button>
+          <button id="btnVpModeCustom" class="subnav-tab-btn" data-vpmode="custom">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+            <span>⚡ ไปที่เว็บ OverTopup (overtopup.com)</span>
+          </button>
+        </div>
+
+        <div class="modal-dialog-body">
+
+          <!-- ================= SUBTAB 1: SMART OPTIMIZER ================= -->
+          <div id="vpOptimizerPanel" class="vp-subpanel active">
+            <div class="calc-input-section">
+              <div class="form-row">
+                <label for="inputCalcVp" style="display:flex; justify-content:space-between; align-items:center;">
+                  <span>จำนวน Valorant Points (VP) ที่ต้องการซื้อ หรือ ราคาสกิน:</span>
+                  <span id="labelCurrentVpInWallet" style="font-size:11px; color:var(--val-cyan); font-weight:600;">(ในไอดีมี: 0 VP)</span>
+                </label>
+                <div class="calc-input-wrap">
+                  <input type="number" id="inputCalcVp" placeholder="เช่น 1775, 2175, 7100..." class="modern-input" min="1" value="1775">
+                  <div class="calc-quick-pull-dropdown">
+                    <button id="btnCalcPullWishlist" class="btn btn-secondary btn-sm" title="คำนวณจากยอดรวมสกินที่ติดดาว Wishlist ทั้งหมด">
+                      ⭐ ดึงจาก Wishlist
+                    </button>
+                    <button id="btnCalcPullDailyShop" class="btn btn-secondary btn-sm" title="คำนวณจากยอดสกินร้านค้าประจำวัน">
+                      🛒 ดึงร้านค้ารายวัน
+                    </button>
+                    <button id="btnCalcPullBundle" class="btn btn-secondary btn-sm" title="คำนวณจากยอดรวมของชุดบันเดิลเด่น (Featured Bundle)">
+                      📦 ดึงราคาบันเดิลเด่น
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick VP Preset Pills -->
+              <div class="calc-preset-pills">
+                <button class="calc-preset-btn" data-vp="875">Select (875 VP)</button>
+                <button class="calc-preset-btn" data-vp="1275">Deluxe (1,275 VP)</button>
+                <button class="calc-preset-btn active" data-vp="1775">Premium (1,775 VP)</button>
+                <button class="calc-preset-btn" data-vp="2175">Exclusive (2,175 VP)</button>
+                <button class="calc-preset-btn" data-vp="2475">Ultra (2,475 VP)</button>
+                <button class="calc-preset-btn" data-vp="4350">Knife (4,350 VP)</button>
+                <button class="calc-preset-btn" data-vp="7100">Bundle (7,100 VP)</button>
+                <button class="calc-preset-btn" data-vp="9900">Mega (9,900 VP)</button>
+              </div>
+
+              <!-- Deduct Current Wallet VP Switch -->
+              <div class="calc-toggle-row">
+                <label class="checkbox-label" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                  <input type="checkbox" id="checkDeductWallet" checked>
+                  <span style="font-size:12px; color:#e0e8f0;">หักลบ VP ที่มีอยู่ในไอดีจริง (คำนวณเฉพาะ VP ที่ต้องเติมเพิ่ม)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Calculation Status Banner -->
+            <div class="calc-result-card" id="calcResultBox">
+              <div class="calc-result-row">
+                <div class="calc-col">
+                  <span class="calc-label">VP เป้าหมายที่ต้องการ:</span>
+                  <span id="calcTargetVpDisplay" class="calc-val-vp" style="color:#fff;">1,775 VP</span>
+                </div>
+                <div class="calc-col">
+                  <span class="calc-label">VP ในไอดีของคุณ:</span>
+                  <span id="calcWalletBalance" class="calc-val-vp">0 VP</span>
+                </div>
+                <div class="calc-col">
+                  <span class="calc-label">VP ที่ต้องเติมเพิ่ม:</span>
+                  <span id="calcNeededVp" class="calc-val-needed">1,775 VP</span>
+                </div>
+              </div>
+
+              <!-- Top Winner Highlight Hero Banner (OverTopup) -->
+              <div class="cheapest-store-hero-banner" id="cheapestStoreHero">
+                <div class="hero-winner-badge">
+                  <span class="winner-crown">⚡</span>
+                  <span id="winnerBadgeTitle">เติมผ่าน OVERTOPUP (ถูกกว่าเติมในเกม)</span>
+                </div>
+                <div class="hero-winner-content">
+                  <div class="hero-store-info">
+                    <h3 id="winnerStoreName">Over Topup (overtopup.com)</h3>
+                    <p id="winnerStoreTag">เติมเข้า Riot ID ไทย อัตโนมัติ • PromptPay / โอนธนาคาร</p>
+                  </div>
+                  <div class="hero-price-box">
+                    <div class="hero-price-digits">
+                      <span id="winnerPriceThb">~489</span> <span class="thb-unit">บาท (THB)</span>
+                    </div>
+                    <div class="hero-savings-pill" id="winnerSavingsTag">
+                      ⚡ ประหยัดได้ 111 ฿ (-18.5% จากเติมในเกม)
+                    </div>
+                  </div>
+                </div>
+                <div class="hero-combo-note" id="winnerComboNote">
+                  <span>📦 แพ็กเกจที่แนะนำบน OverTopup: <strong>1x 2,050 VP (489฿)</strong> (ได้รับ 2,050 VP, เหลือ 275 VP ในไอดี)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Comparison Breakdown Grid: OverTopup vs Riot Official In-Game -->
+            <div class="stores-ranking-section">
+              <div class="stores-section-header">
+                <h4 class="calc-sub-title">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--val-cyan)" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                  <span>เปรียบเทียบ OverTopup กับ เติมตรงในเกม (Comparison Breakdown):</span>
+                </h4>
+              </div>
+
+              <div id="storesComparisonGrid" class="stores-comparison-grid">
+                <!-- Store cards populated dynamically by JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= SUBTAB 2: ALL OVERTOPUP PACKAGES MATRIX ================= -->
+          <div id="vpMatrixPanel" class="vp-subpanel hidden">
+            <div class="matrix-info-note">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--val-cyan)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>ตารางราคาทุก 28 แพ็กเกจของ <strong style="color:var(--val-cyan)">Over Topup (overtopup.com)</strong> เทียบกับราคาทางการเติมในเกม</span>
+            </div>
+
+            <div class="vp-rates-table-wrap">
+              <table class="vp-rates-table" id="allStoresMatrixTable">
+                <thead>
+                  <tr>
+                    <th>แพ็กเกจ VP</th>
+                    <th>ราคา OverTopup ⚡</th>
+                    <th>ราคาเติมในเกม (ทางการ)</th>
+                    <th>ประหยัดได้ (บาท)</th>
+                    <th>ส่วนลด %</th>
+                    <th>เฉลี่ยต่อ 100 VP</th>
+                  </tr>
+                </thead>
+                <tbody id="matrixTableBody">
+                  <!-- Generated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ================= SUBTAB 3: DIRECT LINK & INFO ================= -->
+          <div id="vpCustomPanel" class="vp-subpanel hidden">
+            <div class="custom-shop-tester-card">
+              <div class="tester-hero-desc">
+                <h4>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--val-cyan)" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span>เกี่ยวกับ Over Topup (overtopup.com)</span>
+                </h4>
+                <p>ผู้ให้บริการเติมเกม Valorant ผ่าน Riot ID ปลอดภัย 100% ไม่ต้องใช้รหัสผ่าน</p>
+              </div>
+
+              <div class="overtopup-info-details" style="background:rgba(0,0,0,0.4); border:1px solid rgba(0,245,212,0.2); border-radius:8px; padding:16px; margin-bottom:14px;">
+                <h5 style="color:var(--val-gold); margin-bottom:8px; font-size:13px;">🛡️ ขั้นตอนการเติมเกมบน OverTopup:</h5>
+                <ol style="color:#d0e0f0; font-size:12px; line-height:1.7; padding-left:20px; margin:0 0 14px 0;">
+                  <li>เปิดเว็บไซต์ <strong>https://www.overtopup.com/th/game-topup/valorant</strong></li>
+                  <li>กรอก <strong>Riot ID (GameName#TAG)</strong> บัญชีไทยของคุณ</li>
+                  <li>เลือกจำนวน VP ที่ต้องการเติม</li>
+                  <li>สแกนชำระเงินผ่าน <strong>PromptPay QR</strong> หรือโอนผ่านธนาคาร</li>
+                  <li>ระบบจะส่ง VP เข้าไอดีเกมของคุณทันทีภายในไม่กี่วินาที</li>
+                </ol>
+                
+                <a href="https://www.overtopup.com/th/game-topup/valorant" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width:100%; justify-content:center; padding:10px; font-size:13px; font-weight:700; display:flex; align-items:center; gap:8px;">
+                  <span>⚡ เปิดเว็บไซต์ OverTopup (overtopup.com) เพื่อเติมเงินทันที ↗️</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>VALORANT is a registered trademark of Riot Games, Inc. This application is not affiliated with or endorsed by Riot Games.</p>
+      <p class="sec-note">Built with Zero-Leak In-Memory Session Architecture & End-to-End API Integration.</p>
+    </footer>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script src="app.js?v=4.0"></script>
+</body>
+</html>
