@@ -608,18 +608,19 @@ class ValorantApiService {
         }
       }
 
-      // Convert to array and filter out standard starter weapons for stats calculation
+      // Convert to array
       const allOwnedSkins = Array.from(ownedSkinMap.values());
       const premiumOwnedSkins = allOwnedSkins.filter(s => !s.isStandardDefault);
 
-      // Sort by Equipped first, then VP Price descending, then Name
-      premiumOwnedSkins.sort((a, b) => {
+      // Sort by Equipped first, then Premium first, then VP Price descending, then Name
+      allOwnedSkins.sort((a, b) => {
         if (b.isEquipped !== a.isEquipped) return b.isEquipped ? 1 : -1;
+        if (b.isStandardDefault !== a.isStandardDefault) return a.isStandardDefault ? 1 : -1;
         if (b.estimatedVpPrice !== a.estimatedVpPrice) return b.estimatedVpPrice - a.estimatedVpPrice;
         return (a.name || '').localeCompare(b.name || '');
       });
 
-      // Calculate total VP and THB valuation
+      // Calculate total VP and THB valuation (only counting premium skins)
       let totalVpValue = 0;
       const weaponBreakdown = {};
       const tierBreakdown = {
@@ -628,18 +629,22 @@ class ValorantApiService {
         premium: 0,
         deluxe: 0,
         select: 0,
-        other: 0
+        standard: 0
       };
 
-      for (const s of premiumOwnedSkins) {
-        totalVpValue += (s.estimatedVpPrice || 0);
+      for (const s of allOwnedSkins) {
+        if (!s.isStandardDefault) {
+          totalVpValue += (s.estimatedVpPrice || 0);
+        }
 
         const wp = s.weaponType || 'Other';
         if (!weaponBreakdown[wp]) {
           weaponBreakdown[wp] = { count: 0, totalVp: 0 };
         }
         weaponBreakdown[wp].count++;
-        weaponBreakdown[wp].totalVp += (s.estimatedVpPrice || 0);
+        if (!s.isStandardDefault) {
+          weaponBreakdown[wp].totalVp += (s.estimatedVpPrice || 0);
+        }
 
         const tName = (s.contentTier?.name || s.tier?.name || '').toLowerCase();
         if (tName.includes('ultra')) tierBreakdown.ultra++;
@@ -647,20 +652,21 @@ class ValorantApiService {
         else if (tName.includes('premium')) tierBreakdown.premium++;
         else if (tName.includes('deluxe')) tierBreakdown.deluxe++;
         else if (tName.includes('select')) tierBreakdown.select++;
-        else tierBreakdown.other++;
+        else tierBreakdown.standard++;
       }
 
       const estimatedThbOverTopup = Math.round(totalVpValue * 0.238);
       const estimatedThbRiotOfficial = Math.round(totalVpValue * 0.293);
 
       return {
-        totalSkinsCount: premiumOwnedSkins.length,
+        totalSkinsCount: premiumOwnedSkins.length > 0 ? premiumOwnedSkins.length : allOwnedSkins.length,
+        premiumSkinsCount: premiumOwnedSkins.length,
         totalVpValue,
         estimatedThbOverTopup,
         estimatedThbRiotOfficial,
         weaponBreakdown,
         tierBreakdown,
-        skins: premiumOwnedSkins,
+        skins: allOwnedSkins,
         allSkinsCount: allOwnedSkins.length,
         activeShard
       };
