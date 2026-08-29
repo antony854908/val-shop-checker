@@ -701,15 +701,15 @@ window.addEventListener('visibilitychange', async () => {
 
 async function processTokenString(rawText, alertEl) {
   const alertTarget = alertEl || googleAlert || document.getElementById('loginAlert') || document.getElementById('tokenAlert');
-  let cleanText = (rawText || '').trim();
+  let cleanText = (rawText || '').trim().replace(/^["'\s]+|["'\s]+$/g, '');
 
   if (!cleanText) {
-    showAlert(alertTarget, 'กรุณาวาง URL หรือ Access Token ที่คัดลอกมา');
+    showAlert(alertTarget, 'กรุณาวาง URL หรือ Access Token ที่คัดลอกมาในช่องข้อความ');
     return;
   }
 
   if (cleanText.includes('error=')) {
-    showAlert(alertTarget, 'พบข้อผิดพลาดจาก Riot (กรุณากดปุ่มเปิดหน้าล็อกอินใหม่อีกครั้ง)');
+    showAlert(alertTarget, 'พบข้อผิดพลาดจาก Riot (กรุณากดปุ่ม STEP 1 เพื่อเปิดหน้าล็อกอินใหม่อีกครั้ง)');
     return;
   }
 
@@ -717,27 +717,24 @@ async function processTokenString(rawText, alertEl) {
     try { cleanText = decodeURIComponent(cleanText); } catch (e) {}
   }
 
-  let accessToken = cleanText;
+  let accessToken = null;
   let idToken = null;
 
-  if (cleanText.includes('access_token=')) {
-    let paramStr = cleanText;
-    if (cleanText.includes('#')) {
-      paramStr = cleanText.split('#')[1];
-    } else if (cleanText.includes('?')) {
-      paramStr = cleanText.split('?')[1];
-    }
-    const params = new URLSearchParams(paramStr);
-    accessToken = params.get('access_token') || cleanText;
-    idToken = params.get('id_token');
-  } else if (cleanText.startsWith('eyJ') && cleanText.includes(' ')) {
-    const parts = cleanText.split(/\s+/);
-    accessToken = parts[0];
-    if (parts[1] && parts[1].startsWith('eyJ')) idToken = parts[1];
+  const accessMatch = cleanText.match(/access_token=([a-zA-Z0-9_\-\.]+)/);
+  if (accessMatch) {
+    accessToken = accessMatch[1].trim();
+  } else if (cleanText.startsWith('eyJ')) {
+    const parts = cleanText.split(/[\s&]+/);
+    accessToken = parts[0].replace(/^access_token=/, '').trim();
+    if (parts[1] && parts[1].startsWith('eyJ')) idToken = parts[1].trim();
+  } else {
+    accessToken = cleanText.trim();
   }
 
-  accessToken = accessToken.trim();
-  if (idToken) idToken = idToken.trim();
+  const idMatch = cleanText.match(/id_token=([a-zA-Z0-9_\-\.]+)/);
+  if (idMatch) {
+    idToken = idMatch[1].trim();
+  }
 
   if (!accessToken || accessToken.length < 20) {
     showAlert(alertTarget, 'ไม่พบ Access Token ที่ถูกต้องในข้อความที่วาง <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">[ดูวิธีคัดลอกลิงก์]</a>');
@@ -747,7 +744,7 @@ async function processTokenString(rawText, alertEl) {
   hideAlert(alertTarget);
   if (btnAutoPaste) {
     btnAutoPaste.disabled = true;
-    btnAutoPaste.textContent = "กำลังเข้าสู่ระบบและดึงข้อมูลร้านค้า...";
+    btnAutoPaste.textContent = "กำลังเชื่อมต่อ Riot Games และดึงข้อมูลร้านค้า...";
   }
 
   try {
@@ -778,11 +775,13 @@ async function processTokenString(rawText, alertEl) {
       currentUser = meData.user;
       renderUserHeader(meData.user);
       await loadStore();
+      // Preload inventory in background
+      loadPlayerInventory(true).catch(() => {});
     } else {
       await checkAuth();
     }
   } catch (err) {
-    showAlert(alertTarget, (err.message || 'เข้าสู่ระบบไม่สำเร็จ') + ' <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">[ดูวิธีคัดลอกลิงก์]</a>');
+    showAlert(alertTarget, (err.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง') + ' <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">[ดูวิธีคัดลอกลิงก์]</a>');
   } finally {
     if (btnAutoPaste) {
       btnAutoPaste.disabled = false;
@@ -802,7 +801,16 @@ btnAutoPaste?.addEventListener('click', async () => {
   processTokenString(val, googleAlert);
 });
 
-quickPasteInput?.addEventListener('paste', () => {
+quickPasteInput?.addEventListener('input', () => {
+  const val = quickPasteInput ? quickPasteInput.value.trim() : '';
+  if (val.includes('access_token=') || val.startsWith('eyJ')) {
+    setTimeout(() => {
+      processTokenString(val, googleAlert);
+    }, 100);
+  }
+});
+
+quickPasteInput?.addEventListener('paste', (e) => {
   setTimeout(() => {
     if (quickPasteInput) {
       processTokenString(quickPasteInput.value.trim(), googleAlert);
