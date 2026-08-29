@@ -1329,6 +1329,12 @@ function renderBundles(bundles) {
 
   const heroDiv = document.createElement('div');
   heroDiv.className = 'bundle-hero';
+  heroDiv.style.cursor = 'pointer';
+  heroDiv.title = 'คลิกเพื่อเปิดร้านค้าชุดรวมสกินเด่น (Full Bundle Inspector)';
+  heroDiv.addEventListener('click', (e) => {
+    if (e.target.closest('.btn-bundle-calc')) return;
+    window.openBundleModal(b);
+  });
   heroDiv.innerHTML = `
     <img src="${heroImage}" alt="${b.name}">
     <div class="bundle-overlay">
@@ -1412,6 +1418,179 @@ function renderBundles(bundles) {
     container.appendChild(itemsRow);
   }
 }
+
+// ==========================================================
+// FEATURED BUNDLE INSPECTOR MODAL MODULE
+// ==========================================================
+const bundleModal = document.getElementById("bundleModal");
+const btnCloseBundleModal = document.getElementById("btnCloseBundleModal");
+
+function closeBundleModalHandler() {
+  playTacticalAudio("close");
+  bundleModal?.classList.add("hidden");
+}
+
+btnCloseBundleModal?.addEventListener("click", closeBundleModalHandler);
+bundleModal?.addEventListener("click", (e) => {
+  if (e.target === bundleModal) closeBundleModalHandler();
+});
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && bundleModal && !bundleModal.classList.contains("hidden")) {
+    closeBundleModalHandler();
+  }
+});
+
+window.openBundleModal = function(b) {
+  if (!b) return;
+  playTacticalAudio("open");
+
+  const modal = document.getElementById("bundleModal");
+  if (!modal) return;
+
+  const bundleName = b.name || "Featured Collection";
+  const bundlePrice = b.totalDiscountedCost || b.totalBaseCost || b.price || 0;
+  const heroImage = b.displayIcon || b.verticalPromoImage || (b.items && b.items.find(i => i.displayIcon)?.displayIcon) || "https://media.valorant-api.com/weapons/skins/default/displayicon.png";
+
+  const nameEl = document.getElementById("modalBundleName");
+  if (nameEl) nameEl.textContent = bundleName;
+
+  const priceValEl = document.getElementById("modalBundlePriceVal");
+  if (priceValEl) priceValEl.textContent = bundlePrice.toLocaleString();
+
+  const heroImgEl = document.getElementById("modalBundleHeroImg");
+  if (heroImgEl) heroImgEl.src = heroImage;
+
+  const overlayTitleEl = document.getElementById("modalBundleOverlayTitle");
+  if (overlayTitleEl) overlayTitleEl.textContent = bundleName;
+
+  const overlaySubEl = document.getElementById("modalBundleOverlaySub");
+  if (overlaySubEl) overlaySubEl.textContent = b.subName || "ชุดรวมสกินและไอเทมพิเศษประจำแพตช์ (คลิกปืนแต่ละกระบอกเพื่อดู Finisher และสี Chromas)";
+
+  // Update timer in modal
+  const timerDigitsEl = document.getElementById("modalBundleTimerDigits");
+  if (timerDigitsEl) {
+    timerDigitsEl.textContent = document.getElementById("bundleTimer")?.textContent || "--:--:--";
+  }
+
+  // OverTopup bundle calculation
+  const opt = window.calculateOptimalOverTopup(bundlePrice);
+  const officialEst = Math.round(bundlePrice * 0.292);
+  const savings = Math.max(0, officialEst - opt.totalPrice);
+
+  const comboEl = document.getElementById("modalBundleOverTopupCombo");
+  if (comboEl) comboEl.textContent = opt.comboText || `${opt.totalPrice.toLocaleString()} ฿`;
+
+  const vpGainEl = document.getElementById("modalBundleVpGain");
+  if (vpGainEl) vpGainEl.textContent = `💎 ได้รับ ${opt.totalVp.toLocaleString()} VP`;
+
+  const vpLeftoverEl = document.getElementById("modalBundleVpLeftover");
+  if (vpLeftoverEl) {
+    if (opt.leftoverVp > 0) {
+      vpLeftoverEl.textContent = `✨ เหลือ +${opt.leftoverVp.toLocaleString()} VP ในไอดี`;
+      vpLeftoverEl.style.display = "inline-flex";
+    } else {
+      vpLeftoverEl.style.display = "none";
+    }
+  }
+
+  const savingsTagEl = document.getElementById("modalBundleSavingsTag");
+  if (savingsTagEl) {
+    savingsTagEl.textContent = savings > 0 ? `⚡ ประหยัดได้ ~${savings.toLocaleString()} ฿ จากเติมในเกม` : "⚡ เรทคุ้มกว่าเติมตรงในเกม";
+  }
+
+  const btnBundleCompare = document.getElementById("btnBundleInspectCompareStores");
+  if (btnBundleCompare) {
+    btnBundleCompare.onclick = (e) => {
+      e.stopPropagation();
+      window.openVpCompareModal(bundlePrice);
+    };
+  }
+
+  // Populate bundle items in Daily-Shop Card style!
+  const grid = document.getElementById("modalBundleItemsGrid");
+  if (grid) {
+    grid.innerHTML = "";
+    const items = (b.items || []).filter(item => {
+      const name = (item.name || "").trim().toLowerCase();
+      const type = (item.itemType || "").toLowerCase();
+      if (!name || name === "valorant item" || name === "bundle item") return false;
+      if (name.includes("aeris spray") || (name.includes("aeris") && type.includes("spray"))) return false;
+      return true;
+    });
+
+    items.forEach((item, idx) => {
+      const s = item.skin;
+      const isSkin = !!(item.isWeaponSkin || (s && (s.chromas || s.levels || s.weaponType)));
+      const itemName = item.name || s?.name || "Bundle Item";
+      const itemIcon = item.displayIcon || s?.displayIcon || (s?.chromas && s.chromas[0]?.displayIcon) || ("https://media.valorant-api.com/weaponskinlevels/" + item.uuid + "/displayicon.png");
+      const tierColor = s?.tier?.highlightColor || "#00F5D4";
+      const chromasCount = s?.chromas ? s.chromas.length : 1;
+      const hasVideo = s?.hasVideo || (s?.levels && s.levels.some(l => l.streamedVideo));
+      const itemPrice = item.discountedPrice || item.basePrice || 0;
+      const itemOpt = window.calculateOptimalOverTopup(itemPrice);
+
+      const card = document.createElement("div");
+      card.className = "skin-card";
+      card.style.setProperty("--card-tier-color", tierColor);
+      card.style.setProperty("--card-tier-glow", tierColor + "40");
+      card.style.animationDelay = (idx * 0.05) + "s";
+
+      card.innerHTML = `
+        <div class="skin-card-header">
+          <div class="skin-tier-info">
+            ${s?.tier?.displayIcon ? `<img src="${s.tier.displayIcon}" alt="" class="skin-tier-icon">` : ""}
+            <span class="skin-tier-name">${s?.tier?.name || item.itemType || "Edition"}</span>
+          </div>
+          <div class="skin-features-badge">
+            ${chromasCount > 1 ? `<span class="badge-feat">${chromasCount} สี</span>` : ""}
+            ${hasVideo ? `<span class="badge-feat"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:middle; margin-right:3px;"><polygon points="5 3 19 12 5 21 5 3"/></svg> วิดีโอ VFX</span>` : ""}
+          </div>
+        </div>
+
+        <div class="skin-image-box">
+          <img src="${itemIcon}" alt="${itemName}" loading="lazy" data-err-step="0" onerror="window.handleBundleImgError(this, '${(item.itemType || "Item").replace(/'/g, "\\'")}', '${item.uuid}', '${(itemName).replace(/'/g, "\\'")}')">
+        </div>
+
+        <div class="skin-card-footer">
+          <div class="skin-name" title="${itemName}">${itemName}</div>
+          <div class="skin-meta-row">
+            <div class="skin-price-tag">
+              <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
+              <span>${itemPrice.toLocaleString()}</span>
+              ${itemPrice > 0 ? `
+                <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${itemOpt.comboText}" data-vp="${itemPrice}">${itemOpt.shortTag} ⚡</span>
+              ` : ""}
+            </div>
+            <button class="btn btn-primary btn-sm btn-inspect">
+              <span>ดูเอฟเฟกต์ & สี</span>
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+
+      card.addEventListener("mouseenter", () => playTacticalAudio("hover"));
+      card.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeBundleModalHandler();
+        setTimeout(() => {
+          if (s && (s.chromas || s.levels)) {
+            openSkinModal(s);
+          } else if (item.isWeaponSkin || item.skin) {
+            openSkinByUuid(item.uuid, item.skin || item);
+          } else {
+            openSkinByUuid(item.uuid, item);
+          }
+        }, 150);
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  modal.classList.remove("hidden");
+};
 
 // Render Night Market
 function renderNightMarket(nm) {

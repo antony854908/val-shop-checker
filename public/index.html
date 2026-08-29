@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4.6">
+  <link rel="stylesheet" href="style.css?v=4.7">
 </head>
 <body>
   <!-- Ambient Atmospheric Effects -->
@@ -949,6 +949,79 @@
       </div>
     </div>
 
+    <!-- ================= FEATURED BUNDLE INSPECTOR MODAL ================= -->
+    <div id="bundleModal" class="modal-backdrop-layer hidden">
+      <div class="modal-tactical-dialog modal-bundle-dialog">
+        <button id="btnCloseBundleModal" class="btn-dialog-close" title="ปิดหน้าต่าง">&times;</button>
+        
+        <div class="modal-dialog-header">
+          <div class="badge-tag" style="color:var(--val-cyan); background:rgba(0,245,212,0.12);">FEATURED COLLECTION // BUNDLE</div>
+          <h2 id="modalBundleName" class="modal-skin-heading">Featured Collection</h2>
+          <div class="modal-price-display" id="modalBundlePrice">
+            <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="modal-vp-icon">
+            <span id="modalBundlePriceVal">9,500</span> VP
+          </div>
+        </div>
+
+        <div class="modal-dialog-body bundle-modal-body">
+          
+          <!-- Cinematic Bundle Artwork Banner -->
+          <div class="bundle-modal-hero">
+            <img id="modalBundleHeroImg" src="" alt="Bundle Showcase" class="bundle-modal-hero-img">
+            <div class="bundle-modal-hero-overlay">
+              <div class="bundle-modal-titles">
+                <h3 id="modalBundleOverlayTitle">Featured Collection</h3>
+                <p id="modalBundleOverlaySub">ชุดรวมสกินและไอเทมพิเศษประจำแพตช์</p>
+              </div>
+              <div class="bundle-modal-timer-pill" id="modalBundleTimer">
+                <span class="timer-tag">ระยะเวลาคงเหลือ:</span>
+                <span id="modalBundleTimerDigits" class="timer-digits">--:--:--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- OverTopup Package Recommendation Card for the Whole Bundle -->
+          <div class="skin-price-comparison-bar bundle-compare-bar" id="modalBundlePriceCompareBar">
+            <div class="skin-price-compare-info">
+              <div class="skin-price-compare-title">
+                <span class="overtopup-bolt-icon">⚡</span>
+                <span>คำนวณแพ็กเกจ OverTopup ที่ต้องเติมสำหรับชุดรวมนี้:</span>
+              </div>
+              <div class="skin-price-compare-values">
+                <div class="overtopup-combo-badge" id="modalBundleOverTopupCombo">1x 7,150 VP + 1x 2,050 VP + 1x 475 VP (2,321 ฿)</div>
+                <div class="overtopup-metric-pills">
+                  <span class="pill-vp-gain" id="modalBundleVpGain">💎 ได้รับ 9,675 VP</span>
+                  <span class="pill-vp-leftover" id="modalBundleVpLeftover">✨ เหลือ +175 VP ในไอดี</span>
+                  <span class="pill-savings" id="modalBundleSavingsTag">⚡ ประหยัด ~529 ฿ จากเติมในเกม</span>
+                </div>
+              </div>
+            </div>
+            <div class="skin-price-compare-actions">
+              <a href="https://www.overtopup.com/th/game-topup/valorant" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm btn-glow" title="เปิดหน้าเว็บ OverTopup เพื่อเติมเงินทันที">
+                <span>⚡ ไปเติมที่ OverTopup (overtopup.com) ↗️</span>
+              </a>
+              <button id="btnBundleInspectCompareStores" class="btn btn-secondary btn-sm" title="เปิดระบบเปรียบเทียบทุกแพ็กเกจ">
+                <span>📊 ดูตารางราคาทุกแพ็ก</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bundle Items Section (Daily-Shop Style Cards Grid) -->
+          <div class="bundle-modal-items-section">
+            <div class="bundle-section-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--val-cyan)" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>รายการสกินและไอเทมในชุด (คลิกเพื่อดูวิดีโอ Finisher &amp; เอฟเฟกต์):</span>
+            </div>
+            
+            <div id="modalBundleItemsGrid" class="skins-card-grid bundle-modal-grid">
+              <!-- Rendered just like Daily Offers cards -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     <!-- ================= MATCH SCOREBOARD & REPLAY ANALYSIS MODAL ================= -->
     <div id="matchModal" class="modal-backdrop-layer hidden">
       <div class="modal-tactical-dialog modal-scoreboard-dialog">
@@ -1500,6 +1573,6 @@
 
   </div>
 
-  <script src="app.js?v=4.6"></script>
+  <script src="app.js?v=4.7"></script>
 </body>
 </html>
