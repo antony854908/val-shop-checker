@@ -1,14 +1,26 @@
 {
   "name": "val-shop-checker",
   "version": "1.4.0",
-  "description": "",
-  "main": "index.js",
+  "description": "VALORANT Store & Skin Inspector HD - Full-featured web app for checking daily store, night market, bundles, 3D agent coach, and OverTopup VP price comparison.",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "test": "node test-security.js",
+    "backup": "node backup-drive.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "valorant",
+    "valorant-store",
+    "valorant-api",
+    "riot-games",
+    "skin-checker",
+    "night-market",
+    "overtopup",
+    "vp-calculator",
+    "pwa"
+  ],
+  "author": "antony854908",
+  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "cookie-parser": "^1.4.7",
