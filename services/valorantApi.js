@@ -326,6 +326,47 @@ class ValorantApiService {
         }
       }
 
+      // If bundle items were not fully returned by Riot API, resolve them from the game catalog
+      if (uniqueItems.length === 0 && bundleMeta) {
+        const bundleNameLower = (bundleMeta.name || '').toLowerCase();
+        for (const s of skinCatalog.skins.values()) {
+          if (s.name && (s.name.toLowerCase().includes(bundleNameLower) || (bundleMeta.themeUuid && s.themeUuid === bundleMeta.themeUuid))) {
+            const isMelee = s.weaponType === 'Melee' || s.name.toLowerCase().includes('suit of') || s.name.toLowerCase().includes('blade') || s.name.toLowerCase().includes('knife');
+            uniqueItems.push({
+              uuid: s.uuid,
+              name: s.name,
+              itemType: s.weaponType || 'Weapon Skin',
+              isWeaponSkin: true,
+              displayIcon: s.displayIcon,
+              skin: s,
+              basePrice: isMelee ? 4350 : 2175,
+              discountedPrice: isMelee ? 4350 : 2175,
+              discountPercent: 0
+            });
+          }
+        }
+        const seenAcc = new Set();
+        for (const a of skinCatalog.otherItems.values()) {
+          if (a.name && a.name.toLowerCase().includes(bundleNameLower)) {
+            const accKey = (a.name + '_' + a.itemType).toLowerCase();
+            if (!seenAcc.has(accKey)) {
+              seenAcc.add(accKey);
+              uniqueItems.push({
+                uuid: a.uuid,
+                name: a.name,
+                itemType: a.itemType || 'Accessory',
+                isWeaponSkin: false,
+                displayIcon: a.displayIcon,
+                skin: null,
+                basePrice: a.itemType === 'Gun Buddy' ? 475 : (a.itemType === 'Player Card' ? 375 : 325),
+                discountedPrice: a.itemType === 'Gun Buddy' ? 475 : (a.itemType === 'Player Card' ? 375 : 325),
+                discountPercent: 0
+              });
+            }
+          }
+        }
+      }
+
       const totalBase = b.TotalBaseCost ? (b.TotalBaseCost[config.CURRENCIES.VP] || Object.values(b.TotalBaseCost)[0] || 0) : 0;
       const totalDiscounted = b.TotalDiscountedCost ? (b.TotalDiscountedCost[config.CURRENCIES.VP] || Object.values(b.TotalDiscountedCost)[0] || 0) : 0;
 

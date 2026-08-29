@@ -499,7 +499,7 @@ app.get('/api/skins/all', (req, res) => {
 
 // Endpoint: Skin / Item Details Lookup
 app.get('/api/skin/:uuid', (req, res) => {
-  const skin = skinCatalog.getItemById(req.params.uuid);
+  const skin = skinCatalog.getSkinById(req.params.uuid) || skinCatalog.getItemById(req.params.uuid);
   if (!skin) {
     return res.status(404).json({ ok: false, error: 'ไม่พบข้อมูลสกินหรือไอเทม' });
   }
