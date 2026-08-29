@@ -49,7 +49,7 @@ class SkinCatalog {
 
   generateTitleBadgeSvg(titleName) {
     const safeName = (titleName || 'TITLE').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160" viewBox="0 0 300 160">
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160" viewBox="0 0 300 160">
       <defs>
         <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#161D2B"/>
@@ -69,7 +69,7 @@ class SkinCatalog {
 
   generateSprayBadgeSvg(sprayName) {
     const safeName = (sprayName || 'SPRAY').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
       <defs>
         <linearGradient id="sprayBg" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#181424"/>
@@ -103,7 +103,7 @@ class SkinCatalog {
 
   generateBuddyBadgeSvg(buddyName) {
     const safeName = (buddyName || 'BUDDY').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
       <defs>
         <linearGradient id="buddyBg" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#1A202C"/>
@@ -129,7 +129,7 @@ class SkinCatalog {
 
   generateCardBadgeSvg(cardName) {
     const safeName = (cardName || 'CARD').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="340" viewBox="0 0 240 340">
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="340" viewBox="0 0 240 340">
       <defs>
         <linearGradient id="cardBg" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#141926"/>
@@ -209,7 +209,7 @@ class SkinCatalog {
           this.rawLevels.set(l.uuid.toLowerCase(), {
             uuid: l.uuid,
             name: l.displayName,
-            displayIcon: l.displayIcon || `https://media.valorant-api.com/weaponskinlevels/${l.uuid}/displayicon.png`,
+            displayIcon: l.displayIcon || null,
             itemType: 'Weapon Skin',
             isWeaponSkin: true
           });
@@ -221,7 +221,7 @@ class SkinCatalog {
           this.rawChromas.set(c.uuid.toLowerCase(), {
             uuid: c.uuid,
             name: c.displayName,
-            displayIcon: c.fullRender || c.displayIcon || `https://media.valorant-api.com/weaponskinchromas/${c.uuid}/fullrender.png`,
+            displayIcon: c.fullRender || c.displayIcon || null,
             itemType: 'Weapon Skin',
             isWeaponSkin: true
           });
@@ -449,6 +449,24 @@ class SkinCatalog {
             for (const ch of skin.chromas) {
               this.chromas.set(ch.uuid.toLowerCase(), skinObj);
             }
+          }
+        }
+      }
+
+      // Backfill missing displayIcons in rawLevels and rawChromas from parent skin
+      for (const [lvlId, rawLvl] of this.rawLevels.entries()) {
+        if (!rawLvl.displayIcon) {
+          const parentSkin = this.levels.get(lvlId);
+          if (parentSkin && parentSkin.displayIcon) {
+            rawLvl.displayIcon = parentSkin.displayIcon;
+          }
+        }
+      }
+      for (const [chrId, rawChr] of this.rawChromas.entries()) {
+        if (!rawChr.displayIcon) {
+          const parentSkin = this.chromas.get(chrId);
+          if (parentSkin && parentSkin.displayIcon) {
+            rawChr.displayIcon = parentSkin.displayIcon;
           }
         }
       }

@@ -82,7 +82,10 @@ class RiotAuthService {
     const authCookies = parseCookiesFromHeaders(authRes.headers);
     for (const [k, v] of authCookies) cookieMap.set(k, v);
 
-    const body = await authRes.json();
+    const body = await authRes.json().catch(() => null);
+    if (!body) {
+      throw new Error('ไม่สามารถเชื่อมต่อกับ Riot Games ได้ กรุณาลองใหม่อีกครั้ง');
+    }
 
     if (body.type === 'error') {
       if (body.error === 'auth_failure') {
@@ -112,7 +115,11 @@ class RiotAuthService {
       };
     }
 
-    throw new Error('รูปแบบการตอบกลับจาก Riot ไม่ถูกต้อง (Unexpected auth response)');
+    if (body.type === 'auth') {
+      throw new Error('Riot Games บล็อกการล็อกอินด้วยรหัสผ่านผ่าน Cloud Server (Vercel) แนะนำให้ใช้แท็บ "Google / Social Login" หรือดับเบิ้ลคลิกไฟล์ start.bat บนคอมของคุณ (Localhost)');
+    }
+
+    throw new Error('รูปแบบการตอบกลับจาก Riot ไม่ถูกต้อง หรือถูกจำกัดการเข้าถึงจาก Cloud Server (กรุณาใช้แท็บ Google / Social หรือรันบนคอม)');
   }
 
   async verifyMfa(code, cookieHeader) {

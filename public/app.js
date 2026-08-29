@@ -16,7 +16,7 @@ let catalogTotal = 0;
 let catalogSearchDebounce = null;
 let allWeaponsList = [];
 
-// Session Storage Utilities (Cross-Platform / Mobile Cookie Fallback)
+// Session Storage Utilities (Cross-Platform Persistent 30-Day Auth)
 function getStoredSid() {
   try {
     return localStorage.getItem('val_sid') || '';
@@ -29,6 +29,25 @@ function setStoredSid(sid) {
   if (!sid) return;
   try {
     localStorage.setItem('val_sid', sid);
+  } catch (e) {}
+}
+
+function getStoredAuthPack() {
+  try {
+    return localStorage.getItem('val_auth_pack') || '';
+  } catch (e) {
+    return '';
+  }
+}
+
+function setStoredAuthPack(rawVal) {
+  if (!rawVal) return;
+  try {
+    let str = typeof rawVal === 'string' ? rawVal : JSON.stringify(rawVal);
+    if (!str.startsWith('ey') && typeof rawVal !== 'string') {
+      str = btoa(unescape(encodeURIComponent(str)));
+    }
+    localStorage.setItem('val_auth_pack', str);
   } catch (e) {}
 }
 
@@ -45,9 +64,11 @@ function escapeHtml(str) {
 
 async function apiFetch(url, options = {}) {
   const sid = getStoredSid();
+  const authPack = getStoredAuthPack();
   const headers = {
     ...(options.headers || {}),
-    ...(sid ? { 'X-Val-Session': sid } : {})
+    ...(sid ? { 'X-Val-Session': sid } : {}),
+    ...(authPack ? { 'X-Val-Auth-Pack': authPack } : {})
   };
 
   const res = await fetch(url, {
@@ -59,6 +80,11 @@ async function apiFetch(url, options = {}) {
   const returnedSid = res.headers.get('X-Val-Session');
   if (returnedSid) {
     setStoredSid(returnedSid);
+  }
+
+  const returnedAuthPack = res.headers.get('X-Val-Auth-Pack');
+  if (returnedAuthPack) {
+    setStoredAuthPack(returnedAuthPack);
   }
 
   return res;
@@ -210,45 +236,139 @@ function playTacticalAudio(type) {
     const now = audioCtx.currentTime;
 
     if (type === 'click') {
-      // Standard Red Switch Alphanumeric Key Bottom-Out (Clean Thock)
+      // Crisp Mechanical Thock + Soft Cyber Click
       playRedSwitchKey(now, 360, 1.0, 0.35, false);
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1200, now);
+      osc.frequency.exponentialRampToValueAtTime(400, now + 0.035);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.035);
     } else if (type === 'hover') {
-      // Ultra-Light Key Stem Touch / Soft Keystroke Brush
-      playRedSwitchKey(now, 480, 1.1, 0.07, false);
+      // Ultra-Light Key Touch + Soft High-Tech Glint
+      playRedSwitchKey(now, 520, 1.1, 0.06, false);
+    } else if (type === 'scroll_tick') {
+      // Soft Detent Click for Scroll
+      playRedSwitchKey(now, 680, 1.2, 0.04, false);
     } else if (type === 'tab') {
-      // Spacebar / Modifier Red Switch Thock with Lubed Stabilizers
+      // High-Tech Dual Frequency Blip + Solid Spacebar Thock
       playRedSwitchKey(now, 220, 0.85, 0.4, true);
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(540, now);
+      osc.frequency.exponentialRampToValueAtTime(980, now + 0.08);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.08);
     } else if (type === 'inspect' || type === 'open') {
-      // ASMR 3-Key Red Switch Roll (Q-W-Spacebar fast typing roll)
-      [0.0, 0.035, 0.075].forEach((delay, i) => {
-        const pitches = [380, 330, 200];
-        playRedSwitchKey(now + delay, pitches[i], i === 2 ? 0.8 : 1.0, i === 2 ? 0.42 : 0.3, i === 2);
+      // Resonant Sci-Fi Power-On Sweep + 3-Chord Cyber Chime
+      [0.0, 0.04, 0.09].forEach((delay, i) => {
+        const chord = [523.25, 659.25, 783.99]; // C5 - E5 - G5 Cyber Chime
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(chord[i], now + delay);
+        osc.frequency.exponentialRampToValueAtTime(chord[i] * 1.5, now + delay + 0.25);
+        gain.gain.setValueAtTime(0.14, now + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.25);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + delay);
+        osc.stop(now + delay + 0.25);
       });
+      playRedSwitchKey(now, 260, 0.8, 0.38, true);
     } else if (type === 'close') {
-      // Clean ESC / Backspace Red Switch Keypress
-      playRedSwitchKey(now, 290, 0.9, 0.35, false);
+      // Soft Low-Pass Swoosh + Mechanical Release
+      playRedSwitchKey(now, 290, 0.9, 0.32, false);
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(480, now);
+      osc.frequency.exponentialRampToValueAtTime(140, now + 0.1);
+      gain.gain.setValueAtTime(0.09, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.1);
     } else if (type === 'star') {
-      // Heavy Lubed Spacebar Thock
-      playRedSwitchKey(now, 195, 0.8, 0.45, true);
+      // Golden Bell Twinkle Shimmer (C6 - E6 - G6 sparkling chord)
+      [0.0, 0.045, 0.09].forEach((delay, i) => {
+        const chord = [1046.50, 1318.51, 1567.98];
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(chord[i], now + delay);
+        gain.gain.setValueAtTime(0.18, now + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.35);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + delay);
+        osc.stop(now + delay + 0.35);
+      });
+      playRedSwitchKey(now, 195, 0.8, 0.42, true);
     } else if (type === 'chroma') {
-      // Shift / Caps Lock Red Switch Keypress
-      playRedSwitchKey(now, 410, 1.05, 0.35, false);
+      // High-Tech Frequency Modulation Chirp
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(740, now);
+      osc.frequency.exponentialRampToValueAtTime(1180, now + 0.09);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.09);
+      playRedSwitchKey(now, 410, 1.05, 0.3, false);
     } else if (type === 'level') {
-      // Rapid 2-Key Red Switch Double Tap (tak-THOCK)
-      playRedSwitchKey(now, 380, 1.0, 0.32, false);
-      playRedSwitchKey(now + 0.05, 230, 0.85, 0.4, true);
+      // Rapid 2-Tone Sci-Fi Level Up Double Beep
+      [0.0, 0.06].forEach((delay, i) => {
+        const freqs = [660, 990];
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freqs[i], now + delay);
+        gain.gain.setValueAtTime(0.15, now + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.12);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + delay);
+        osc.stop(now + delay + 0.12);
+      });
+      playRedSwitchKey(now, 380, 1.0, 0.3, false);
     } else if (type === 'login') {
-      // ASMR 5-Key Fast Mechanical Typing Streak + Solid Enter Key Thock
+      // Theatrical 5-Key Typing Burst + Ascending Fanfare
       [0.0, 0.04, 0.08, 0.12, 0.17].forEach((delay, i) => {
         const pitches = [370, 340, 390, 320, 190];
         playRedSwitchKey(now + delay, pitches[i], i === 4 ? 0.75 : 1.0, i === 4 ? 0.48 : 0.32, i === 4);
       });
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, now + 0.18);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.35);
+      gain.gain.setValueAtTime(0.18, now + 0.18);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now + 0.18);
+      osc.stop(now + 0.35);
     } else if (type === 'refresh') {
-      // Quick Double Tap Red Switch Keypress
+      // Dual Cyber Harmonic Spin
       playRedSwitchKey(now, 350, 1.0, 0.32, false);
       playRedSwitchKey(now + 0.055, 330, 0.95, 0.34, false);
     } else if (type === 'error') {
-      // Heavy Double Backspace Muffled Tap
+      // Heavy Muffled Double Buzz
       playRedSwitchKey(now, 240, 0.85, 0.38, true);
       playRedSwitchKey(now + 0.06, 210, 0.8, 0.4, true);
     } else if (type === 'headshot') {
@@ -265,10 +385,8 @@ function playTacticalAudio(type) {
       osc.start(now);
       osc.stop(now + 0.12);
     } else if (type === 'kill') {
-      // Solid Key Thock + Low Impact
       playRedSwitchKey(now, 160, 0.75, 0.45, true);
     } else if (type === 'plant') {
-      // Electronic Spike Beep
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = 'square';
@@ -409,6 +527,41 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (targetTab) targetTab.classList.remove('hidden');
   });
 });
+
+// ==========================================================
+// 100% AUTOMATIC DEVICE DETECTION (PC VS MOBILE - ZERO MANUAL BUTTONS)
+// ==========================================================
+function autoDetectDeviceMode() {
+  const isMobile = window.innerWidth <= 900 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent || '');
+  document.body.classList.toggle('ui-mode-mobile', isMobile);
+  document.body.classList.toggle('ui-mode-pc', !isMobile);
+
+  const mobPanel = document.getElementById('deviceGuideMobile');
+  const pcPanel = document.getElementById('deviceGuidePc');
+  const tutMob = document.getElementById('tutModalMobileDetail');
+  const tutPc = document.getElementById('tutModalPcDetail');
+
+  if (isMobile) {
+    mobPanel?.classList.remove('hidden');
+    mobPanel?.classList.add('active');
+    pcPanel?.classList.add('hidden');
+    pcPanel?.classList.remove('active');
+
+    tutMob?.classList.remove('hidden');
+    tutPc?.classList.add('hidden');
+  } else {
+    pcPanel?.classList.remove('hidden');
+    pcPanel?.classList.add('active');
+    mobPanel?.classList.add('hidden');
+    mobPanel?.classList.remove('active');
+
+    tutPc?.classList.remove('hidden');
+    tutMob?.classList.add('hidden');
+  }
+}
+
+autoDetectDeviceMode();
+window.addEventListener('resize', autoDetectDeviceMode, { passive: true });
 
 // Google & Device Tutorial Navigation
 document.querySelectorAll('.btn-device-tab').forEach(btn => {
@@ -608,6 +761,11 @@ async function processTokenString(rawText, alertEl) {
     if (data.sessionId) {
       setStoredSid(data.sessionId);
     }
+    if (data.authPack) {
+      setStoredAuthPack(data.authPack);
+    } else if (data.auth) {
+      setStoredAuthPack(data.auth);
+    }
 
     if (!data.ok) {
       throw new Error(data.error || 'Token ไม่ถูกต้องหรือหมดอายุ');
@@ -719,7 +877,7 @@ function startTimers() {
   }, 1000);
 }
 
-// Check Existing Session & Auto-Restore
+// Check Existing Session & Auto-Restore (Permanent Persistent Auth)
 async function checkAuth() {
   try {
     const res = await apiFetch('/api/auth/me');
@@ -731,6 +889,44 @@ async function checkAuth() {
       return true;
     }
   } catch (err) {}
+
+  // Silent Auto-Rehydrate for Long-Term Persistent Login (Log in once, stay logged in!)
+  const storedPack = getStoredAuthPack();
+  if (storedPack) {
+    try {
+      let decoded = null;
+      try {
+        decoded = JSON.parse(decodeURIComponent(escape(atob(storedPack))));
+      } catch (e) {
+        decoded = JSON.parse(storedPack);
+      }
+
+      if (decoded && decoded.accessToken) {
+        const reLoginRes = await apiFetch('/api/auth/token-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            accessToken: decoded.accessToken,
+            idToken: decoded.idToken,
+            region: decoded.region || 'auto'
+          })
+        });
+        const reData = await reLoginRes.json();
+        if (reData.ok) {
+          if (reData.authPack) setStoredAuthPack(reData.authPack);
+          else if (reData.auth) setStoredAuthPack(reData.auth);
+          const meRes = await apiFetch('/api/auth/me');
+          const meData = await meRes.json();
+          if (meData.ok && meData.loggedIn) {
+            currentUser = meData.user;
+            renderUserHeader(meData.user);
+            await loadStore();
+            return true;
+          }
+        }
+      }
+    } catch (e) {}
+  }
 
   showLoginView();
   return false;
@@ -820,6 +1016,11 @@ riotLoginForm?.addEventListener('submit', async (e) => {
     if (data.sessionId) {
       setStoredSid(data.sessionId);
     }
+    if (data.authPack) {
+      setStoredAuthPack(data.authPack);
+    } else if (data.auth) {
+      setStoredAuthPack(data.auth);
+    }
 
     if (!data.ok) {
       throw new Error(data.error || 'เข้าสู่ระบบล้มเหลว');
@@ -866,6 +1067,11 @@ mfaForm?.addEventListener('submit', async (e) => {
     const data = await res.json();
     if (data.sessionId) {
       setStoredSid(data.sessionId);
+    }
+    if (data.authPack) {
+      setStoredAuthPack(data.authPack);
+    } else if (data.auth) {
+      setStoredAuthPack(data.auth);
     }
 
     if (!data.ok) {
@@ -944,6 +1150,11 @@ tokenLoginForm?.addEventListener('submit', async (e) => {
     const data = await res.json();
     if (data.sessionId) {
       setStoredSid(data.sessionId);
+    }
+    if (data.authPack) {
+      setStoredAuthPack(data.authPack);
+    } else if (data.auth) {
+      setStoredAuthPack(data.auth);
     }
 
     if (!data.ok) {
@@ -1153,7 +1364,7 @@ function renderDailyShop(skins) {
       </div>
 
       <div class="skin-image-box">
-        <img src="${safeIcon}" alt="${skin.name}" loading="lazy">
+        <img src="${safeIcon}" alt="${skin.name}" loading="lazy" onerror="this.onerror=null;this.src=window.generateItemFallbackSvg('${(skin.name || 'Weapon').replace(/'/g, "\\'")}', 'Weapon Skin')">
       </div>
 
       <div class="skin-card-footer">
@@ -1183,7 +1394,7 @@ window.generateItemFallbackSvg = function(itemName, itemType) {
   const typeStr = ((itemType || '') + ' ' + (itemName || '')).toLowerCase();
   
   if (typeStr.includes('spray')) {
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
       <defs>
         <linearGradient id="spBg" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#181424"/>
@@ -1216,7 +1427,7 @@ window.generateItemFallbackSvg = function(itemName, itemType) {
   }
   
   if (typeStr.includes('buddy')) {
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
       <defs>
         <linearGradient id="bdBg" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#1A202C"/>
@@ -1241,7 +1452,7 @@ window.generateItemFallbackSvg = function(itemName, itemType) {
   }
 
   if (typeStr.includes('card')) {
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="340" viewBox="0 0 240 340">
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="340" viewBox="0 0 240 340">
       <defs>
         <linearGradient id="cdBg" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#141926"/>
@@ -1258,7 +1469,17 @@ window.generateItemFallbackSvg = function(itemName, itemType) {
     </svg>`);
   }
 
-  return 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="180" viewBox="0 0 300 180">
+    <defs>
+      <linearGradient id="wpnBg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#1b202e"/>
+        <stop offset="100%" stop-color="#0f131a"/>
+      </linearGradient>
+    </defs>
+    <rect width="300" height="180" rx="12" fill="url(#wpnBg)" stroke="rgba(255,70,85,0.3)" stroke-width="2"/>
+    <path d="M60 90 L240 90 M200 70 L240 90 L200 110" stroke="#FF4655" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
+    <text x="150" y="145" dominant-baseline="middle" text-anchor="middle" fill="#EAEAEA" font-family="sans-serif" font-size="13" font-weight="bold">${safeName}</text>
+  </svg>`);
 };
 
 // Bundle Image Error Fallback Handler
@@ -1292,7 +1513,8 @@ window.handleBundleImgError = function(img, itemType, uuid, itemName) {
     fallbackUrls = [
       'https://media.valorant-api.com/weaponskinlevels/' + uuid + '/displayicon.png',
       'https://media.valorant-api.com/weaponskinchromas/' + uuid + '/fullrender.png',
-      'https://media.valorant-api.com/weaponskinchromas/' + uuid + '/displayicon.png'
+      'https://media.valorant-api.com/weaponskinchromas/' + uuid + '/displayicon.png',
+      'https://media.valorant-api.com/weaponskins/' + uuid + '/displayicon.png'
     ];
   }
 
@@ -1630,7 +1852,7 @@ function renderNightMarket(nm) {
       </div>
 
       <div class="skin-image-box">
-        <img src="${safeIcon}" alt="${offer.name}">
+        <img src="${safeIcon}" alt="${offer.name}" loading="lazy" onerror="this.onerror=null;this.src=window.generateItemFallbackSvg('${(offer.name || 'Weapon').replace(/'/g, "\\'")}', 'Weapon Skin')">
       </div>
 
       <div class="skin-card-footer">
@@ -2013,15 +2235,19 @@ btnLogout?.addEventListener('click', async () => {
   } catch (e) {}
   try {
     localStorage.removeItem('val_sid');
+    localStorage.removeItem('val_auth_pack');
+    document.cookie = 'val_auth_pack=; Max-Age=0; path=/;';
+    document.cookie = 'val_sid=; Max-Age=0; path=/;';
   } catch (e) {}
   showLoginView();
 });
 
-// Navigation Mode Switching (Store vs Career vs Agents vs Catalog)
+// Navigation Mode Switching (Unified Desktop & Mobile Bottom Nav)
 const btnTabStore = document.getElementById('btnTabStore');
 const btnTabCareer = document.getElementById('btnTabCareer');
 const btnTabAgents = document.getElementById('btnTabAgents');
 const btnTabCatalog = document.getElementById('btnTabCatalog');
+const btnMobOpenVp = document.getElementById('btnMobOpenVp');
 
 function triggerSectionAnimation(el) {
   if (!el) return;
@@ -2030,79 +2256,82 @@ function triggerSectionAnimation(el) {
   el.classList.add('page-view-enter');
 }
 
-btnTabStore?.addEventListener('click', () => {
+function switchAppMode(mode) {
   playTacticalAudio('tab');
-  currentAppMode = 'store';
-  btnTabStore.classList.add('active');
-  btnTabCareer?.classList.remove('active');
-  btnTabAgents?.classList.remove('active');
-  btnTabCatalog?.classList.remove('active');
+  currentAppMode = mode;
+
+  // Update top desktop tabs
+  btnTabStore?.classList.toggle('active', mode === 'store');
+  btnTabCareer?.classList.toggle('active', mode === 'career');
+  btnTabAgents?.classList.toggle('active', mode === 'agents');
+  btnTabCatalog?.classList.toggle('active', mode === 'catalog');
+
+  // Update mobile bottom nav items
+  document.querySelectorAll('.mobile-nav-item[data-tab]').forEach(item => {
+    item.classList.toggle('active', item.dataset.tab === mode);
+  });
+
   catalogSection?.classList.add('hidden');
   careerSection?.classList.add('hidden');
   agentsSection?.classList.add('hidden');
-  if (currentUser) {
-    storeSection?.classList.remove('hidden');
+  storeSection?.classList.add('hidden');
+
+  if (mode === 'store') {
+    if (currentUser) {
+      storeSection?.classList.remove('hidden');
+      loginSection?.classList.add('hidden');
+      triggerSectionAnimation(storeSection);
+    } else {
+      loginSection?.classList.remove('hidden');
+      storeSection?.classList.add('hidden');
+      triggerSectionAnimation(loginSection);
+    }
+  } else if (mode === 'career') {
+    if (currentUser) {
+      careerSection?.classList.remove('hidden');
+      loginSection?.classList.add('hidden');
+      triggerSectionAnimation(careerSection);
+      loadCareer();
+    } else {
+      loginSection?.classList.remove('hidden');
+      careerSection?.classList.add('hidden');
+      triggerSectionAnimation(loginSection);
+    }
+  } else if (mode === 'agents') {
     loginSection?.classList.add('hidden');
-    triggerSectionAnimation(storeSection);
-  } else {
-    loginSection?.classList.remove('hidden');
     storeSection?.classList.add('hidden');
-    triggerSectionAnimation(loginSection);
-  }
-});
-
-btnTabCareer?.addEventListener('click', () => {
-  playTacticalAudio('tab');
-  currentAppMode = 'career';
-  btnTabCareer.classList.add('active');
-  btnTabStore?.classList.remove('active');
-  btnTabAgents?.classList.remove('active');
-  btnTabCatalog?.classList.remove('active');
-  catalogSection?.classList.add('hidden');
-  storeSection?.classList.add('hidden');
-  agentsSection?.classList.add('hidden');
-  if (currentUser) {
-    careerSection?.classList.remove('hidden');
-    loginSection?.classList.add('hidden');
-    triggerSectionAnimation(careerSection);
-    loadCareer();
-  } else {
-    loginSection?.classList.remove('hidden');
     careerSection?.classList.add('hidden');
-    triggerSectionAnimation(loginSection);
+    catalogSection?.classList.add('hidden');
+    agentsSection?.classList.remove('hidden');
+    triggerSectionAnimation(agentsSection);
+    loadAgentsEncyclopedia();
+  } else if (mode === 'catalog') {
+    loginSection?.classList.add('hidden');
+    storeSection?.classList.add('hidden');
+    careerSection?.classList.add('hidden');
+    agentsSection?.classList.add('hidden');
+    catalogSection?.classList.remove('hidden');
+    triggerSectionAnimation(catalogSection);
+    resetAndLoadCatalog();
   }
+}
+
+btnTabStore?.addEventListener('click', () => switchAppMode('store'));
+btnTabCareer?.addEventListener('click', () => switchAppMode('career'));
+btnTabAgents?.addEventListener('click', () => switchAppMode('agents'));
+btnTabCatalog?.addEventListener('click', () => switchAppMode('catalog'));
+
+// Mobile Bottom Nav Click Handlers
+document.querySelectorAll('.mobile-nav-item[data-tab]').forEach(item => {
+  item.addEventListener('click', () => {
+    const tab = item.dataset.tab;
+    if (tab) switchAppMode(tab);
+  });
 });
 
-btnTabAgents?.addEventListener('click', () => {
-  playTacticalAudio('tab');
-  currentAppMode = 'agents';
-  btnTabAgents.classList.add('active');
-  btnTabStore?.classList.remove('active');
-  btnTabCareer?.classList.remove('active');
-  btnTabCatalog?.classList.remove('active');
-  loginSection?.classList.add('hidden');
-  storeSection?.classList.add('hidden');
-  careerSection?.classList.add('hidden');
-  catalogSection?.classList.add('hidden');
-  agentsSection?.classList.remove('hidden');
-  triggerSectionAnimation(agentsSection);
-  loadAgentsEncyclopedia();
-});
-
-btnTabCatalog?.addEventListener('click', () => {
-  playTacticalAudio('tab');
-  currentAppMode = 'catalog';
-  btnTabCatalog.classList.add('active');
-  btnTabStore?.classList.remove('active');
-  btnTabCareer?.classList.remove('active');
-  btnTabAgents?.classList.remove('active');
-  loginSection?.classList.add('hidden');
-  storeSection?.classList.add('hidden');
-  careerSection?.classList.add('hidden');
-  agentsSection?.classList.add('hidden');
-  catalogSection?.classList.remove('hidden');
-  triggerSectionAnimation(catalogSection);
-  resetAndLoadCatalog();
+btnMobOpenVp?.addEventListener('click', () => {
+  playTacticalAudio('click');
+  window.openVpCompareModal?.();
 });
 
 // Load weapons list for dropdown
@@ -3789,7 +4018,9 @@ btnRefreshMatches?.addEventListener('click', async () => {
 // Register PWA Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(err => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      reg.update().catch(() => {});
+    }).catch(err => {
       console.log('SW registration failed:', err);
     });
   });
@@ -4479,12 +4710,57 @@ document.addEventListener('mousemove', (e) => {
 let lastMotionSoundTime = 0;
 
 document.addEventListener('mouseover', (e) => {
-  const interactive = e.target.closest('.skin-card, .agent-catalog-card, .match-card, .btn, .cat-pill, .mode-tab-btn, .tab-btn, .chroma-pill, .level-card, .btn-wishlist-star');
+  const interactive = e.target.closest('.skin-card, .agent-catalog-card, .match-card, .btn, .cat-pill, .mode-tab-btn, .tab-btn, .chroma-pill, .level-card, .btn-wishlist-star, .btn-inspect, .btn-bundle-calc, .btn-pill, .btn-terminal-action');
   if (interactive && !interactive.contains(e.relatedTarget)) {
     const now = Date.now();
-    if (now - lastMotionSoundTime > 120) {
+    if (now - lastMotionSoundTime > 90) {
       lastMotionSoundTime = now;
       playTacticalAudio('hover');
     }
   }
 });
+
+// ==========================================================
+// DYNAMIC SCROLL AUDIO & SCROLL REVEAL OBSERVER (60 FPS)
+// ==========================================================
+let lastScrollAudioTime = 0;
+let lastScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+window.addEventListener('scroll', () => {
+  const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  const scrollDiff = Math.abs(currentScrollTop - lastScrollTop);
+  
+  if (scrollDiff > 40) {
+    const now = Date.now();
+    if (now - lastScrollAudioTime > 90) {
+      lastScrollAudioTime = now;
+      lastScrollTop = currentScrollTop;
+      playTacticalAudio('scroll_tick');
+    }
+  }
+}, { passive: true });
+
+// Universal IntersectionObserver for Staggered Scroll Animations
+const scrollRevealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in-view');
+    }
+  });
+}, {
+  threshold: 0.05,
+  rootMargin: '0px 0px -30px 0px'
+});
+
+function observeScrollElements() {
+  document.querySelectorAll('.skin-card, .bundle-hero, .section-header, .career-summary-card, .agent-catalog-card, .tactical-login-card, .all-agents-catalog-grid, .night-market-card, .bundle-item-card').forEach(el => {
+    if (!el.classList.contains('scroll-observed')) {
+      el.classList.add('scroll-observed', 'scroll-reveal');
+      scrollRevealObserver.observe(el);
+    }
+  });
+}
+
+// Observe on initial load and periodically when new cards render
+observeScrollElements();
+setInterval(observeScrollElements, 800);

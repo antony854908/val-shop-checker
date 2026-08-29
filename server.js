@@ -35,7 +35,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
       imgSrc: ["'self'", "data:", "blob:", "https:"],
-      mediaSrc: ["'self'", "blob:", "https:"],
+      mediaSrc: ["'self'", "blob:", "https:", "https://*.riotcdn.net", "https://valorant.dyn.riotcdn.net"],
       connectSrc: [
         "'self'",
         "https://auth.riotgames.com",
@@ -44,7 +44,11 @@ app.use(helmet({
         "https://riot-geo.pas.riotgames.com",
         "https://valorant-api.com",
         "https://media.valorant-api.com",
-        "https://www.overtopup.com"
+        "https://www.overtopup.com",
+        "https://fonts.googleapis.com",
+        "https://fonts.gstatic.com",
+        "https://*.riotcdn.net",
+        "https://valorant.dyn.riotcdn.net"
       ],
       frameAncestors: ["'none'"],
       baseUri: ["'self'"],
@@ -86,7 +90,7 @@ app.use(cors({
     }
   },
   credentials: true,
-  exposedHeaders: ['X-Val-Session']
+  exposedHeaders: ['X-Val-Session', 'X-Val-Auth-Pack']
 }));
 app.use(cookieParser(config.SESSION_SECRET));
 app.use(express.json({ limit: '256kb' }));
@@ -129,9 +133,22 @@ function getSessionMiddleware(req, res, next) {
     });
   }
 
+  // Auto-rehydrate auth from client auth pack header or cookie if server session memory was lost (Serverless persistence)
+  const authPackRaw = req.headers['x-val-auth-pack'] || req.cookies?.val_auth_pack;
+  if (authPackRaw && (!session.auth || !session.auth.accessToken)) {
+    try {
+      const decodedStr = Buffer.from(authPackRaw, 'base64').toString('utf8');
+      const authObj = JSON.parse(decodedStr);
+      if (authObj && authObj.accessToken && authObj.puuid) {
+        session.auth = authObj;
+        sessionStore.updateSession(session.id, { auth: authObj });
+      }
+    } catch (e) {}
+  }
+
   req.valSession = session;
   res.setHeader('X-Val-Session', session.id);
-  res.setHeader('Access-Control-Expose-Headers', 'X-Val-Session');
+  res.setHeader('Access-Control-Expose-Headers', 'X-Val-Session, X-Val-Auth-Pack');
   next();
 }
 
@@ -180,11 +197,23 @@ app.post('/api/auth/login', authRateLimitMiddleware, async (req, res) => {
 
     // Auth succeeded -> complete session setup
     const tokens = authResult.tokens;
-    await completeUserSession(req.valSession.id, tokens, region);
+    const authData = await completeUserSession(req.valSession.id, tokens, region);
+    const authPackBase64 = Buffer.from(JSON.stringify(authData)).toString('base64');
+
+    res.cookie('val_auth_pack', authPackBase64, {
+      httpOnly: false,
+      secure: isProd,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60 * 1000
+    });
+    res.setHeader('X-Val-Auth-Pack', authPackBase64);
 
     res.json({
       ok: true,
       sessionId: req.valSession.id,
+      auth: authData,
+      authPack: authPackBase64,
       mfaRequired: false,
       message: 'เข้าสู่ระบบสำเร็จ'
     });
@@ -210,7 +239,17 @@ app.post('/api/auth/mfa', authRateLimitMiddleware, async (req, res) => {
     }
 
     const tokens = await riotAuth.verifyMfa(code, mfaState.cookieHeader);
-    await completeUserSession(req.valSession.id, tokens, mfaState.preferredRegion);
+    const authData = await completeUserSession(req.valSession.id, tokens, mfaState.preferredRegion);
+    const authPackBase64 = Buffer.from(JSON.stringify(authData)).toString('base64');
+
+    res.cookie('val_auth_pack', authPackBase64, {
+      httpOnly: false,
+      secure: isProd,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60 * 1000
+    });
+    res.setHeader('X-Val-Auth-Pack', authPackBase64);
 
     // Clean up MFA state
     sessionStore.updateSession(req.valSession.id, { mfaState: null });
@@ -218,6 +257,8 @@ app.post('/api/auth/mfa', authRateLimitMiddleware, async (req, res) => {
     res.json({
       ok: true,
       sessionId: req.valSession.id,
+      auth: authData,
+      authPack: authPackBase64,
       message: 'ยืนยัน 2FA สำเร็จ เข้าสู่ระบบเรียบร้อย'
     });
   } catch (err) {
@@ -241,11 +282,23 @@ app.post('/api/auth/token-login', authRateLimitMiddleware, async (req, res) => {
       idToken
     };
 
-    await completeUserSession(req.valSession.id, tokens, region || 'auto');
+    const authData = await completeUserSession(req.valSession.id, tokens, region || 'auto');
+    const authPackBase64 = Buffer.from(JSON.stringify(authData)).toString('base64');
+
+    res.cookie('val_auth_pack', authPackBase64, {
+      httpOnly: false,
+      secure: isProd,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60 * 1000
+    });
+    res.setHeader('X-Val-Auth-Pack', authPackBase64);
 
     res.json({
       ok: true,
       sessionId: req.valSession.id,
+      auth: authData,
+      authPack: authPackBase64,
       message: 'เข้าสู่ระบบด้วย Token สำเร็จ'
     });
   } catch (err) {
@@ -305,7 +358,7 @@ async function completeUserSession(sessionId, tokens, userRegion) {
 app.get('/api/auth/me', async (req, res) => {
   const auth = req.valSession.auth;
   if (!auth) {
-    return res.status(401).json({ ok: false, loggedIn: false });
+    return res.json({ ok: true, loggedIn: false });
   }
 
   try {
