@@ -774,6 +774,7 @@ async function processTokenString(rawText, alertEl) {
     if (meData.ok && meData.loggedIn) {
       currentUser = meData.user;
       renderUserHeader(meData.user);
+      switchAppMode('store');
       await loadStore();
       // Preload inventory in background
       loadPlayerInventory(true).catch(() => {});
@@ -790,7 +791,20 @@ async function processTokenString(rawText, alertEl) {
   }
 }
 
-btnAutoPaste?.addEventListener('click', async () => {
+document.getElementById('quickGoogleForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  let val = quickPasteInput ? quickPasteInput.value.trim() : '';
+  if (!val && navigator.clipboard && navigator.clipboard.readText) {
+    try {
+      val = await navigator.clipboard.readText();
+      if (quickPasteInput) quickPasteInput.value = val;
+    } catch (e) {}
+  }
+  processTokenString(val, googleAlert);
+});
+
+btnAutoPaste?.addEventListener('click', async (e) => {
+  e.preventDefault();
   let val = quickPasteInput ? quickPasteInput.value.trim() : '';
   if (!val && navigator.clipboard && navigator.clipboard.readText) {
     try {
@@ -806,7 +820,7 @@ quickPasteInput?.addEventListener('input', () => {
   if (val.includes('access_token=') || val.startsWith('eyJ')) {
     setTimeout(() => {
       processTokenString(val, googleAlert);
-    }, 100);
+    }, 150);
   }
 });
 

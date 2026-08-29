@@ -220,16 +220,16 @@
                   <span>เมื่อล็อกอินเสร็จ หน้าเว็บจะขึ้น <strong>404 Not Found</strong> (ปกติ 100%) ให้คัดลอกลิงก์ด้านบนสุดมาวาง:</span>
                 </div>
 
-                <div class="terminal-action-row">
+                <form id="quickGoogleForm" class="terminal-action-row" onsubmit="return false;">
                   <div class="terminal-field-wrap">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="terminal-prefix-icon"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                    <input type="text" id="quickPasteInput" placeholder="วางลิงก์ URL หรือ Token ที่นี่ (หรือกดปุ่มวาง)..." class="terminal-text-input" autocomplete="off" spellcheck="false">
+                    <input type="text" id="quickPasteInput" placeholder="วางลิงก์ URL หรือ Token ที่นี่..." class="terminal-text-input" autocomplete="off" spellcheck="false">
                   </div>
-                  <button type="button" id="btnAutoPaste" class="btn-terminal-action">
+                  <button type="submit" id="btnAutoPaste" class="btn-terminal-action">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
                     <span>วาง &amp; เข้าสู่ระบบทันที</span>
                   </button>
-                </div>
+                </form>
               </div>
 
             </div>
