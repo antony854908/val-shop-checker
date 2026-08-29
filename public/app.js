@@ -4441,6 +4441,22 @@ loadAllAgents();
 checkAuth();
 
 // ==========================================================
+// 3D HOLOGRAPHIC MOUSE PARALLAX TRACKER (60 FPS BUTTERY)
+// ==========================================================
+document.addEventListener('mousemove', (e) => {
+  const card = e.target.closest('.skin-card, .bundle-hero, .agent-catalog-card');
+  if (card) {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const px = Math.round((x / rect.width) * 100);
+    const py = Math.round((y / rect.height) * 100);
+    card.style.setProperty('--mouse-x', `${px}%`);
+    card.style.setProperty('--mouse-y', `${py}%`);
+  }
+});
+
+// ==========================================================
 // TACTILE HOVER SOUND FEEDBACK (SMOOTH & LIGHT DEBOUNCED)
 // ==========================================================
 let lastMotionSoundTime = 0;
