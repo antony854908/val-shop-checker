@@ -14,6 +14,8 @@ class SkinCatalog {
     this.agents = new Map(); // agentUuid -> agent details
     this.maps = new Map(); // mapUrl / mapUuid -> map details
     this.ranks = new Map(); // tierNumber -> rank details
+    this.seasons = new Map(); // seasonUuid -> season details
+    this.orderedSeasonIds = []; // chronological act uuids
     this.uniqueSkinsList = [];
     this.weaponsList = [];
     this.clientVersion = config.DEFAULT_CLIENT_VERSION;
@@ -83,6 +85,7 @@ class SkinCatalog {
         agentsRes,
         mapsRes,
         compTiersRes,
+        seasonsRes,
         versionRes
       ] = await Promise.all([
         fetch('https://valorant-api.com/v1/weapons/skins?language=en-US').then(r => r.json()),
@@ -98,6 +101,7 @@ class SkinCatalog {
         fetch('https://valorant-api.com/v1/agents?language=th-TH&isPlayableCharacter=true').then(r => r.json()).catch(() => ({ data: [] })),
         fetch('https://valorant-api.com/v1/maps').then(r => r.json()).catch(() => ({ data: [] })),
         fetch('https://valorant-api.com/v1/competitivetiers').then(r => r.json()).catch(() => ({ data: [] })),
+        fetch('https://valorant-api.com/v1/seasons').then(r => r.json()).catch(() => ({ data: [] })),
         fetch('https://valorant-api.com/v1/version').then(r => r.json()).catch(() => null)
       ]);
 
@@ -441,6 +445,29 @@ class SkinCatalog {
               smallIcon: t.smallIcon || null,
               largeIcon: t.largeIcon || null
             });
+          }
+        }
+      }
+
+      // Map seasons chronologically
+      if (seasonsRes && seasonsRes.data) {
+        const sorted = [...seasonsRes.data].sort((a, b) => {
+          const tA = a.startTime ? new Date(a.startTime).getTime() : 0;
+          const tB = b.startTime ? new Date(b.startTime).getTime() : 0;
+          return tA - tB;
+        });
+        for (const s of sorted) {
+          const sObj = {
+            uuid: s.uuid,
+            displayName: s.displayName,
+            startTime: s.startTime,
+            endTime: s.endTime,
+            type: s.type,
+            parentUuid: s.parentUuid
+          };
+          this.seasons.set(s.uuid.toLowerCase(), sObj);
+          if (s.type === 'EAresSeasonType::Act') {
+            this.orderedSeasonIds.push(s.uuid.toLowerCase());
           }
         }
       }

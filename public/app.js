@@ -378,7 +378,7 @@ const googleAlert = document.getElementById('googleAlert');
 
 async function processTokenString(rawText, alertEl) {
   const alertTarget = alertEl || googleAlert || document.getElementById('loginAlert') || document.getElementById('tokenAlert');
-  const cleanText = (rawText || '').trim();
+  let cleanText = (rawText || '').trim();
 
   if (!cleanText) {
     showAlert(alertTarget, 'กรุณาวาง URL หรือ Access Token');
@@ -390,15 +390,31 @@ async function processTokenString(rawText, alertEl) {
     return;
   }
 
+  if (cleanText.includes('%23') || cleanText.includes('%3D') || cleanText.includes('%26')) {
+    try { cleanText = decodeURIComponent(cleanText); } catch (e) {}
+  }
+
   let accessToken = cleanText;
   let idToken = null;
 
   if (cleanText.includes('access_token=')) {
-    const hash = cleanText.includes('#') ? cleanText.split('#')[1] : cleanText;
-    const params = new URLSearchParams(hash.includes('?') ? hash.split('?')[1] : hash);
+    let paramStr = cleanText;
+    if (cleanText.includes('#')) {
+      paramStr = cleanText.split('#')[1];
+    } else if (cleanText.includes('?')) {
+      paramStr = cleanText.split('?')[1];
+    }
+    const params = new URLSearchParams(paramStr);
     accessToken = params.get('access_token') || cleanText;
     idToken = params.get('id_token');
+  } else if (cleanText.startsWith('eyJ') && cleanText.includes(' ')) {
+    const parts = cleanText.split(/\s+/);
+    accessToken = parts[0];
+    if (parts[1] && parts[1].startsWith('eyJ')) idToken = parts[1];
   }
+
+  accessToken = accessToken.trim();
+  if (idToken) idToken = idToken.trim();
 
   if (!accessToken || accessToken.length < 20) {
     showAlert(alertTarget, 'ไม่พบ Access Token ที่ถูกต้อง กรุณาตรวจสอบลิงก์อีกครั้ง');
@@ -431,9 +447,14 @@ async function processTokenString(rawText, alertEl) {
       localStorage.setItem('val_auth_token', cleanText);
     } catch (e) {}
 
-    const authOk = await checkAuth();
-    if (!authOk) {
-      await new Promise(r => setTimeout(r, 200));
+    // Success! Immediately fetch profile and load store
+    const meRes = await apiFetch('/api/auth/me');
+    const meData = await meRes.json();
+    if (meData.ok && meData.loggedIn) {
+      currentUser = meData.user;
+      renderUserHeader(meData.user);
+      await loadStore();
+    } else {
       await checkAuth();
     }
   } catch (err) {
@@ -749,14 +770,32 @@ tokenLoginForm?.addEventListener('submit', async (e) => {
   let raw = rawInput ? rawInput.value.trim() : '';
   const region = regionInput ? regionInput.value : 'auto';
 
+  if (!raw) {
+    showAlert(tokenAlert, 'กรุณาวาง URL หรือ Access Token');
+    return;
+  }
+
+  if (raw.includes('%23') || raw.includes('%3D') || raw.includes('%26')) {
+    try { raw = decodeURIComponent(raw); } catch (e) {}
+  }
+
   let accessToken = raw;
   let idToken = null;
 
   if (raw.includes('access_token=')) {
-    const hash = raw.includes('#') ? raw.split('#')[1] : raw;
-    const params = new URLSearchParams(hash.includes('?') ? hash.split('?')[1] : hash);
+    let paramStr = raw;
+    if (raw.includes('#')) {
+      paramStr = raw.split('#')[1];
+    } else if (raw.includes('?')) {
+      paramStr = raw.split('?')[1];
+    }
+    const params = new URLSearchParams(paramStr);
     accessToken = params.get('access_token') || raw;
     idToken = params.get('id_token');
+  } else if (raw.startsWith('eyJ') && raw.includes(' ')) {
+    const parts = raw.split(/\s+/);
+    accessToken = parts[0];
+    if (parts[1] && parts[1].startsWith('eyJ')) idToken = parts[1];
   }
 
   const submitBtn = document.getElementById('btnTokenSubmit');
@@ -778,14 +817,22 @@ tokenLoginForm?.addEventListener('submit', async (e) => {
     }
 
     if (!data.ok) {
-      throw new Error(data.error || 'Token ไม่ถูกต้อง');
+      throw new Error(data.error || 'Token ไม่ถูกต้องหรือหมดอายุ');
     }
 
     try {
       localStorage.setItem('val_auth_token', raw);
     } catch (e) {}
 
-    await checkAuth();
+    const meRes = await apiFetch('/api/auth/me');
+    const meData = await meRes.json();
+    if (meData.ok && meData.loggedIn) {
+      currentUser = meData.user;
+      renderUserHeader(meData.user);
+      await loadStore();
+    } else {
+      await checkAuth();
+    }
   } catch (err) {
     showAlert(tokenAlert, err.message || 'เข้าสู่ระบบไม่สำเร็จ');
   } finally {

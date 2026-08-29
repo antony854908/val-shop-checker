@@ -428,43 +428,74 @@ class ValorantApiService {
       const queueSkills = data.QueueSkills || {};
       const compInfo = queueSkills.competitive || {};
       const seasonalInfo = compInfo.SeasonalInfoBySeasonID || {};
+      const latestUpdate = data.LatestCompetitiveUpdate;
 
-      // Find current active season or latest season
-      const seasonIds = Object.keys(seasonalInfo);
-      let currentSeasonData = null;
+      let currentTier = 0;
+      let currentRR = 0;
+      let currentWins = 0;
       let peakTier = 0;
+      let leaderboardRank = 0;
 
-      for (const sId of seasonIds) {
-        const sData = seasonalInfo[sId];
+      // 1. Calculate Peak Tier across all seasons
+      for (const sData of Object.values(seasonalInfo)) {
+        if (sData && typeof sData.CompetitiveTier === 'number') {
+          if (sData.CompetitiveTier > peakTier) {
+            peakTier = sData.CompetitiveTier;
+          }
+        }
+      }
+
+      // 2. Try latest competitive update first (most up-to-date)
+      if (latestUpdate && typeof latestUpdate.TierAfterUpdate === 'number' && latestUpdate.TierAfterUpdate > 0) {
+        currentTier = latestUpdate.TierAfterUpdate;
+        currentRR = typeof latestUpdate.RankedRatingAfterUpdate === 'number' ? latestUpdate.RankedRatingAfterUpdate : (latestUpdate.RankedRatingEarned || 0);
+      }
+
+      // 3. Match against chronological season list (from latest to oldest)
+      const orderedActs = (skinCatalog.orderedSeasonIds && skinCatalog.orderedSeasonIds.length > 0)
+        ? [...skinCatalog.orderedSeasonIds].reverse()
+        : Object.keys(seasonalInfo);
+
+      for (const sId of orderedActs) {
+        const sData = seasonalInfo[sId] || seasonalInfo[sId.toLowerCase()];
         if (sData) {
           if (sData.CompetitiveTier > peakTier) {
             peakTier = sData.CompetitiveTier;
           }
-          currentSeasonData = sData;
+          if (currentTier === 0 && sData.CompetitiveTier > 0) {
+            currentTier = sData.CompetitiveTier;
+            currentRR = sData.RankedRating || 0;
+            currentWins = sData.NumberOfWinsWithPlacements || sData.NumberOfWins || 0;
+            leaderboardRank = sData.LeaderboardRank || 0;
+            break;
+          } else if (currentWins === 0 && (sData.NumberOfWinsWithPlacements || sData.NumberOfWins)) {
+            currentWins = sData.NumberOfWinsWithPlacements || sData.NumberOfWins || 0;
+            if (!leaderboardRank) leaderboardRank = sData.LeaderboardRank || 0;
+          }
         }
       }
 
-      const currentTier = currentSeasonData?.CompetitiveTier || 0;
-      const currentRR = currentSeasonData?.RankedRating || 0;
-      const currentWins = currentSeasonData?.NumberOfWinsWithPlacements || currentSeasonData?.NumberOfWins || 0;
-      const gamesNeeded = compInfo.TotalGamesNeededForRating || 0;
+      if (currentTier > peakTier) {
+        peakTier = currentTier;
+      }
 
+      const gamesNeeded = compInfo.TotalGamesNeededForRating || 0;
       const rankMeta = skinCatalog.getRank(currentTier);
       const peakRankMeta = skinCatalog.getRank(peakTier);
 
       return {
         tier: currentTier,
-        tierName: rankMeta.tierName,
-        divisionName: rankMeta.divisionName,
-        color: rankMeta.color,
-        rankIcon: rankMeta.largeIcon || rankMeta.smallIcon,
+        tierName: rankMeta.tierName || 'UNRANKED',
+        divisionName: rankMeta.divisionName || 'UNRANKED',
+        color: rankMeta.color || '#ffffff',
+        rankIcon: rankMeta.largeIcon || rankMeta.smallIcon || 'https://media.valorant-api.com/competitivetiers/03621f52-342b-cf4e-4f86-9350a49c6d04/0/largeicon.png',
         rankedRating: currentRR,
         gamesNeededForRating: gamesNeeded,
         seasonalWins: currentWins,
         peakTier,
-        peakRankName: peakRankMeta.tierName,
-        peakRankIcon: peakRankMeta.largeIcon || peakRankMeta.smallIcon,
-        leaderboardRank: currentSeasonData?.LeaderboardRank || 0
+        peakRankName: peakRankMeta.tierName || 'UNRANKED',
+        peakRankIcon: peakRankMeta.largeIcon || peakRankMeta.smallIcon || 'https://media.valorant-api.com/competitivetiers/03621f52-342b-cf4e-4f86-9350a49c6d04/0/largeicon.png',
+        leaderboardRank
       };
     } catch (e) {
       console.error('[ValorantApi] MMR lookup failed:', e.message);
@@ -474,7 +505,7 @@ class ValorantApiService {
         tierName: 'UNRANKED',
         divisionName: 'UNRANKED',
         color: '#ffffff',
-        rankIcon: unranked.largeIcon || unranked.smallIcon,
+        rankIcon: unranked.largeIcon || unranked.smallIcon || 'https://media.valorant-api.com/competitivetiers/03621f52-342b-cf4e-4f86-9350a49c6d04/0/largeicon.png',
         rankedRating: 0,
         gamesNeededForRating: 0,
         seasonalWins: 0,

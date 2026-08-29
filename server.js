@@ -226,15 +226,26 @@ async function completeUserSession(sessionId, tokens, userRegion) {
 
   let finalRegion = userRegion;
   if (!finalRegion || finalRegion === 'auto') {
-    finalRegion = await riotAuth.detectRegion(tokens.idToken, 'ap');
+    try {
+      finalRegion = await riotAuth.detectRegion(tokens.idToken, 'ap');
+    } catch (e) {
+      finalRegion = 'ap';
+    }
   }
 
-  const nameData = await valorantApi.getPlayerName(
-    userInfo.puuid,
-    finalRegion,
-    tokens.accessToken,
-    entitlementsToken
-  );
+  let nameData = { gameName: 'Agent', tagLine: 'VAL' };
+  try {
+    nameData = await valorantApi.getPlayerName(
+      userInfo.puuid,
+      finalRegion,
+      tokens.accessToken,
+      entitlementsToken
+    );
+  } catch (e) {
+    if (userInfo.acct?.game_name) {
+      nameData = { gameName: userInfo.acct.game_name, tagLine: userInfo.acct.tag_line || 'VAL' };
+    }
+  }
 
   const authData = {
     accessToken: tokens.accessToken,
@@ -243,14 +254,16 @@ async function completeUserSession(sessionId, tokens, userRegion) {
     puuid: userInfo.puuid,
     region: finalRegion,
     country: userInfo.country,
-    gameName: nameData.gameName,
-    tagLine: nameData.tagLine
+    gameName: nameData.gameName || 'Agent',
+    tagLine: nameData.tagLine || 'VAL'
   };
 
   sessionStore.updateSession(sessionId, {
     auth: authData,
     mfaState: null
   });
+
+  return authData;
 }
 
 // Endpoint: Get Current User Info & Wallet

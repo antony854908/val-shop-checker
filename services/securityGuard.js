@@ -126,24 +126,44 @@ function validateTokenInput(body) {
     return { ok: false, error: 'กรุณาระบุ Access Token หรือวาง URL' };
   }
 
-  accessToken = accessToken.trim();
-  if (accessToken.length > 4096) {
-    return { ok: false, error: 'Token มีขนาดยาวเกินกำหนด' };
+  let raw = accessToken.trim();
+  if (raw.includes('%23') || raw.includes('%3D') || raw.includes('%26')) {
+    try { raw = decodeURIComponent(raw); } catch (e) {}
   }
 
-  // Extract access_token if full URL was pasted
-  if (accessToken.includes('access_token=')) {
-    const hashPart = accessToken.includes('#') ? accessToken.split('#')[1] : accessToken;
-    const params = new URLSearchParams(hashPart);
+  if (raw.includes('access_token=')) {
+    let paramStr = raw;
+    if (raw.includes('#')) {
+      paramStr = raw.split('#')[1];
+    } else if (raw.includes('?')) {
+      paramStr = raw.split('?')[1];
+    }
+    const params = new URLSearchParams(paramStr);
     const extractedAccess = params.get('access_token');
     const extractedId = params.get('id_token');
     if (extractedAccess) accessToken = extractedAccess.trim();
     if (extractedId) idToken = extractedId.trim();
+  } else if (raw.startsWith('eyJ') && raw.includes(' ')) {
+    const parts = raw.split(/\s+/);
+    accessToken = parts[0].trim();
+    if (parts[1] && parts[1].startsWith('eyJ')) {
+      idToken = parts[1].trim();
+    }
+  } else {
+    accessToken = raw;
+  }
+
+  if (!accessToken || accessToken.length < 20) {
+    return { ok: false, error: 'ไม่พบ Access Token ที่ถูกต้อง กรุณาคัดลอกลิงก์ทั้งหมดมาวางใหม่อีกครั้ง' };
+  }
+
+  if (accessToken.length > 4096) {
+    return { ok: false, error: 'Token มีขนาดยาวเกินกำหนด' };
   }
 
   if (idToken && typeof idToken === 'string') {
     idToken = idToken.trim();
-    if (idToken.length > 4096) idToken = null;
+    if (idToken.length > 4096 || idToken.length < 20) idToken = null;
   }
 
   let finalRegion = 'auto';
