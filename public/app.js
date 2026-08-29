@@ -740,14 +740,14 @@ async function processTokenString(rawText, alertEl) {
   if (idToken) idToken = idToken.trim();
 
   if (!accessToken || accessToken.length < 20) {
-    showAlert(alertTarget, '⚠️ ไม่พบ Access Token ที่ถูกต้องในข้อความที่วาง <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">📖 คลิกที่นี่เพื่อดูภาพวิธีก็อปปี้ลิงก์ที่ถูกต้อง</a>');
+    showAlert(alertTarget, 'ไม่พบ Access Token ที่ถูกต้องในข้อความที่วาง <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">[ดูวิธีคัดลอกลิงก์]</a>');
     return;
   }
 
   hideAlert(alertTarget);
   if (btnAutoPaste) {
     btnAutoPaste.disabled = true;
-    btnAutoPaste.textContent = '⏳ กำลังเข้าสู่ระบบและดึงข้อมูลร้านค้า...';
+    btnAutoPaste.textContent = "กำลังเข้าสู่ระบบและดึงข้อมูลร้านค้า...";
   }
 
   try {
@@ -782,7 +782,7 @@ async function processTokenString(rawText, alertEl) {
       await checkAuth();
     }
   } catch (err) {
-    showAlert(alertTarget, (err.message || 'เข้าสู่ระบบไม่สำเร็จ') + ' <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">📖 ดูภาพสอนวิธีคัดลอกลิงก์ใหม่</a>');
+    showAlert(alertTarget, (err.message || 'เข้าสู่ระบบไม่สำเร็จ') + ' <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">[ดูวิธีคัดลอกลิงก์]</a>');
   } finally {
     if (btnAutoPaste) {
       btnAutoPaste.disabled = false;
@@ -1374,7 +1374,7 @@ function renderDailyShop(skins) {
           <div class="skin-price-tag">
             <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
             <span>${(skin.price || 0).toLocaleString()}</span>
-            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")} ⚡</span>
+            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")}</span>
           </div>
           <button class="btn btn-primary btn-sm btn-inspect"><span>ดูเอฟเฟกต์ & สี</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
@@ -1575,7 +1575,7 @@ function renderBundles(bundles) {
             ${savings > 0 ? `<span class="bundle-savings-tag">ประหยัด ${savings.toLocaleString()} ฿</span>` : ''}
           </div>
           <button class="btn btn-bundle-calc" data-vp="${bundlePrice}" title="เปิดระบบคำนวณแพ็กเกจ OverTopup สำหรับบันเดิลนี้">
-            <span>⚡ เทียบราคา OverTopup</span>
+            <span>เทียบราคา OverTopup</span>
           </button>
         ` : ''}
       </div>
@@ -1619,7 +1619,7 @@ function renderBundles(bundles) {
           <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
           <span>${itemPrice.toLocaleString()}</span>
           ${itemPrice > 0 ? `
-            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${itemPrice}">${opt.shortTag || ("~" + Math.round(itemPrice * 0.238) + " ฿")} ⚡</span>
+            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${itemPrice}">${opt.shortTag || ("~" + Math.round(itemPrice * 0.238) + " ฿")}</span>
           ` : ''}
         </div>
       `;
@@ -1704,12 +1704,12 @@ window.openBundleModal = function(b) {
   if (comboEl) comboEl.textContent = opt.comboText || `${opt.totalPrice.toLocaleString()} ฿`;
 
   const vpGainEl = document.getElementById("modalBundleVpGain");
-  if (vpGainEl) vpGainEl.textContent = `💎 ได้รับ ${opt.totalVp.toLocaleString()} VP`;
+  if (vpGainEl) vpGainEl.textContent = `ได้รับ ${opt.totalVp.toLocaleString()} VP`;
 
   const vpLeftoverEl = document.getElementById("modalBundleVpLeftover");
   if (vpLeftoverEl) {
     if (opt.leftoverVp > 0) {
-      vpLeftoverEl.textContent = `✨ เหลือ +${opt.leftoverVp.toLocaleString()} VP ในไอดี`;
+      vpLeftoverEl.textContent = `คงเหลือ +${opt.leftoverVp.toLocaleString()} VP ในไอดี`;
       vpLeftoverEl.style.display = "inline-flex";
     } else {
       vpLeftoverEl.style.display = "none";
@@ -1718,7 +1718,7 @@ window.openBundleModal = function(b) {
 
   const savingsTagEl = document.getElementById("modalBundleSavingsTag");
   if (savingsTagEl) {
-    savingsTagEl.textContent = savings > 0 ? `⚡ ประหยัดได้ ~${savings.toLocaleString()} ฿ จากเติมในเกม` : "⚡ เรทคุ้มกว่าเติมตรงในเกม";
+    savingsTagEl.textContent = savings > 0 ? `ประหยัดได้ ~${savings.toLocaleString()} ฿ จากเติมในเกม` : "เรทคุ้มกว่าเติมตรงในเกม";
   }
 
   const btnBundleCompare = document.getElementById("btnBundleInspectCompareStores");
@@ -1781,7 +1781,7 @@ window.openBundleModal = function(b) {
               <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
               <span>${itemPrice.toLocaleString()}</span>
               ${itemPrice > 0 ? `
-                <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${itemOpt.comboText}" data-vp="${itemPrice}">${itemOpt.shortTag} ⚡</span>
+                <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${itemOpt.comboText}" data-vp="${itemPrice}">${itemOpt.shortTag}</span>
               ` : ""}
             </div>
             <button class="btn btn-primary btn-sm btn-inspect">
@@ -1863,7 +1863,7 @@ function renderNightMarket(nm) {
             <span class="original-price">${offer.originalPrice.toLocaleString()}</span>
             <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
             <span style="color:var(--val-gold)">${offer.discountedPrice.toLocaleString()}</span>
-            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")} ⚡</span>
+            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")}</span>
           </div>
           <button class="btn btn-primary btn-sm btn-inspect"><span>ดูสกิน & สี</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
@@ -1943,17 +1943,17 @@ function openSkinModal(skin) {
     const savingsEl = document.getElementById("modalSkinSavingsTag");
 
     if (comboBadgeEl) comboBadgeEl.textContent = opt.comboText || `${opt.totalPrice.toLocaleString()} ฿`;
-    if (vpGainEl) vpGainEl.textContent = `💎 ได้รับ ${opt.totalVp.toLocaleString()} VP`;
+    if (vpGainEl) vpGainEl.textContent = `ได้รับ ${opt.totalVp.toLocaleString()} VP`;
     if (vpLeftoverEl) {
       if (opt.leftoverVp > 0) {
-        vpLeftoverEl.textContent = `✨ เหลือ +${opt.leftoverVp.toLocaleString()} VP ในไอดี`;
+        vpLeftoverEl.textContent = `คงเหลือ +${opt.leftoverVp.toLocaleString()} VP ในไอดี`;
         vpLeftoverEl.style.display = "inline-flex";
       } else {
         vpLeftoverEl.style.display = "none";
       }
     }
     if (savingsEl) {
-      savingsEl.textContent = savings > 0 ? `⚡ ประหยัดได้ ~${savings.toLocaleString()} ฿` : "⚡ เรทคุ้มกว่าเติมตรงในเกม";
+      savingsEl.textContent = savings > 0 ? `ประหยัดได้ ~${savings.toLocaleString()} ฿` : "เรทคุ้มกว่าเติมตรงในเกม";
     }
 
     compareBar.classList.remove("hidden");
@@ -3454,7 +3454,7 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
         <div class="best-agent-meta">
           <div class="best-agent-title-row">
             <h3 class="agent-title-large">${agentName}</h3>
-            <span class="agent-mastery-tag">👑 MVP AGENT</span>
+            <span class="agent-mastery-tag">MVP AGENT</span>
           </div>
           <div class="best-agent-subtitle">
             <span>ลงเล่นไป <strong>${bestAgent.games}</strong> แมตช์</span>
@@ -3541,10 +3541,10 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
         </div>
       </div>
       <div class="recom-info-details">
-        <div class="recom-badge-top">⚡ AI แนะนำตัวละครที่เข้ากับสไตล์ของคุณ:</div>
+        <div class="recom-badge-top">AI แนะนำตัวละครที่เข้ากับสไตล์ของคุณ:</div>
         <h3 class="recom-agent-name">${recomName}</h3>
         <p class="recom-strategy-advice">${recomAdvice}</p>
-        <div class="recom-action-hint">🔍 แตะเพื่อดูเทคนิค &amp; สกิลของ ${recomName} ↗️</div>
+        <div class="recom-action-hint">แตะเพื่อดูเทคนิค &amp; สกิลของ ${recomName}</div>
       </div>
     </div>
   `;
@@ -3763,7 +3763,7 @@ function updateReplayCanvas() {
         const avatar = k.victimAgent?.displayIcon || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png';
         marker.innerHTML = `
           <img src="${avatar}" class="marker-agent-avatar" alt="${k.victimName}">
-          ${isPast ? '<span class="marker-death-cross">✕</span>' : ''}
+          ${isPast ? '<span class="marker-death-cross"></span>' : ''}
         `;
         marker.title = `${k.victimName} (${isPast ? 'Eliminated' : 'Alive'})`;
         markersLayer.appendChild(marker);
@@ -4157,7 +4157,7 @@ const DEFAULT_VP_STORES = {
     trustLevel: "ร้านค้าจดทะเบียนทางการ OverTopup",
     type: "partner",
     accentColor: "#00F5D4",
-    logoIcon: "⚡",
+    logoIcon: "",
     webUrl: "https://www.overtopup.com/th/game-topup/valorant",
     paymentMethods: ["PromptPay QR", "โอนผ่านธนาคาร", "TrueMoney"],
     description: "เติมเกม Valorant สะดวก รวดเร็ว เพียงกรอก Riot ID ไทย รับ VP อัตโนมัติในเกม",
@@ -4200,7 +4200,7 @@ const DEFAULT_VP_STORES = {
     trustLevel: "Direct Riot In-Game Client",
     type: "official",
     accentColor: "#FF4655",
-    logoIcon: "🔴",
+    logoIcon: "",
     webUrl: "https://playvalorant.com",
     paymentMethods: ["PromptPay QR", "TrueMoney Wallet", "บัตรเครดิต/เดบิต", "AIS / Dtac / True"],
     description: "เติมตรงผ่านหน้าร้านค้าในเกม VALORANT เรทมาตรฐานสากลของ Riot Games",
@@ -4332,9 +4332,9 @@ function calculateAllStoresLocal(targetVp, currentWalletVp, deductWallet) {
     res.rank = index + 1;
     if (res.storeId === "overtopup") {
       res.isCheapest = true;
-      res.rankTitle = "🏆 Over Topup (ถูกที่สุด ประหยัดกว่าเติมในเกม)";
+      res.rankTitle = "Over Topup (ประหยัดที่สุด)";
     } else {
-      res.rankTitle = "🔴 Riot Games Official (ราคาปกติในเกม)";
+      res.rankTitle = "Riot Games Official (ราคาปกติในเกม)";
     }
   });
 
@@ -4410,7 +4410,7 @@ async function updateVpCalculator() {
   if (neededDisplay) {
     neededDisplay.textContent = `${neededVp.toLocaleString()} VP`;
     if (neededVp === 0 && targetVp > 0) {
-      neededDisplay.textContent = "0 VP (มีพอแล้ว! 🎉)";
+      neededDisplay.textContent = "0 VP (มีพอแล้ว)";
       neededDisplay.style.color = "var(--val-cyan)";
     } else {
       neededDisplay.style.color = "var(--val-gold)";
@@ -4446,13 +4446,13 @@ function renderVpComparisonResults(result) {
   const winnerSavingsTagEl = document.getElementById("winnerSavingsTag");
   const winnerComboNoteEl = document.getElementById("winnerComboNote");
 
-  if (winnerStoreNameEl) winnerStoreNameEl.textContent = "⚡ Over Topup (overtopup.com)";
+  if (winnerStoreNameEl) winnerStoreNameEl.textContent = "Over Topup (overtopup.com)";
   if (winnerStoreTagEl) winnerStoreTagEl.textContent = "เติมเข้า Riot ID ไทย อัตโนมัติ • PromptPay / โอนธนาคาร";
   if (winnerPriceThbEl) winnerPriceThbEl.textContent = `~${winner.totalPrice.toLocaleString()}`;
 
   if (winnerSavingsTagEl) {
     if (result.maxSavingsThb > 0) {
-      winnerSavingsTagEl.textContent = `⚡ ประหยัดได้ ${result.maxSavingsThb.toLocaleString()} ฿ (-${result.maxSavingsPct}% จากเติมในเกม)`;
+      winnerSavingsTagEl.textContent = `ประหยัดได้ ${result.maxSavingsThb.toLocaleString()} ฿ (-${result.maxSavingsPct}% จากเติมในเกม)`;
       winnerSavingsTagEl.style.display = "inline-block";
     } else {
       winnerSavingsTagEl.textContent = "ราคาใกล้เคียงกับในเกม";
@@ -4463,9 +4463,9 @@ function renderVpComparisonResults(result) {
   if (winnerComboNoteEl) {
     if (winner.combination && winner.combination.length > 0) {
       const comboTxt = winner.combination.map(c => `${c.count}x ${c.package.tag} (${c.subtotalPrice}฿)`).join(" + ");
-      winnerComboNoteEl.innerHTML = `<span>📦 แพ็กเกจที่แนะนำบน OverTopup: <strong>${comboTxt}</strong> (ได้รับรวม <strong>${winner.totalVp.toLocaleString()} VP</strong>, เหลือ <strong>${winner.leftoverVp.toLocaleString()} VP</strong> หลังซื้อ)</span>`;
+      winnerComboNoteEl.innerHTML = `<span>แพ็กเกจที่แนะนำบน OverTopup: <strong>${comboTxt}</strong> (ได้รับรวม <strong>${winner.totalVp.toLocaleString()} VP</strong>, เหลือ <strong>${winner.leftoverVp.toLocaleString()} VP</strong> หลังซื้อ)</span>`;
     } else {
-      winnerComboNoteEl.innerHTML = `<span>🎉 คุณมี VP ในกระเป๋าเพียงพอสำหรับซื้อสกินนี้แล้ว ไม่จำเป็นต้องเติมเงินเพิ่ม!</span>`;
+      winnerComboNoteEl.innerHTML = `<span>คุณมี VP ในกระเป๋าเพียงพอสำหรับซื้อสกินนี้แล้ว ไม่จำเป็นต้องเติมเงินเพิ่ม!</span>`;
     }
   }
 
@@ -4487,9 +4487,9 @@ function renderVpComparisonResults(result) {
     card.innerHTML = `
       <div class="store-card-header">
         <div class="store-header-left">
-          <span class="store-rank-badge ${isOver ? "rank-1" : "rank-other"}">${isOver ? "🏆 ถูกที่สุด (OverTopup)" : "🔴 เติมในเกม (ราคาปกติ)"}</span>
+          <span class="store-rank-badge ${isOver ? "rank-1" : "rank-other"}">${isOver ? "อันดับ 1 (OverTopup)" : "ราคาปกติ (ในเกม)"}</span>
           <div>
-            <div class="store-name-title">${st.logoIcon || "🛒"} ${st.name}</div>
+            <div class="store-name-title">${st.logoIcon || ""} ${st.name}</div>
             <span class="store-trust-pill">${st.badge} • ${st.trustLevel}</span>
           </div>
         </div>
@@ -4500,7 +4500,7 @@ function renderVpComparisonResults(result) {
       </div>
 
       <div class="store-combo-box">
-        <span class="store-combo-label">📦 แพ็กเกจที่ต้องกดซื้อ:</span>
+        <span class="store-combo-label">แพ็กเกจที่ต้องกดซื้อ:</span>
         <div class="store-combo-list">${comboSummary}</div>
       </div>
 
@@ -4517,7 +4517,7 @@ function renderVpComparisonResults(result) {
 
       ${isOver ? `
         <a href="https://www.overtopup.com/th/game-topup/valorant" target="_blank" rel="noopener noreferrer" class="store-action-btn" style="background:var(--val-cyan); color:#080B10; font-weight:800;">
-          <span>⚡ สั่งซื้อที่ OverTopup (overtopup.com) ↗️</span>
+          <span>สั่งซื้อที่ OverTopup (overtopup.com)</span>
         </a>
       ` : `
         <div style="font-size:11px; color:var(--val-gray); text-align:center; padding:4px 0;">เติมผ่านหน้าร้านค้าในเกม VALORANT (F10 / กดที่ไอคอน VP)</div>
@@ -4545,7 +4545,7 @@ async function loadAllStoresMatrix() {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td><strong>${pkg.vp.toLocaleString()} VP</strong></td>
-      <td class="matrix-cheapest-cell"><strong>${pkg.price.toLocaleString()} ฿ ⚡</strong></td>
+      <td class="matrix-cheapest-cell"><strong>${pkg.price.toLocaleString()} ฿ [BEST]</strong></td>
       <td style="color:var(--val-gray); font-weight:600;">${officialSol.totalPrice.toLocaleString()} ฿</td>
       <td style="color:var(--val-gold); font-weight:700;">+${savings.toLocaleString()} ฿</td>
       <td><span class="hero-savings-pill" style="font-size:10.5px;">-${savingsPct}%</span></td>
@@ -4629,7 +4629,7 @@ function initVpCompareModule() {
     playTacticalAudio("click");
     const wishlistUuids = Array.from(wishlistSet || []);
     if (wishlistUuids.length === 0) {
-      alert("คุณยังไม่มีสกินที่ติดดาว ⭐ Wishlist ไว้ในรายการ");
+      alert("คุณยังไม่มีสกินที่บันทึก Wishlist ไว้ในรายการ");
       return;
     }
 

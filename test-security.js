@@ -13,7 +13,7 @@ const vpPricing = require('./services/vpPricing');
 
 async function runSecurityTestSuite() {
   console.log('====================================================');
-  console.log('🛡️  VALORANT SHOP CHECKER - COMPREHENSIVE SECURITY TEST');
+  console.log('  VALORANT SHOP CHECKER - COMPREHENSIVE SECURITY TEST');
   console.log('====================================================\n');
 
   let passedTests = 0;
@@ -23,10 +23,10 @@ async function runSecurityTestSuite() {
     totalTests++;
     try {
       fn();
-      console.log(`✅ [PASS] ${name}`);
+      console.log(` [PASS] ${name}`);
       passedTests++;
     } catch (err) {
-      console.error(`❌ [FAIL] ${name}`);
+      console.error(` [FAIL] ${name}`);
       console.error(`   Reason: ${err.message}`);
     }
   }
@@ -35,10 +35,10 @@ async function runSecurityTestSuite() {
     totalTests++;
     try {
       await fn();
-      console.log(`✅ [PASS] ${name}`);
+      console.log(` [PASS] ${name}`);
       passedTests++;
     } catch (err) {
-      console.error(`❌ [FAIL] ${name}`);
+      console.error(` [FAIL] ${name}`);
       console.error(`   Reason: ${err.message}`);
     }
   }
@@ -236,8 +236,8 @@ async function runSecurityTestSuite() {
   await new Promise(resolve => server.close(resolve));
 
   console.log('\n====================================================');
-  console.log(`📊 TEST RESULTS: ${passedTests} / ${totalTests} TESTS PASSED (100%)`);
-  console.log('🛡️  SECURITY INTEGRITY: VERIFIED & FULLY HARDENED');
+  console.log(` TEST RESULTS: ${passedTests} / ${totalTests} TESTS PASSED (100%)`);
+  console.log('  SECURITY INTEGRITY: VERIFIED & FULLY HARDENED');
   console.log('====================================================\n');
   process.exit(0);
 }
