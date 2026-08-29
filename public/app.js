@@ -2332,9 +2332,10 @@ function switchAppMode(mode) {
       triggerSectionAnimation(inventorySection);
       loadPlayerInventory();
     } else {
-      loginSection?.classList.remove('hidden');
-      inventorySection?.classList.add('hidden');
-      triggerSectionAnimation(loginSection);
+      inventorySection?.classList.remove('hidden');
+      loginSection?.classList.add('hidden');
+      triggerSectionAnimation(inventorySection);
+      renderInventoryNotLoggedInPrompt();
     }
   } else if (mode === 'crosshairs') {
     loginSection?.classList.add('hidden');
@@ -4837,6 +4838,37 @@ setInterval(observeScrollElements, 800);
 let playerInventoryData = null;
 let filteredInvSkins = [];
 
+function renderInventoryNotLoggedInPrompt() {
+  const grid = document.getElementById('invSkinsGrid');
+  const vpEl = document.getElementById('invTotalVp');
+  const thbOverEl = document.getElementById('invTotalThbOver');
+  const thbRiotEl = document.getElementById('invTotalThbRiot');
+  const countEl = document.getElementById('invTotalSkinsCount');
+  const tierBreakdownEl = document.getElementById('invTierBreakdown');
+
+  if (vpEl) vpEl.innerHTML = `0 <span class="unit-vp">VP</span>`;
+  if (thbOverEl) thbOverEl.textContent = `~0 ฿`;
+  if (thbRiotEl) thbRiotEl.textContent = `~0 ฿`;
+  if (countEl) countEl.innerHTML = `0 <span class="unit-vp">ชิ้น</span>`;
+  if (tierBreakdownEl) tierBreakdownEl.innerHTML = '';
+
+  if (grid) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 40px 20px; text-align: center; background: rgba(0,0,0,0.4); border: 1px solid rgba(245,211,108,0.3); border-radius: 12px;">
+        <div style="font-family:var(--font-heading); font-size:22px; font-weight:800; color:var(--val-gold); margin-bottom:8px;">
+          กรุณาเข้าสู่ระบบเพื่อดึงคลังสกินของไอดีคุณ
+        </div>
+        <p style="color:#C0D0E0; font-size:13px; max-width:480px; margin:0 auto 18px auto; line-height:1.6;">
+          ระบบจะเชื่อมต่อไปยัง Riot Games เพื่อสแกนสกินทั้งหมดที่คุณเป็นเจ้าของ คำนวณมูลค่าไอดีรวมเป็นเงินบาท และระบุสกินที่คุณกำลังสวมใส่อยู่
+        </p>
+        <button type="button" class="btn btn-primary" onclick="switchAppMode('store')" style="padding:10px 24px; font-size:14px; font-weight:700;">
+          ไปหน้าเข้าสู่ระบบ (Google / Social)
+        </button>
+      </div>
+    `;
+  }
+}
+
 async function loadPlayerInventory(forceRefresh = false) {
   const grid = document.getElementById('invSkinsGrid');
   if (!grid) return;
@@ -5380,3 +5412,6 @@ document.getElementById('customCrosshairInput')?.addEventListener('input', (e) =
     drawCrosshairOnCanvas(canvas, e.target.value.trim());
   }
 });
+
+// Auto preload crosshairs on app start
+setTimeout(loadProCrosshairs, 200);

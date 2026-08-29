@@ -449,16 +449,53 @@ class ValorantApiService {
   // Fetch Player Inventory & Owned Skins + Total Account Value
   async getPlayerInventory(puuid, region, accessToken, entitlementsToken) {
     try {
-      // 1. Fetch player weapon skin entitlements
-      const entResult = await this.fetchWithShardFallback(
-        puuid,
-        region,
-        '/store/v1/entitlements/{puuid}/e7c63390-eda7-46e0-bb7a-a6abdacd2433',
-        'GET',
-        null,
-        accessToken,
-        entitlementsToken
-      );
+      // 1. Fetch player weapon skin entitlements (try specific type first, fallback to all)
+      let rawEntitlements = [];
+      let activeShard = region || 'ap';
+
+      try {
+        const entResult = await this.fetchWithShardFallback(
+          puuid,
+          region,
+          '/store/v1/entitlements/{puuid}/e7c63390-eda7-46e0-bb7a-a6abdacd2433',
+          'GET',
+          null,
+          accessToken,
+          entitlementsToken
+        );
+        activeShard = entResult.activeShard || activeShard;
+        
+        if (entResult.data?.EntitlementsByTypes) {
+          for (const t of entResult.data.EntitlementsByTypes) {
+            if (Array.isArray(t.Entitlements)) rawEntitlements.push(...t.Entitlements);
+          }
+        } else if (Array.isArray(entResult.data?.Entitlements)) {
+          rawEntitlements.push(...entResult.data.Entitlements);
+        } else if (Array.isArray(entResult.data)) {
+          rawEntitlements.push(...entResult.data);
+        }
+      } catch (errEntSpecific) {
+        console.log('[ValorantApi] Specific entitlement endpoint error, trying global endpoint...');
+        try {
+          const globalEntResult = await this.fetchWithShardFallback(
+            puuid,
+            region,
+            '/store/v1/entitlements/{puuid}',
+            'GET',
+            null,
+            accessToken,
+            entitlementsToken
+          );
+          activeShard = globalEntResult.activeShard || activeShard;
+          if (globalEntResult.data?.EntitlementsByTypes) {
+            for (const t of globalEntResult.data.EntitlementsByTypes) {
+              if (Array.isArray(t.Entitlements)) rawEntitlements.push(...t.Entitlements);
+            }
+          } else if (Array.isArray(globalEntResult.data?.Entitlements)) {
+            rawEntitlements.push(...globalEntResult.data.Entitlements);
+          }
+        } catch (e2) {}
+      }
 
       // 2. Fetch equipped player loadout
       let loadoutData = null;
@@ -482,22 +519,27 @@ class ValorantApiService {
       const equippedChromas = new Map();
       if (loadoutData && loadoutData.Guns) {
         for (const g of loadoutData.Guns) {
-          if (g.SkinID) equippedMap.set(g.SkinID.toLowerCase(), true);
-          if (g.SkinLevelID) equippedMap.set(g.SkinLevelID.toLowerCase(), true);
-          if (g.ChromaID) equippedChromas.set(g.SkinID?.toLowerCase(), g.ChromaID.toLowerCase());
+          if (g.SkinID) {
+            equippedMap.set(g.SkinID.toLowerCase(), true);
+            rawEntitlements.push({ ItemID: g.SkinID });
+          }
+          if (g.SkinLevelID) {
+            equippedMap.set(g.SkinLevelID.toLowerCase(), true);
+            rawEntitlements.push({ ItemID: g.SkinLevelID });
+          }
+          if (g.ChromaID) {
+            equippedChromas.set(g.SkinID?.toLowerCase(), g.ChromaID.toLowerCase());
+            rawEntitlements.push({ ItemID: g.ChromaID });
+          }
         }
       }
 
       // 3. Process Entitlements
-      const rawEntitlements = entResult.data?.EntitlementsByTypes?.[0]?.Entitlements || 
-                             entResult.data?.Entitlements || 
-                             [];
-
       const ownedSkinMap = new Map();
       const ownedLevelsSet = new Set();
 
       for (const ent of rawEntitlements) {
-        const itemId = (ent.ItemID || ent.Item?.ID || ent.id || '').toLowerCase();
+        const itemId = (ent.ItemID || ent.Item?.ID || ent.id || ent.ItemId || '').toLowerCase();
         if (!itemId) continue;
 
         ownedLevelsSet.add(itemId);
@@ -514,7 +556,7 @@ class ValorantApiService {
             // Determine price estimation
             let price = skin.price || 0;
             const isMelee = (skin.weaponType || '').toLowerCase().includes('melee') || (skin.name || '').toLowerCase().includes('knife') || (skin.name || '').toLowerCase().includes('blade') || (skin.name || '').toLowerCase().includes('dagger') || (skin.name || '').toLowerCase().includes('karambit') || (skin.name || '').toLowerCase().includes('sword') || (skin.name || '').toLowerCase().includes('scythe') || (skin.name || '').toLowerCase().includes('axe');
-            const tierName = (skin.contentTier?.name || '').toLowerCase();
+            const tierName = (skin.contentTier?.name || skin.tier?.name || '').toLowerCase();
 
             if (!price) {
               if (tierName.includes('ultra')) {
@@ -528,7 +570,7 @@ class ValorantApiService {
               } else if (tierName.includes('select')) {
                 price = isMelee ? 1750 : 875;
               } else {
-                price = 0; // Standard default or reward
+                price = isMelee ? 2550 : 1275;
               }
             }
 
@@ -570,7 +612,7 @@ class ValorantApiService {
       const allOwnedSkins = Array.from(ownedSkinMap.values());
       const premiumOwnedSkins = allOwnedSkins.filter(s => !s.isStandardDefault);
 
-      // Sort by VP Price descending, then Name
+      // Sort by Equipped first, then VP Price descending, then Name
       premiumOwnedSkins.sort((a, b) => {
         if (b.isEquipped !== a.isEquipped) return b.isEquipped ? 1 : -1;
         if (b.estimatedVpPrice !== a.estimatedVpPrice) return b.estimatedVpPrice - a.estimatedVpPrice;
@@ -599,7 +641,7 @@ class ValorantApiService {
         weaponBreakdown[wp].count++;
         weaponBreakdown[wp].totalVp += (s.estimatedVpPrice || 0);
 
-        const tName = (s.contentTier?.name || '').toLowerCase();
+        const tName = (s.contentTier?.name || s.tier?.name || '').toLowerCase();
         if (tName.includes('ultra')) tierBreakdown.ultra++;
         else if (tName.includes('exclusive')) tierBreakdown.exclusive++;
         else if (tName.includes('premium')) tierBreakdown.premium++;
@@ -620,7 +662,7 @@ class ValorantApiService {
         tierBreakdown,
         skins: premiumOwnedSkins,
         allSkinsCount: allOwnedSkins.length,
-        activeShard: entResult.activeShard || region
+        activeShard
       };
     } catch (e) {
       console.error('[ValorantApi] Inventory lookup failed:', e.message);
