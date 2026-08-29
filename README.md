@@ -8,7 +8,7 @@
 
 เว็บตรวจเช็กข้อมูลไอดี **VALORANT** ออนไลน์ ดูได้ทุกที่ทุกเวลาบนมือถือและคอมพิวเตอร์:
 - 🛒 **ดูร้านค้า 4 สกินประจำวัน (Daily Offers)** และเวลาคงเหลือก่อนรีเซ็ตร้านค้า
-- 🌙 **ดูตลาดกาลกิณี (Night Market)** พร้อมคำนวณส่วนลดและราคาพิเศษ
+- 🌙 **ดูตลาดไนท์มาร์เก็ต (Night Market)** พร้อมคำนวณส่วนลดและราคาพิเศษ
 - 🎁 **ดูชุดบันเดิลปัจจุบัน (Featured Bundles)** พร้อมราคาหักลดของที่มีแล้ว
 - 🎨 **ดูสกินและสลับสี Chromas ทุกแบบ** พร้อมเปิดดูคลิปวิดีโอเสียงยิง/เอฟเฟกต์ Finisher ปิดฉาก
 - 🤖 **ดูโมเดลตัวละคร 3D & สกิล** พร้อมระบบ AI วิเคราะห์ประวัติการเล่นและสถิติแรงก์
@@ -32,24 +32,24 @@
 ---
 
 ### 🎁 3. หน้าชุดรวมบันเดิลเด่น (Featured Bundles)
-<div align="center">
-  <img src="https://media.valorant-api.com/bundles/bae9a7b5-4009-67f8-0794-96b3646147fb/displayicon.png" width="560" alt="Mystbloom Bundle"/><br>
-  <b>Mystbloom Collection (8,700 VP)</b>
-</div>
+| <img src="https://media.valorant-api.com/bundles/bae9a7b5-4009-67f8-0794-96b3646147fb/displayicon2.png" width="360" alt="Mystbloom Bundle"/><br>**Mystbloom Collection**<br>`8,700 VP` | <img src="https://media.valorant-api.com/bundles/69d9b2be-4439-0785-780b-ba8951053683/displayicon2.png" width="360" alt="Kuronami Bundle"/><br>**Kuronami Collection**<br>`9,500 VP` |
+| :---: | :---: |
 
 ---
 
-### 🎨 4. หน้าตรวจสกิน, สลับสี (Chromas) & วิดีโอ Finisher
-| สีเริ่มต้น (Default) | สีม่วง / น้ำเงิน (Variant) |
+### 🎨 4. หน้าตรวจสกินและสลับสี Chromas (Kuronami Vandal)
+| สีเริ่มต้น (Default) | สีม่วง (Variant 1 Purple) |
 | :---: | :---: |
-| <img src="https://media.valorant-api.com/weaponskinchromas/4f2a71bf-4b95-88ff-c962-d29068beae45/fullrender.png" width="280" alt="Chroma 1"/><br><b>Level 4 Finisher + Sound VFX</b> | <img src="https://media.valorant-api.com/weaponskinchromas/86a7d7ba-4b21-4f9e-a864-42b74ba2aa7d/fullrender.png" width="280" alt="Chroma 2"/><br><b>Custom Reload & Animation</b> |
+| <img src="https://media.valorant-api.com/weaponskinchromas/3637a0be-4785-8841-9893-1198325185f2/fullrender.png" width="320" alt="Kuronami Default"/><br>**Level 4 Finisher + Custom VFX** | <img src="https://media.valorant-api.com/weaponskinchromas/9dd03547-4cd7-3b80-3d10-beaebd36d6e7/fullrender.png" width="320" alt="Kuronami Purple"/><br>**Purple Variant + Custom Reload** |
+| **สีขาว (Variant 2 White)** | **สีดำ (Variant 3 Black)** |
+| <img src="https://media.valorant-api.com/weaponskinchromas/b0113d7e-4417-0264-b5f5-949a8379bb21/fullrender.png" width="320" alt="Kuronami White"/><br>**White Variant + Weather Effect** | <img src="https://media.valorant-api.com/weaponskinchromas/b899afbc-47fc-78bf-d30b-20863c1c89f0/fullrender.png" width="320" alt="Kuronami Black"/><br>**Black Variant + Rain Animation** |
 
 ---
 
 ### 🤖 5. หน้าโมเดลตัวละคร 3D, สกิล และประวัติแรงก์
 | โมเดลตัวละคร 3D & สกิล | สถิติการเล่น & แรงก์ (Career) |
 | :---: | :---: |
-| <img src="https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/fullportrait.png" width="220" alt="Fade"/><br><b>สำรวจตัวละครครบทุกตัว 29+ ตัว</b> | <img src="https://media.valorant-api.com/competitivetiers/03621f52-342b-cf4e-4f86-9350a49c6d04/24/largeicon.png" width="130" alt="Immortal"/><br><b>เช็ก KDA, Win Rate, Headshot %</b> |
+| <img src="https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/fullportrait.png" width="220" alt="Fade"/><br>**สำรวจตัวละครครบทุกตัว 29+ ตัว** | <img src="https://media.valorant-api.com/competitivetiers/03621f52-342b-cf4e-4f86-9350a49c6d04/24/largeicon.png" width="130" alt="Immortal"/><br>**เช็ก KDA, Win Rate, Headshot %** |
 
 ---
 
