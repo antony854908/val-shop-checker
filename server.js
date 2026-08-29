@@ -9,6 +9,7 @@ const skinCatalog = require('./services/skinCatalog');
 const riotAuth = require('./services/riotAuth');
 const valorantApi = require('./services/valorantApi');
 const vpPricing = require('./services/vpPricing');
+const crosshairs = require('./services/crosshairs');
 const {
   authRateLimitMiddleware,
   apiRateLimitMiddleware,
@@ -433,6 +434,46 @@ app.get('/api/shop', async (req, res) => {
     }
     res.status(500).json({ ok: false, error: err.message || 'ไม่สามารถโหลดร้านค้าได้' });
   }
+});
+
+// Endpoint: Get Player Inventory & Account Valuation
+app.get('/api/inventory', async (req, res) => {
+  const auth = req.valSession.auth;
+  if (!auth) {
+    return res.status(401).json({ ok: false, error: 'กรุณาเข้าสู่ระบบก่อนดูคลังสกินและมูลค่าไอดี' });
+  }
+
+  try {
+    const inventory = await valorantApi.getPlayerInventory(
+      auth.puuid,
+      auth.region,
+      auth.accessToken,
+      auth.entitlementsToken
+    );
+
+    res.json({
+      ok: true,
+      inventory
+    });
+  } catch (err) {
+    console.error('[Inventory Error]:', err.message);
+    if (err.code === 'TOKEN_EXPIRED') {
+      sessionStore.updateSession(req.valSession.id, { auth: null });
+      return res.status(401).json({ ok: false, error: 'Access Token หมดอายุ กรุณาเข้าสู่ระบบใหม่' });
+    }
+    res.status(500).json({ ok: false, error: err.message || 'ไม่สามารถโหลดคลังสกินได้' });
+  }
+});
+
+// Endpoint: Get Pro Player Crosshairs Database
+app.get('/api/crosshairs', (req, res) => {
+  const { category, search } = req.query;
+  const list = crosshairs.getAllCrosshairs(category, search);
+  res.json({
+    ok: true,
+    crosshairs: list,
+    total: list.length
+  });
 });
 
 // Endpoint: Get Player MMR & Competitive Rank

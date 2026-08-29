@@ -63,6 +63,18 @@
           </span>
           <span class="tab-label">ร้านค้าไอดี (Store)</span>
         </button>
+        <button id="btnTabInventory" class="mode-tab-btn">
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </span>
+          <span class="tab-label">คลังของฉัน &amp; มูลค่าไอดี (Inventory)</span>
+        </button>
+        <button id="btnTabCrosshairs" class="mode-tab-btn">
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="2"/></svg>
+          </span>
+          <span class="tab-label">เป้าเล็งโปร (Pro Crosshairs)</span>
+        </button>
         <button id="btnTabCareer" class="mode-tab-btn">
           <span class="tab-icon">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
@@ -698,6 +710,148 @@
           <button id="btnLoadMoreSkins" class="btn btn-secondary btn-glow">
             โหลดสกินเพิ่มเติม...
           </button>
+        </div>
+      </section>
+
+      <!-- ================= MY INVENTORY & ACCOUNT VALUATION ================= -->
+      <section id="inventorySection" class="inventory-dashboard-view hidden">
+        
+        <!-- Account Valuation Banner -->
+        <div class="inventory-valuation-banner">
+          <div class="valuation-top-row">
+            <div class="valuation-brand">
+              <div class="valuation-badge-tag">ACCOUNT VALUATION &amp; INVENTORY</div>
+              <h2 class="valuation-heading">คลังสกินของฉัน &amp; มูลค่าไอดีรวม</h2>
+              <p class="valuation-sub">ประเมินมูลค่าสกินอาวุธทั้งหมดที่ครอบครองในบัญชีของคุณ</p>
+            </div>
+            <button id="btnRefreshInventory" class="btn btn-secondary btn-sm" title="รีเฟรชคลังสกิน">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+              <span>รีเฟรชคลัง</span>
+            </button>
+          </div>
+
+          <!-- Valuation Highlights Cards -->
+          <div class="valuation-stats-grid">
+            <div class="val-stat-card card-glow-gold">
+              <div class="stat-icon-wrap">
+                <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" width="28" height="28">
+              </div>
+              <div class="stat-content">
+                <div class="stat-label">มูลค่าสกินรวมในไอดี</div>
+                <div class="stat-value" id="invTotalVp">0 <span class="unit-vp">VP</span></div>
+                <div class="stat-sub">คำนวณจากราคามาตรฐานของสกินที่ครอบครอง</div>
+              </div>
+            </div>
+
+            <div class="val-stat-card card-glow-cyan">
+              <div class="stat-icon-wrap">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
+              <div class="stat-content">
+                <div class="stat-label">เทียบมูลค่าเงินจริง (OverTopup)</div>
+                <div class="stat-value text-cyan" id="invTotalThbOver">~0 ฿</div>
+                <div class="stat-sub">เทียบเรทเติมตรงในเกม: <span id="invTotalThbRiot" class="text-gold">~0 ฿</span></div>
+              </div>
+            </div>
+
+            <div class="val-stat-card card-glow-red">
+              <div class="stat-icon-wrap">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              </div>
+              <div class="stat-content">
+                <div class="stat-label">จำนวนสกินที่ครอบครอง</div>
+                <div class="stat-value text-red" id="invTotalSkinsCount">0 <span class="unit-vp">ชิ้น</span></div>
+                <div class="stat-sub">รวมสกินปืน &amp; มีด (ไม่รวมสกินเริ่มต้น)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tier Breakdown Bar -->
+          <div class="inv-tier-breakdown-bar" id="invTierBreakdown">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Inventory Filter & Search Bar -->
+        <div class="catalog-filter-bar inv-filter-bar">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" class="search-icon-svg">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="invSearchInput" placeholder="ค้นหาสกินในคลังของคุณ (เช่น Vandal, Prime, Kuronami...)" class="search-input-field">
+            <button id="btnClearInvSearch" class="btn-search-clear hidden">&times;</button>
+          </div>
+
+          <div class="dropdown-filter-group">
+            <select id="filterInvWeapon" class="modern-select">
+              <option value="all">อาวุธทั้งหมด (All Weapons)</option>
+            </select>
+
+            <select id="filterInvSort" class="modern-select">
+              <option value="equipped">สกินที่กำลังใช้งานก่อน (Equipped First)</option>
+              <option value="price_desc">ราคา VP สูงสุด (Highest Value)</option>
+              <option value="price_asc">ราคา VP ต่ำสุด</option>
+              <option value="name_asc">ชื่อ A-Z</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Inventory Grid -->
+        <div id="invSkinsGrid" class="skins-card-grid">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ================= PRO PLAYER CROSSHAIRS ================= -->
+      <section id="crosshairsSection" class="crosshairs-dashboard-view hidden">
+        
+        <div class="crosshairs-hero-banner">
+          <div class="crosshair-hero-left">
+            <div class="badge-tag-official">PRO PLAYER DATABASE &amp; GENERATOR</div>
+            <h2 class="section-title">คลังเป้าเล็งโปรเพลเยอร์ระดับโลก</h2>
+            <p class="section-desc">รวมโค้ดเป้าเล็งของนักแข่งระดับท็อป VCT, แชมป์โลก Champions, และโปรเพลเยอร์ไทย พร้อมพรีวิวสดและปุ่มคัดลอกโค้ดไปวางในเกมทันที</p>
+          </div>
+
+          <!-- Quick Interactive Tester Box -->
+          <div class="crosshair-quick-tester">
+            <div class="tester-title">ทดสอบโค้ดเป้าเล็งของคุณเอง (Custom Code Tester)</div>
+            <div class="tester-input-row">
+              <input type="text" id="customCrosshairInput" placeholder="วางโค้ดเป้าเล็ง VALORANT ที่นี่ (เช่น 0;s;1;P;c;5;...)" class="modern-input custom-ch-input">
+              <button id="btnPreviewCustomCh" class="btn btn-primary btn-sm">พรีวิว</button>
+            </div>
+            <div class="tester-canvas-preview-wrap">
+              <canvas id="customChCanvas" width="220" height="120" class="ch-preview-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Crosshairs Filter Bar -->
+        <div class="crosshair-category-pills">
+          <button class="ch-cat-pill active" data-cat="all">ทั้งหมด (All Pros)</button>
+          <button class="ch-cat-pill" data-cat="champions">แชมป์โลก (Champions MVPs)</button>
+          <button class="ch-cat-pill" data-cat="thai-pros">โปรไทย (Thai Pros)</button>
+          <button class="ch-cat-pill" data-cat="sentinels">Sentinels (SEN)</button>
+          <button class="ch-cat-pill" data-cat="paper-rex">Paper Rex (PRX)</button>
+          <button class="ch-cat-pill" data-cat="fnatic">Fnatic (FNC)</button>
+          <button class="ch-cat-pill" data-cat="americas">Americas</button>
+          <button class="ch-cat-pill" data-cat="emea">EMEA</button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="crosshair-search-bar">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" class="search-icon-svg">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="crosshairSearchInput" placeholder="ค้นหาโปรเพลเยอร์, ทีม, หรือรูปแบบเป้า (เช่น TenZ, Aspas, Jinggg, Dot...)" class="search-input-field">
+          </div>
+        </div>
+
+        <!-- Crosshair Cards Grid -->
+        <div id="crosshairsGrid" class="crosshairs-card-grid">
+          <!-- Populated by JS -->
         </div>
       </section>
 
@@ -1454,6 +1608,14 @@
       <button type="button" class="mobile-nav-item active" data-tab="store" id="mobTabStore">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
         <span>ร้านค้า</span>
+      </button>
+      <button type="button" class="mobile-nav-item" data-tab="inventory" id="mobTabInventory">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <span>คลังของฉัน</span>
+      </button>
+      <button type="button" class="mobile-nav-item" data-tab="crosshairs" id="mobTabCrosshairs">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+        <span>เป้าเล็ง</span>
       </button>
       <button type="button" class="mobile-nav-item" data-tab="career" id="mobTabCareer">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>

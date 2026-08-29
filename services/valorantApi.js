@@ -446,6 +446,199 @@ class ValorantApiService {
     };
   }
 
+  // Fetch Player Inventory & Owned Skins + Total Account Value
+  async getPlayerInventory(puuid, region, accessToken, entitlementsToken) {
+    try {
+      // 1. Fetch player weapon skin entitlements
+      const entResult = await this.fetchWithShardFallback(
+        puuid,
+        region,
+        '/store/v1/entitlements/{puuid}/e7c63390-eda7-46e0-bb7a-a6abdacd2433',
+        'GET',
+        null,
+        accessToken,
+        entitlementsToken
+      );
+
+      // 2. Fetch equipped player loadout
+      let loadoutData = null;
+      try {
+        const loadoutRes = await this.fetchWithShardFallback(
+          puuid,
+          region,
+          '/personalization/v2/players/{puuid}/playerloadout',
+          'GET',
+          null,
+          accessToken,
+          entitlementsToken
+        );
+        loadoutData = loadoutRes.data;
+      } catch (e) {
+        // Loadout is optional fallback
+      }
+
+      // Map equipped skins by weapon UUID or skin UUID
+      const equippedMap = new Map();
+      const equippedChromas = new Map();
+      if (loadoutData && loadoutData.Guns) {
+        for (const g of loadoutData.Guns) {
+          if (g.SkinID) equippedMap.set(g.SkinID.toLowerCase(), true);
+          if (g.SkinLevelID) equippedMap.set(g.SkinLevelID.toLowerCase(), true);
+          if (g.ChromaID) equippedChromas.set(g.SkinID?.toLowerCase(), g.ChromaID.toLowerCase());
+        }
+      }
+
+      // 3. Process Entitlements
+      const rawEntitlements = entResult.data?.EntitlementsByTypes?.[0]?.Entitlements || 
+                             entResult.data?.Entitlements || 
+                             [];
+
+      const ownedSkinMap = new Map();
+      const ownedLevelsSet = new Set();
+
+      for (const ent of rawEntitlements) {
+        const itemId = (ent.ItemID || ent.Item?.ID || ent.id || '').toLowerCase();
+        if (!itemId) continue;
+
+        ownedLevelsSet.add(itemId);
+
+        // Resolve parent skin from level or chroma or skin UUID
+        const skin = skinCatalog.levels.get(itemId) || 
+                     skinCatalog.chromas.get(itemId) || 
+                     skinCatalog.skins.get(itemId) || 
+                     skinCatalog.getSkinById(itemId);
+
+        if (skin && skin.uuid) {
+          const skinId = skin.uuid.toLowerCase();
+          if (!ownedSkinMap.has(skinId)) {
+            // Determine price estimation
+            let price = skin.price || 0;
+            const isMelee = (skin.weaponType || '').toLowerCase().includes('melee') || (skin.name || '').toLowerCase().includes('knife') || (skin.name || '').toLowerCase().includes('blade') || (skin.name || '').toLowerCase().includes('dagger') || (skin.name || '').toLowerCase().includes('karambit') || (skin.name || '').toLowerCase().includes('sword') || (skin.name || '').toLowerCase().includes('scythe') || (skin.name || '').toLowerCase().includes('axe');
+            const tierName = (skin.contentTier?.name || '').toLowerCase();
+
+            if (!price) {
+              if (tierName.includes('ultra')) {
+                price = isMelee ? 4950 : 2475;
+              } else if (tierName.includes('exclusive')) {
+                price = isMelee ? 4350 : 2175;
+              } else if (tierName.includes('premium')) {
+                price = isMelee ? 3550 : 1775;
+              } else if (tierName.includes('deluxe')) {
+                price = isMelee ? 2550 : 1275;
+              } else if (tierName.includes('select')) {
+                price = isMelee ? 1750 : 875;
+              } else {
+                price = 0; // Standard default or reward
+              }
+            }
+
+            // Exclude default starter weapons from account valuation
+            const isStandardDefault = (skin.name || '').toLowerCase().startsWith('standard ') || (skin.name || '').toLowerCase() === 'melee';
+            if (isStandardDefault) {
+              price = 0;
+            }
+
+            const isEquipped = equippedMap.has(skinId) || 
+                              (skin.levels && skin.levels.some(l => equippedMap.has(l.uuid.toLowerCase())));
+
+            const equippedChromaId = equippedChromas.get(skinId);
+            let activeDisplayIcon = skin.displayIcon;
+            if (equippedChromaId && skin.chromas) {
+              const activeChr = skin.chromas.find(c => c.uuid.toLowerCase() === equippedChromaId);
+              if (activeChr && (activeChr.fullRender || activeChr.displayIcon)) {
+                activeDisplayIcon = activeChr.fullRender || activeChr.displayIcon;
+              }
+            }
+
+            ownedSkinMap.set(skinId, {
+              ...skin,
+              displayIcon: activeDisplayIcon,
+              estimatedVpPrice: price,
+              isStandardDefault,
+              isEquipped,
+              equippedChromaId,
+              ownedLevelsCount: 1
+            });
+          } else {
+            const existing = ownedSkinMap.get(skinId);
+            existing.ownedLevelsCount = (existing.ownedLevelsCount || 1) + 1;
+          }
+        }
+      }
+
+      // Convert to array and filter out standard starter weapons for stats calculation
+      const allOwnedSkins = Array.from(ownedSkinMap.values());
+      const premiumOwnedSkins = allOwnedSkins.filter(s => !s.isStandardDefault);
+
+      // Sort by VP Price descending, then Name
+      premiumOwnedSkins.sort((a, b) => {
+        if (b.isEquipped !== a.isEquipped) return b.isEquipped ? 1 : -1;
+        if (b.estimatedVpPrice !== a.estimatedVpPrice) return b.estimatedVpPrice - a.estimatedVpPrice;
+        return (a.name || '').localeCompare(b.name || '');
+      });
+
+      // Calculate total VP and THB valuation
+      let totalVpValue = 0;
+      const weaponBreakdown = {};
+      const tierBreakdown = {
+        ultra: 0,
+        exclusive: 0,
+        premium: 0,
+        deluxe: 0,
+        select: 0,
+        other: 0
+      };
+
+      for (const s of premiumOwnedSkins) {
+        totalVpValue += (s.estimatedVpPrice || 0);
+
+        const wp = s.weaponType || 'Other';
+        if (!weaponBreakdown[wp]) {
+          weaponBreakdown[wp] = { count: 0, totalVp: 0 };
+        }
+        weaponBreakdown[wp].count++;
+        weaponBreakdown[wp].totalVp += (s.estimatedVpPrice || 0);
+
+        const tName = (s.contentTier?.name || '').toLowerCase();
+        if (tName.includes('ultra')) tierBreakdown.ultra++;
+        else if (tName.includes('exclusive')) tierBreakdown.exclusive++;
+        else if (tName.includes('premium')) tierBreakdown.premium++;
+        else if (tName.includes('deluxe')) tierBreakdown.deluxe++;
+        else if (tName.includes('select')) tierBreakdown.select++;
+        else tierBreakdown.other++;
+      }
+
+      const estimatedThbOverTopup = Math.round(totalVpValue * 0.238);
+      const estimatedThbRiotOfficial = Math.round(totalVpValue * 0.293);
+
+      return {
+        totalSkinsCount: premiumOwnedSkins.length,
+        totalVpValue,
+        estimatedThbOverTopup,
+        estimatedThbRiotOfficial,
+        weaponBreakdown,
+        tierBreakdown,
+        skins: premiumOwnedSkins,
+        allSkinsCount: allOwnedSkins.length,
+        activeShard: entResult.activeShard || region
+      };
+    } catch (e) {
+      console.error('[ValorantApi] Inventory lookup failed:', e.message);
+      if (e.code === 'TOKEN_EXPIRED') throw e;
+      return {
+        totalSkinsCount: 0,
+        totalVpValue: 0,
+        estimatedThbOverTopup: 0,
+        estimatedThbRiotOfficial: 0,
+        weaponBreakdown: {},
+        tierBreakdown: {},
+        skins: [],
+        allSkinsCount: 0,
+        activeShard: region || 'ap'
+      };
+    }
+  }
+
   // Fetch Player MMR & Rank Stats
   async getMmr(puuid, region, accessToken, entitlementsToken) {
     try {

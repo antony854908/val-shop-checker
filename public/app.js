@@ -2244,10 +2244,15 @@ btnLogout?.addEventListener('click', async () => {
 
 // Navigation Mode Switching (Unified Desktop & Mobile Bottom Nav)
 const btnTabStore = document.getElementById('btnTabStore');
+const btnTabInventory = document.getElementById('btnTabInventory');
+const btnTabCrosshairs = document.getElementById('btnTabCrosshairs');
 const btnTabCareer = document.getElementById('btnTabCareer');
 const btnTabAgents = document.getElementById('btnTabAgents');
 const btnTabCatalog = document.getElementById('btnTabCatalog');
 const btnMobOpenVp = document.getElementById('btnMobOpenVp');
+
+const inventorySection = document.getElementById('inventorySection');
+const crosshairsSection = document.getElementById('crosshairsSection');
 
 function triggerSectionAnimation(el) {
   if (!el) return;
@@ -2262,6 +2267,8 @@ function switchAppMode(mode) {
 
   // Update top desktop tabs
   btnTabStore?.classList.toggle('active', mode === 'store');
+  btnTabInventory?.classList.toggle('active', mode === 'inventory');
+  btnTabCrosshairs?.classList.toggle('active', mode === 'crosshairs');
   btnTabCareer?.classList.toggle('active', mode === 'career');
   btnTabAgents?.classList.toggle('active', mode === 'agents');
   btnTabCatalog?.classList.toggle('active', mode === 'catalog');
@@ -2275,6 +2282,8 @@ function switchAppMode(mode) {
   careerSection?.classList.add('hidden');
   agentsSection?.classList.add('hidden');
   storeSection?.classList.add('hidden');
+  inventorySection?.classList.add('hidden');
+  crosshairsSection?.classList.add('hidden');
 
   if (mode === 'store') {
     if (currentUser) {
@@ -2286,6 +2295,27 @@ function switchAppMode(mode) {
       storeSection?.classList.add('hidden');
       triggerSectionAnimation(loginSection);
     }
+  } else if (mode === 'inventory') {
+    if (currentUser) {
+      inventorySection?.classList.remove('hidden');
+      loginSection?.classList.add('hidden');
+      triggerSectionAnimation(inventorySection);
+      loadPlayerInventory();
+    } else {
+      loginSection?.classList.remove('hidden');
+      inventorySection?.classList.add('hidden');
+      triggerSectionAnimation(loginSection);
+    }
+  } else if (mode === 'crosshairs') {
+    loginSection?.classList.add('hidden');
+    storeSection?.classList.add('hidden');
+    careerSection?.classList.add('hidden');
+    agentsSection?.classList.add('hidden');
+    catalogSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.remove('hidden');
+    triggerSectionAnimation(crosshairsSection);
+    loadProCrosshairs();
   } else if (mode === 'career') {
     if (currentUser) {
       careerSection?.classList.remove('hidden');
@@ -2302,6 +2332,8 @@ function switchAppMode(mode) {
     storeSection?.classList.add('hidden');
     careerSection?.classList.add('hidden');
     catalogSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
     agentsSection?.classList.remove('hidden');
     triggerSectionAnimation(agentsSection);
     loadAgentsEncyclopedia();
@@ -2310,6 +2342,8 @@ function switchAppMode(mode) {
     storeSection?.classList.add('hidden');
     careerSection?.classList.add('hidden');
     agentsSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
     catalogSection?.classList.remove('hidden');
     triggerSectionAnimation(catalogSection);
     resetAndLoadCatalog();
@@ -2317,6 +2351,8 @@ function switchAppMode(mode) {
 }
 
 btnTabStore?.addEventListener('click', () => switchAppMode('store'));
+btnTabInventory?.addEventListener('click', () => switchAppMode('inventory'));
+btnTabCrosshairs?.addEventListener('click', () => switchAppMode('crosshairs'));
 btnTabCareer?.addEventListener('click', () => switchAppMode('career'));
 btnTabAgents?.addEventListener('click', () => switchAppMode('agents'));
 btnTabCatalog?.addEventListener('click', () => switchAppMode('catalog'));
@@ -4764,3 +4800,553 @@ function observeScrollElements() {
 // Observe on initial load and periodically when new cards render
 observeScrollElements();
 setInterval(observeScrollElements, 800);
+
+// ==========================================================
+// 1. PLAYER INVENTORY & ACCOUNT VALUATION MODULE
+// ==========================================================
+let playerInventoryData = null;
+let filteredInvSkins = [];
+
+async function loadPlayerInventory(forceRefresh = false) {
+  const grid = document.getElementById('invSkinsGrid');
+  if (!grid) return;
+
+  if (playerInventoryData && !forceRefresh) {
+    renderInventoryView(playerInventoryData);
+    return;
+  }
+
+  grid.innerHTML = `
+    <div class="catalog-loading-state" style="grid-column: 1 / -1; padding: 60px 20px; text-align: center;">
+      <div class="loading-spinner"></div>
+      <div style="font-family:var(--font-heading); font-size:18px; font-weight:700; color:var(--val-cyan); margin-top:14px; letter-spacing:1px;">
+        กำลังตรวจสอบคลังสกินและประเมินมูลค่าไอดีจาก Riot Games...
+      </div>
+      <div style="font-size:12px; color:var(--val-gray); margin-top:4px;">ระบบกำลังสแกนไอเทมที่ครอบครองทั้งหมด</div>
+    </div>
+  `;
+
+  try {
+    const res = await apiFetch('/api/inventory');
+    const data = await res.json();
+
+    if (!data.ok || !data.inventory) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">ไม่สามารถโหลดคลังสกินได้ (${escapeHtml(data.error || 'กรุณาลองใหม่อีกครั้ง')})</div>`;
+      return;
+    }
+
+    playerInventoryData = data.inventory;
+    populateInventoryWeaponFilter(playerInventoryData);
+    renderInventoryView(playerInventoryData);
+  } catch (err) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">เกิดข้อผิดพลาดในการเชื่อมต่อคลังสกิน: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function renderInventoryView(inv) {
+  // 1. Render Highlights
+  const vpEl = document.getElementById('invTotalVp');
+  const thbOverEl = document.getElementById('invTotalThbOver');
+  const thbRiotEl = document.getElementById('invTotalThbRiot');
+  const countEl = document.getElementById('invTotalSkinsCount');
+  const tierBreakdownEl = document.getElementById('invTierBreakdown');
+
+  if (vpEl) vpEl.innerHTML = `${(inv.totalVpValue || 0).toLocaleString()} <span class="unit-vp">VP</span>`;
+  if (thbOverEl) thbOverEl.textContent = `~${(inv.estimatedThbOverTopup || 0).toLocaleString()} ฿`;
+  if (thbRiotEl) thbRiotEl.textContent = `~${(inv.estimatedThbRiotOfficial || 0).toLocaleString()} ฿`;
+  if (countEl) countEl.innerHTML = `${(inv.totalSkinsCount || 0).toLocaleString()} <span class="unit-vp">ชิ้น</span>`;
+
+  // 2. Render Tier Breakdown Chips
+  if (tierBreakdownEl && inv.tierBreakdown) {
+    const tb = inv.tierBreakdown;
+    tierBreakdownEl.innerHTML = `
+      <div class="inv-tier-chip"><span class="tier-dot" style="background:#F5D36C;"></span>Ultra: <strong>${tb.ultra || 0}</strong></div>
+      <div class="inv-tier-chip"><span class="tier-dot" style="background:#FF9900;"></span>Exclusive: <strong>${tb.exclusive || 0}</strong></div>
+      <div class="inv-tier-chip"><span class="tier-dot" style="background:#B366FF;"></span>Premium: <strong>${tb.premium || 0}</strong></div>
+      <div class="inv-tier-chip"><span class="tier-dot" style="background:#2ECC71;"></span>Deluxe: <strong>${tb.deluxe || 0}</strong></div>
+      <div class="inv-tier-chip"><span class="tier-dot" style="background:#3498DB;"></span>Select: <strong>${tb.select || 0}</strong></div>
+    `;
+  }
+
+  filterAndRenderInventoryGrid();
+}
+
+function populateInventoryWeaponFilter(inv) {
+  const select = document.getElementById('filterInvWeapon');
+  if (!select || !inv.weaponBreakdown) return;
+
+  const currentVal = select.value;
+  select.innerHTML = '<option value="all">อาวุธทั้งหมด (All Weapons)</option>';
+
+  Object.entries(inv.weaponBreakdown)
+    .sort((a, b) => b[1].count - a[1].count)
+    .forEach(([weapon, info]) => {
+      const opt = document.createElement('option');
+      opt.value = weapon;
+      opt.textContent = `${weapon} (${info.count} สกิน • ${info.totalVp.toLocaleString()} VP)`;
+      select.appendChild(opt);
+    });
+
+  if (currentVal) select.value = currentVal;
+}
+
+function filterAndRenderInventoryGrid() {
+  const grid = document.getElementById('invSkinsGrid');
+  if (!grid || !playerInventoryData) return;
+
+  const search = (document.getElementById('invSearchInput')?.value || '').toLowerCase().trim();
+  const weaponFilter = document.getElementById('filterInvWeapon')?.value || 'all';
+  const sort = document.getElementById('filterInvSort')?.value || 'equipped';
+
+  let list = [...(playerInventoryData.skins || [])];
+
+  if (search) {
+    list = list.filter(s => 
+      (s.name || '').toLowerCase().includes(search) || 
+      (s.weaponType || '').toLowerCase().includes(search) ||
+      (s.contentTier?.name || '').toLowerCase().includes(search)
+    );
+  }
+
+  if (weaponFilter !== 'all') {
+    list = list.filter(s => (s.weaponType || '').toLowerCase() === weaponFilter.toLowerCase());
+  }
+
+  if (sort === 'equipped') {
+    list.sort((a, b) => {
+      if (b.isEquipped !== a.isEquipped) return b.isEquipped ? 1 : -1;
+      return (b.estimatedVpPrice || 0) - (a.estimatedVpPrice || 0);
+    });
+  } else if (sort === 'price_desc') {
+    list.sort((a, b) => (b.estimatedVpPrice || 0) - (a.estimatedVpPrice || 0));
+  } else if (sort === 'price_asc') {
+    list.sort((a, b) => (a.estimatedVpPrice || 0) - (b.estimatedVpPrice || 0));
+  } else if (sort === 'name_asc') {
+    list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  }
+
+  if (list.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 50px 20px; text-align: center;">
+        <div style="font-size:16px; color:var(--val-gray);">ไม่พบสกินที่ตรงกับเงื่อนไขการค้นหาในคลังของคุณ</div>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = '';
+  list.forEach(skin => {
+    const card = document.createElement('div');
+    card.className = `skin-card inv-skin-card ${skin.isEquipped ? 'is-equipped-card' : ''}`;
+    card.dataset.uuid = skin.uuid;
+
+    const tierName = skin.contentTier?.name || 'Standard Edition';
+    const tierColor = skin.contentTier?.color || '#FFFFFF';
+    const tierIcon = skin.contentTier?.displayIcon || '';
+    const imgUrl = skin.displayIcon || 'assets/icon-192.png';
+    const priceFormatted = (skin.estimatedVpPrice || 0) > 0 ? (skin.estimatedVpPrice.toLocaleString() + ' VP') : 'Battlepass / Reward';
+
+    card.innerHTML = `
+      ${skin.isEquipped ? '<div class="inv-equipped-badge">EQUIPPED / กำลังใช้งาน</div>' : ''}
+      <div class="skin-tier-indicator" style="background-color: ${tierColor};"></div>
+      
+      <div class="skin-card-header">
+        <div class="tier-badge-pill" style="border-color: ${tierColor}; color: ${tierColor};">
+          ${tierIcon ? `<img src="${tierIcon}" alt="tier" class="tier-icon-small">` : ''}
+          <span>${escapeHtml(tierName)}</span>
+        </div>
+        <div class="skin-weapon-tag">${escapeHtml(skin.weaponType || 'Weapon')}</div>
+      </div>
+
+      <div class="skin-image-box">
+        <img src="${imgUrl}" alt="${escapeHtml(skin.name)}" class="skin-render-img" loading="lazy">
+      </div>
+
+      <div class="skin-card-footer">
+        <h3 class="skin-title" title="${escapeHtml(skin.name)}">${escapeHtml(skin.name)}</h3>
+        <div class="skin-price-row">
+          <div class="skin-price-box">
+            ${(skin.estimatedVpPrice || 0) > 0 ? '<img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="vp-symbol">' : ''}
+            <span class="price-number" style="font-size:13px; font-weight:700;">${priceFormatted}</span>
+          </div>
+          <button class="btn btn-sm btn-inspect" title="ดูสีปืนและคลิป Finisher">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>ตรวจสกิน</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', (e) => {
+      playTacticalAudio('inspect');
+      window.openSkinModal?.(skin.uuid);
+    });
+
+    grid.appendChild(card);
+  });
+
+  observeScrollElements();
+}
+
+// Inventory Search & Filter Listeners
+document.getElementById('invSearchInput')?.addEventListener('input', (e) => {
+  const val = e.target.value;
+  const clearBtn = document.getElementById('btnClearInvSearch');
+  if (clearBtn) clearBtn.classList.toggle('hidden', !val);
+  filterAndRenderInventoryGrid();
+});
+
+document.getElementById('btnClearInvSearch')?.addEventListener('click', () => {
+  const input = document.getElementById('invSearchInput');
+  if (input) input.value = '';
+  document.getElementById('btnClearInvSearch')?.classList.add('hidden');
+  filterAndRenderInventoryGrid();
+});
+
+document.getElementById('filterInvWeapon')?.addEventListener('change', () => {
+  playTacticalAudio('click');
+  filterAndRenderInventoryGrid();
+});
+
+document.getElementById('filterInvSort')?.addEventListener('change', () => {
+  playTacticalAudio('click');
+  filterAndRenderInventoryGrid();
+});
+
+document.getElementById('btnRefreshInventory')?.addEventListener('click', () => {
+  playTacticalAudio('click');
+  loadPlayerInventory(true);
+});
+
+// ==========================================================
+// 2. PRO PLAYER CROSSHAIRS & CANVAS GENERATOR MODULE
+// ==========================================================
+let allCrosshairsList = [];
+let currentChCategory = 'all';
+
+function parseCrosshairCode(codeStr) {
+  if (!codeStr || typeof codeStr !== 'string') return null;
+
+  const parts = codeStr.trim().split(';');
+  const settings = {
+    color: '#00FFFF',
+    outlines: true,
+    outlineThickness: 1,
+    outlineOpacity: 1,
+    centerDot: false,
+    centerDotSize: 2,
+    centerDotOpacity: 1,
+    showInnerLines: true,
+    innerThickness: 1,
+    innerLength: 4,
+    innerOffset: 2,
+    innerOpacity: 1,
+    showOuterLines: false,
+    outerThickness: 1,
+    outerLength: 2,
+    outerOffset: 10,
+    outerOpacity: 1
+  };
+
+  const colorMap = {
+    '0': '#FFFFFF',
+    '1': '#00FF00',
+    '2': '#7FFF00',
+    '3': '#DFFF00',
+    '4': '#FFFF00',
+    '5': '#00FFFF',
+    '6': '#FF00FF',
+    '7': '#FF4655'
+  };
+
+  let inPrimary = false;
+  for (let i = 0; i < parts.length; i++) {
+    const key = parts[i];
+    const val = parts[i + 1];
+    if (key === 'P') { inPrimary = true; continue; }
+    if (key === 'A' || key === 'S') { inPrimary = false; }
+    
+    if (inPrimary) {
+      if (key === 'c' && colorMap[val]) settings.color = colorMap[val];
+      else if (key === 'u' && val) settings.color = '#' + val.slice(0, 6);
+      else if (key === 'h') settings.outlines = val !== '0';
+      else if (key === 't') settings.outlineThickness = parseFloat(val) || 1;
+      else if (key === 'o') settings.outlineOpacity = parseFloat(val) || 1;
+      else if (key === 'd') settings.centerDot = val === '1';
+      else if (key === 'z') settings.centerDotSize = parseFloat(val) || 2;
+      else if (key === 'a') settings.centerDotOpacity = parseFloat(val) || 1;
+      else if (key === '0b') settings.showInnerLines = val !== '0';
+      else if (key === '0t') settings.innerThickness = parseFloat(val) || 1;
+      else if (key === '0l') settings.innerLength = parseFloat(val) || 4;
+      else if (key === '0o') settings.innerOffset = parseFloat(val) || 2;
+      else if (key === '0a') settings.innerOpacity = parseFloat(val) || 1;
+      else if (key === '1b') settings.showOuterLines = val === '1';
+      else if (key === '1t') settings.outerThickness = parseFloat(val) || 1;
+      else if (key === '1l') settings.outerLength = parseFloat(val) || 2;
+      else if (key === '1o') settings.outerOffset = parseFloat(val) || 10;
+      else if (key === '1a') settings.outerOpacity = parseFloat(val) || 1;
+    }
+  }
+  return settings;
+}
+
+function drawCrosshairOnCanvas(canvas, codeStr) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const w = canvas.width;
+  const h = canvas.height;
+  const cx = Math.floor(w / 2);
+  const cy = Math.floor(h / 2);
+
+  // Background gradient & tactical grid
+  ctx.fillStyle = '#0B1018';
+  ctx.fillRect(0, 0, w, h);
+
+  // Subtle grid
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let x = 0; x < w; x += 16) {
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+  }
+  for (let y = 0; y < h; y += 16) {
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+  }
+  ctx.stroke();
+
+  // Subtle Target Guide Rings
+  ctx.strokeStyle = 'rgba(0, 245, 212, 0.12)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+  ctx.arc(cx, cy, 48, 0, Math.PI * 2);
+  ctx.stroke();
+
+  const cfg = parseCrosshairCode(codeStr);
+  if (!cfg) return;
+
+  const color = cfg.color || '#00FFFF';
+  const outlines = cfg.outlines;
+  const outThick = cfg.outlineThickness;
+
+  function drawRectWithOutline(x, y, rw, rh, opacity) {
+    if (outlines) {
+      ctx.fillStyle = `rgba(0, 0, 0, ${cfg.outlineOpacity})`;
+      ctx.fillRect(x - outThick, y - outThick, rw + outThick * 2, rh + outThick * 2);
+    }
+    ctx.fillStyle = color;
+    ctx.globalAlpha = opacity;
+    ctx.fillRect(x, y, rw, rh);
+    ctx.globalAlpha = 1.0;
+  }
+
+  // Draw Center Dot
+  if (cfg.centerDot) {
+    const s = Math.max(1, cfg.centerDotSize);
+    const half = Math.floor(s / 2);
+    drawRectWithOutline(cx - half, cy - half, s, s, cfg.centerDotOpacity);
+  }
+
+  // Draw Inner Lines
+  if (cfg.showInnerLines && cfg.innerLength > 0) {
+    const t = Math.max(1, cfg.innerThickness);
+    const l = cfg.innerLength;
+    const off = cfg.innerOffset;
+    const halfT = Math.floor(t / 2);
+
+    // Top
+    drawRectWithOutline(cx - halfT, cy - off - l, t, l, cfg.innerOpacity);
+    // Bottom
+    drawRectWithOutline(cx - halfT, cy + off, t, l, cfg.innerOpacity);
+    // Left
+    drawRectWithOutline(cx - off - l, cy - halfT, l, t, cfg.innerOpacity);
+    // Right
+    drawRectWithOutline(cx + off, cy - halfT, l, t, cfg.innerOpacity);
+  }
+
+  // Draw Outer Lines
+  if (cfg.showOuterLines && cfg.outerLength > 0) {
+    const t = Math.max(1, cfg.outerThickness);
+    const l = cfg.outerLength;
+    const off = cfg.outerOffset;
+    const halfT = Math.floor(t / 2);
+
+    // Top
+    drawRectWithOutline(cx - halfT, cy - off - l, t, l, cfg.outerOpacity);
+    // Bottom
+    drawRectWithOutline(cx - halfT, cy + off, t, l, cfg.outerOpacity);
+    // Left
+    drawRectWithOutline(cx - off - l, cy - halfT, l, t, cfg.outerOpacity);
+    // Right
+    drawRectWithOutline(cx + off, cy - halfT, l, t, cfg.outerOpacity);
+  }
+}
+
+async function loadProCrosshairs() {
+  const grid = document.getElementById('crosshairsGrid');
+  if (!grid) return;
+
+  if (allCrosshairsList.length > 0) {
+    filterAndRenderCrosshairs();
+    return;
+  }
+
+  grid.innerHTML = `
+    <div class="catalog-loading-state" style="grid-column: 1 / -1; padding: 50px 20px; text-align: center;">
+      <div class="loading-spinner"></div>
+      <div style="font-family:var(--font-heading); font-size:18px; font-weight:700; color:var(--val-cyan); margin-top:14px;">
+        กำลังโหลดฐานข้อมูลเป้าเล็งโปรเพลเยอร์...
+      </div>
+    </div>
+  `;
+
+  try {
+    const res = await fetch('/api/crosshairs');
+    const data = await res.json();
+    if (data.ok && data.crosshairs) {
+      allCrosshairsList = data.crosshairs;
+      filterAndRenderCrosshairs();
+
+      // Set initial custom tester
+      const customInput = document.getElementById('customCrosshairInput');
+      const customCanvas = document.getElementById('customChCanvas');
+      if (customInput && customCanvas && allCrosshairsList[0]) {
+        customInput.value = allCrosshairsList[0].code;
+        drawCrosshairOnCanvas(customCanvas, allCrosshairsList[0].code);
+      }
+    }
+  } catch (err) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">ไม่สามารถโหลดฐานข้อมูลเป้าเล็งได้: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function filterAndRenderCrosshairs() {
+  const grid = document.getElementById('crosshairsGrid');
+  if (!grid) return;
+
+  const search = (document.getElementById('crosshairSearchInput')?.value || '').toLowerCase().trim();
+  let list = allCrosshairsList;
+
+  if (currentChCategory !== 'all') {
+    list = list.filter(c => c.category === currentChCategory);
+  }
+
+  if (search) {
+    list = list.filter(c => 
+      c.player.toLowerCase().includes(search) ||
+      c.team.toLowerCase().includes(search) ||
+      c.role.toLowerCase().includes(search) ||
+      c.style.toLowerCase().includes(search)
+    );
+  }
+
+  if (list.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 50px 20px; text-align: center;">
+        <div style="font-size:16px; color:var(--val-gray);">ไม่พบเป้าเล็งของโปรเพลเยอร์ที่ตรงกับการค้นหา</div>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = '';
+  list.forEach(ch => {
+    const card = document.createElement('div');
+    card.className = 'crosshair-card';
+
+    card.innerHTML = `
+      <div class="ch-card-header">
+        <div>
+          <div class="ch-player-name">${escapeHtml(ch.player)}</div>
+          <div class="ch-player-team">${escapeHtml(ch.team)} • ${escapeHtml(ch.role)}</div>
+        </div>
+        <div class="ch-team-badge">${escapeHtml(ch.teamLogo || 'PRO')}</div>
+      </div>
+
+      <div class="ch-canvas-stage">
+        <canvas width="260" height="120" class="card-ch-canvas" id="canvas_${ch.id}"></canvas>
+      </div>
+
+      <div class="ch-meta-row">
+        <span class="ch-style-tag">${escapeHtml(ch.style)}</span>
+        <span style="color:${ch.colorHex}; font-weight:700;">${escapeHtml(ch.colorName)}</span>
+      </div>
+
+      <div class="ch-desc-text">${escapeHtml(ch.description)}</div>
+
+      <button class="ch-copy-btn" data-code="${escapeHtml(ch.code)}">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span>คัดลอกโค้ดเป้าเล็ง</span>
+      </button>
+    `;
+
+    grid.appendChild(card);
+
+    // Render Canvas
+    const canvas = card.querySelector(`#canvas_${ch.id}`);
+    if (canvas) {
+      drawCrosshairOnCanvas(canvas, ch.code);
+    }
+  });
+
+  // Attach copy listeners
+  grid.querySelectorAll('.ch-copy-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const code = btn.dataset.code;
+      if (!code) return;
+
+      playTacticalAudio('click');
+      navigator.clipboard.writeText(code).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>คัดลอกสำเร็จ! นำไปวางในเกมได้เลย</span>
+        `;
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span>คัดลอกโค้ดเป้าเล็ง</span>
+          `;
+        }, 2200);
+      });
+    });
+  });
+
+  observeScrollElements();
+}
+
+// Category Pills Handler for Crosshairs
+document.querySelectorAll('.ch-cat-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    playTacticalAudio('tab');
+    document.querySelectorAll('.ch-cat-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    currentChCategory = pill.dataset.cat || 'all';
+    filterAndRenderCrosshairs();
+  });
+});
+
+document.getElementById('crosshairSearchInput')?.addEventListener('input', () => {
+  filterAndRenderCrosshairs();
+});
+
+document.getElementById('btnPreviewCustomCh')?.addEventListener('click', () => {
+  playTacticalAudio('click');
+  const input = document.getElementById('customCrosshairInput');
+  const canvas = document.getElementById('customChCanvas');
+  if (input && canvas && input.value.trim()) {
+    drawCrosshairOnCanvas(canvas, input.value.trim());
+  }
+});
+
+document.getElementById('customCrosshairInput')?.addEventListener('input', (e) => {
+  const canvas = document.getElementById('customChCanvas');
+  if (canvas && e.target.value.trim()) {
+    drawCrosshairOnCanvas(canvas, e.target.value.trim());
+  }
+});

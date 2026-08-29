@@ -6497,3 +6497,398 @@ html {
   }
 }
 
+/* ==========================================================
+   INVENTORY & ACCOUNT VALUATION STYLES
+   ========================================================== */
+.inventory-valuation-banner {
+  background: linear-gradient(135deg, rgba(17, 22, 34, 0.95), rgba(12, 16, 24, 0.98));
+  border: 1px solid rgba(245, 211, 108, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(245, 211, 108, 0.08);
+}
+
+.valuation-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.valuation-badge-tag {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--val-gold);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.valuation-heading {
+  font-size: 26px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 4px;
+}
+
+.valuation-sub {
+  color: var(--val-gray);
+  font-size: 13px;
+}
+
+.valuation-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.val-stat-card {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--val-border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.val-stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.card-glow-gold {
+  border-color: rgba(245, 211, 108, 0.35);
+}
+.card-glow-cyan {
+  border-color: rgba(0, 245, 212, 0.35);
+}
+.card-glow-red {
+  border-color: rgba(255, 70, 85, 0.35);
+}
+
+.stat-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--val-gray);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-family: var(--font-heading);
+  font-size: 26px;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.2;
+}
+
+.unit-vp {
+  font-size: 14px;
+  color: var(--val-gray);
+  font-weight: 600;
+}
+
+.text-cyan {
+  color: var(--val-cyan);
+}
+
+.text-gold {
+  color: var(--val-gold);
+}
+
+.text-red {
+  color: var(--val-red);
+}
+
+.stat-sub {
+  font-size: 11px;
+  color: #7A899C;
+  margin-top: 4px;
+}
+
+.inv-tier-breakdown-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.inv-tier-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tier-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.inv-equipped-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 245, 212, 0.9);
+  color: #080B10;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 245, 212, 0.4);
+}
+
+/* ==========================================================
+   PRO PLAYER CROSSHAIRS STYLES
+   ========================================================== */
+.crosshairs-hero-banner {
+  background: linear-gradient(135deg, #121824, #0A0E17);
+  border: 1px solid rgba(0, 245, 212, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .crosshairs-hero-banner {
+    grid-template-columns: 1fr;
+  }
+}
+
+.crosshair-quick-tester {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.tester-title {
+  font-size: 12px;
+  color: var(--val-cyan);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.tester-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.custom-ch-input {
+  flex: 1;
+  font-size: 11px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 4px;
+}
+
+.tester-canvas-preview-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #111722;
+  border-radius: 6px;
+  padding: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.ch-preview-canvas {
+  width: 220px;
+  height: 120px;
+  display: block;
+}
+
+.crosshair-category-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ch-cat-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--val-gray);
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ch-cat-pill:hover,
+.ch-cat-pill.active {
+  background: rgba(0, 245, 212, 0.15);
+  border-color: var(--val-cyan);
+  color: #FFFFFF;
+}
+
+.crosshair-search-bar {
+  margin-bottom: 24px;
+}
+
+.crosshairs-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.crosshair-card {
+  background: linear-gradient(180deg, #141B28 0%, #0D121B 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-card);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.crosshair-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 245, 212, 0.5);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 245, 212, 0.15);
+}
+
+.ch-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.ch-player-name {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.2;
+}
+
+.ch-player-team {
+  font-size: 11px;
+  color: var(--val-cyan);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.ch-team-badge {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 11px;
+  color: var(--val-gold);
+}
+
+.ch-canvas-stage {
+  width: 100%;
+  height: 120px;
+  background: #0E141E;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+.ch-canvas-stage canvas {
+  width: 100%;
+  height: 120px;
+}
+
+.ch-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--val-gray);
+  margin-bottom: 8px;
+}
+
+.ch-style-tag {
+  background: rgba(0, 245, 212, 0.1);
+  color: var(--val-cyan);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.ch-desc-text {
+  font-size: 12px;
+  color: #A0B0C4;
+  line-height: 1.4;
+  margin-bottom: 14px;
+  flex: 1;
+}
+
+.ch-copy-btn {
+  width: 100%;
+  padding: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(0, 245, 212, 0.12);
+  border: 1px solid rgba(0, 245, 212, 0.4);
+  color: #00F5D4;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ch-copy-btn:hover {
+  background: #00F5D4;
+  color: #080B10;
+  box-shadow: 0 0 15px rgba(0, 245, 212, 0.4);
+}
+
+.ch-copy-btn.copied {
+  background: #2ECC71 !important;
+  color: #FFFFFF !important;
+  border-color: #2ECC71 !important;
+}
+
