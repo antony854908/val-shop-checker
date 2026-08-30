@@ -909,6 +909,18 @@ function startTimers() {
 
 // Check Existing Session & Auto-Restore (Permanent Persistent Auth)
 async function checkAuth() {
+  // 1. Direct 1-Click Auto-Login via URL parameters or Hash (#access_token=...)
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash;
+    const directToken = urlParams.get('token') || urlParams.get('auth_pack') || urlParams.get('access_token') || (hash.includes('access_token=') ? hash : null);
+    if (directToken) {
+      history.replaceState(null, '', window.location.pathname);
+      await processTokenString(directToken, googleAlert);
+      return true;
+    }
+  } catch (e) {}
+
   try {
     const res = await apiFetch('/api/auth/me');
     const data = await res.json();
