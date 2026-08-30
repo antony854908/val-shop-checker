@@ -12,7 +12,7 @@ const STORES = {
     trustLevel: 'ร้านค้าจดทะเบียนทางการ OverTopup',
     type: 'partner',
     accentColor: '#00F5D4',
-    logoIcon: '⚡',
+    logoIcon: "",
     webUrl: 'https://www.overtopup.com/th/game-topup/valorant',
     paymentMethods: ['PromptPay QR', 'โอนผ่านธนาคาร', 'TrueMoney'],
     description: 'เติมเกม Valorant สะดวก รวดเร็ว เพียงกรอก Riot ID ไทย รับ VP อัตโนมัติในเกม',
@@ -55,7 +55,7 @@ const STORES = {
     trustLevel: 'Direct Riot In-Game Client',
     type: 'official',
     accentColor: '#FF4655',
-    logoIcon: '🔴',
+    logoIcon: "",
     webUrl: 'https://playvalorant.com',
     paymentMethods: ['PromptPay QR', 'TrueMoney Wallet', 'บัตรเครดิต/เดบิต', 'AIS / Dtac / True'],
     description: 'เติมตรงผ่านหน้าร้านค้าในเกม VALORANT เรทมาตรฐานสากลของ Riot Games',
@@ -207,9 +207,9 @@ function compareAllStores(targetVp, currentWalletVp = 0, deductWallet = true) {
     res.rank = index + 1;
     if (res.storeId === 'overtopup') {
       res.isCheapest = true;
-      res.rankTitle = '🏆 Over Topup (ถูกที่สุด ประหยัดกว่าเติมในเกม)';
+      res.rankTitle = "Over Topup (ประหยัดที่สุด)";
     } else {
-      res.rankTitle = '🔴 Riot Games Official (ราคามาตรฐานในเกม)';
+      res.rankTitle = "Riot Games Official (ราคามาตรฐานในเกม)";
     }
   });
 

@@ -170,7 +170,10 @@ class RiotAuthService {
 
     if (!res.ok) {
       const errText = await res.text().catch(() => '');
-      throw new Error(`Failed to fetch entitlements token (Status: ${res.status}): ${errText}`);
+      if (res.status === 401 || errText.includes('CREDENTIALS_EXPIRED') || errText.includes('expired')) {
+        throw new Error('Access Token หมดอายุแล้ว (โทเคนจาก Riot มีอายุ 1 ชั่วโมง) กรุณากดปุ่ม STEP 1 เพื่อเปิดหน้าล็อกอินใหม่อีกครั้ง');
+      }
+      throw new Error(`ไม่สามารถขอรับ Entitlements Token ได้ (สถานะ: ${res.status})`);
     }
 
     const data = await res.json();
@@ -186,7 +189,10 @@ class RiotAuthService {
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch userinfo (Status: ${res.status})`);
+      if (res.status === 401) {
+        throw new Error('Access Token หมดอายุแล้ว กรุณากดปุ่ม STEP 1 เพื่อเข้าสู่ระบบใหม่อีกครั้ง');
+      }
+      throw new Error(`ไม่สามารถดึงข้อมูลบัญชีได้ (สถานะ: ${res.status})`);
     }
 
     const data = await res.json();

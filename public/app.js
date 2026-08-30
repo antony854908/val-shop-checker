@@ -699,17 +699,20 @@ window.addEventListener('visibilitychange', async () => {
   }
 });
 
+let isSubmittingToken = false;
+
 async function processTokenString(rawText, alertEl) {
+  if (isSubmittingToken) return;
   const alertTarget = alertEl || googleAlert || document.getElementById('loginAlert') || document.getElementById('tokenAlert');
-  let cleanText = (rawText || '').trim();
+  let cleanText = (rawText || '').trim().replace(/^["'\s]+|["'\s]+$/g, '');
 
   if (!cleanText) {
-    showAlert(alertTarget, 'กรุณาวาง URL หรือ Access Token ที่คัดลอกมา');
+    showAlert(alertTarget, 'กรุณาวาง URL หรือ Access Token ที่คัดลอกมาในช่องข้อความ');
     return;
   }
 
   if (cleanText.includes('error=')) {
-    showAlert(alertTarget, 'พบข้อผิดพลาดจาก Riot (กรุณากดปุ่มเปิดหน้าล็อกอินใหม่อีกครั้ง)');
+    showAlert(alertTarget, 'พบข้อผิดพลาดจาก Riot (กรุณากดปุ่ม STEP 1 เพื่อเปิดหน้าล็อกอินใหม่อีกครั้ง)');
     return;
   }
 
@@ -717,37 +720,35 @@ async function processTokenString(rawText, alertEl) {
     try { cleanText = decodeURIComponent(cleanText); } catch (e) {}
   }
 
-  let accessToken = cleanText;
+  let accessToken = null;
   let idToken = null;
 
-  if (cleanText.includes('access_token=')) {
-    let paramStr = cleanText;
-    if (cleanText.includes('#')) {
-      paramStr = cleanText.split('#')[1];
-    } else if (cleanText.includes('?')) {
-      paramStr = cleanText.split('?')[1];
-    }
-    const params = new URLSearchParams(paramStr);
-    accessToken = params.get('access_token') || cleanText;
-    idToken = params.get('id_token');
-  } else if (cleanText.startsWith('eyJ') && cleanText.includes(' ')) {
-    const parts = cleanText.split(/\s+/);
-    accessToken = parts[0];
-    if (parts[1] && parts[1].startsWith('eyJ')) idToken = parts[1];
+  const accessMatch = cleanText.match(/access_token=([^&]+)/);
+  if (accessMatch) {
+    accessToken = accessMatch[1].trim();
+  } else if (cleanText.startsWith('eyJ')) {
+    const parts = cleanText.split(/[\s&]+/);
+    accessToken = parts[0].replace(/^access_token=/, '').trim();
+    if (parts[1] && parts[1].startsWith('eyJ')) idToken = parts[1].trim();
+  } else {
+    accessToken = cleanText.trim();
   }
 
-  accessToken = accessToken.trim();
-  if (idToken) idToken = idToken.trim();
+  const idMatch = cleanText.match(/id_token=([^&]+)/);
+  if (idMatch) {
+    idToken = idMatch[1].trim();
+  }
 
   if (!accessToken || accessToken.length < 20) {
-    showAlert(alertTarget, '⚠️ ไม่พบ Access Token ที่ถูกต้องในข้อความที่วาง <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">📖 คลิกที่นี่เพื่อดูภาพวิธีก็อปปี้ลิงก์ที่ถูกต้อง</a>');
+    showAlert(alertTarget, 'ไม่พบ Access Token ที่ถูกต้องในข้อความที่วาง <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">[ดูวิธีคัดลอกลิงก์]</a>');
     return;
   }
 
+  isSubmittingToken = true;
   hideAlert(alertTarget);
   if (btnAutoPaste) {
     btnAutoPaste.disabled = true;
-    btnAutoPaste.textContent = '⏳ กำลังเข้าสู่ระบบและดึงข้อมูลร้านค้า...';
+    btnAutoPaste.textContent = "กำลังเชื่อมต่อ Riot Games และดึงข้อมูลร้านค้า...";
   }
 
   try {
@@ -758,6 +759,10 @@ async function processTokenString(rawText, alertEl) {
     });
 
     const data = await res.json();
+    if (!data.ok) {
+      throw new Error(data.error || 'Token ไม่ถูกต้องหรือหมดอายุ');
+    }
+
     if (data.sessionId) {
       setStoredSid(data.sessionId);
     }
@@ -767,23 +772,26 @@ async function processTokenString(rawText, alertEl) {
       setStoredAuthPack(data.auth);
     }
 
-    if (!data.ok) {
-      throw new Error(data.error || 'Token ไม่ถูกต้องหรือหมดอายุ');
-    }
+    // Immediately activate logged in state and switch to store!
+    currentUser = data.user || data.auth;
+    renderUserHeader(currentUser);
+    switchAppMode('store');
+    playTacticalAudio('login');
 
-    // Success! Immediately fetch profile and load store
-    const meRes = await apiFetch('/api/auth/me');
-    const meData = await meRes.json();
-    if (meData.ok && meData.loggedIn) {
-      currentUser = meData.user;
-      renderUserHeader(meData.user);
-      await loadStore();
-    } else {
-      await checkAuth();
-    }
+    // Fetch live store, wallet balances and inventory concurrently
+    loadStore();
+    loadPlayerInventory(true).catch(() => {});
+
+    apiFetch('/api/auth/me').then(r => r.json()).then(meData => {
+      if (meData.ok && meData.user) {
+        currentUser = meData.user;
+        renderUserHeader(meData.user);
+      }
+    }).catch(() => {});
   } catch (err) {
-    showAlert(alertTarget, (err.message || 'เข้าสู่ระบบไม่สำเร็จ') + ' <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">📖 ดูภาพสอนวิธีคัดลอกลิงก์ใหม่</a>');
+    showAlert(alertTarget, (err.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง') + ' <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">[ดูวิธีคัดลอกลิงก์]</a>');
   } finally {
+    isSubmittingToken = false;
     if (btnAutoPaste) {
       btnAutoPaste.disabled = false;
       btnAutoPaste.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> <span>วาง & เข้าสู่ระบบทันที</span>`;
@@ -791,7 +799,8 @@ async function processTokenString(rawText, alertEl) {
   }
 }
 
-btnAutoPaste?.addEventListener('click', async () => {
+document.getElementById('quickGoogleForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
   let val = quickPasteInput ? quickPasteInput.value.trim() : '';
   if (!val && navigator.clipboard && navigator.clipboard.readText) {
     try {
@@ -802,7 +811,28 @@ btnAutoPaste?.addEventListener('click', async () => {
   processTokenString(val, googleAlert);
 });
 
-quickPasteInput?.addEventListener('paste', () => {
+btnAutoPaste?.addEventListener('click', async (e) => {
+  e.preventDefault();
+  let val = quickPasteInput ? quickPasteInput.value.trim() : '';
+  if (!val && navigator.clipboard && navigator.clipboard.readText) {
+    try {
+      val = await navigator.clipboard.readText();
+      if (quickPasteInput) quickPasteInput.value = val;
+    } catch (e) {}
+  }
+  processTokenString(val, googleAlert);
+});
+
+quickPasteInput?.addEventListener('input', () => {
+  const val = quickPasteInput ? quickPasteInput.value.trim() : '';
+  if (val.includes('access_token=') || val.startsWith('eyJ')) {
+    setTimeout(() => {
+      processTokenString(val, googleAlert);
+    }, 150);
+  }
+});
+
+quickPasteInput?.addEventListener('paste', (e) => {
   setTimeout(() => {
     if (quickPasteInput) {
       processTokenString(quickPasteInput.value.trim(), googleAlert);
@@ -879,6 +909,18 @@ function startTimers() {
 
 // Check Existing Session & Auto-Restore (Permanent Persistent Auth)
 async function checkAuth() {
+  // 1. Direct 1-Click Auto-Login via URL parameters or Hash (#access_token=...)
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash;
+    const directToken = urlParams.get('token') || urlParams.get('auth_pack') || urlParams.get('access_token') || (hash.includes('access_token=') ? hash : null);
+    if (directToken) {
+      history.replaceState(null, '', window.location.pathname);
+      await processTokenString(directToken, googleAlert);
+      return true;
+    }
+  } catch (e) {}
+
   try {
     const res = await apiFetch('/api/auth/me');
     const data = await res.json();
@@ -955,21 +997,50 @@ function renderUserHeader(user) {
   loginSection?.classList.add('hidden');
   if (currentAppMode === 'store') {
     storeSection?.classList.remove('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
     careerSection?.classList.add('hidden');
     agentsSection?.classList.add('hidden');
     catalogSection?.classList.add('hidden');
+  } else if (currentAppMode === 'inventory') {
+    inventorySection?.classList.remove('hidden');
+    storeSection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
+    careerSection?.classList.add('hidden');
+    agentsSection?.classList.add('hidden');
+    catalogSection?.classList.add('hidden');
+    loadPlayerInventory();
+  } else if (currentAppMode === 'crosshairs') {
+    crosshairsSection?.classList.remove('hidden');
+    storeSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    careerSection?.classList.add('hidden');
+    agentsSection?.classList.add('hidden');
+    catalogSection?.classList.add('hidden');
+    loadProCrosshairs();
   } else if (currentAppMode === 'career') {
     careerSection?.classList.remove('hidden');
     storeSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
     agentsSection?.classList.add('hidden');
     catalogSection?.classList.add('hidden');
     loadCareer();
   } else if (currentAppMode === 'agents') {
     agentsSection?.classList.remove('hidden');
     storeSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
     careerSection?.classList.add('hidden');
     catalogSection?.classList.add('hidden');
     loadAgentsEncyclopedia();
+  } else if (currentAppMode === 'catalog') {
+    catalogSection?.classList.remove('hidden');
+    storeSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
+    careerSection?.classList.add('hidden');
+    agentsSection?.classList.add('hidden');
   }
 }
 
@@ -977,8 +1048,9 @@ function showLoginView() {
   currentUser = null;
   userHeader?.classList.add('hidden');
   storeSection?.classList.add('hidden');
+  inventorySection?.classList.add('hidden');
   careerSection?.classList.add('hidden');
-  if (currentAppMode === 'store' || currentAppMode === 'career') {
+  if (currentAppMode === 'store' || currentAppMode === 'career' || currentAppMode === 'inventory') {
     loginSection?.classList.remove('hidden');
   }
   mfaBox?.classList.add('hidden');
@@ -1098,86 +1170,9 @@ document.getElementById('btnMfaCancel')?.addEventListener('click', () => {
 // Form 2: Token / Social Login
 tokenLoginForm?.addEventListener('submit', async (e) => {
   e.preventDefault();
-  hideAlert(tokenAlert);
-
   const rawInput = document.getElementById('inputAccessToken');
-  const regionInput = document.getElementById('tokenRegion');
-
-  let raw = rawInput ? rawInput.value.trim() : '';
-  const region = regionInput ? regionInput.value : 'auto';
-
-  if (!raw) {
-    showAlert(tokenAlert, 'กรุณาวาง URL หรือ Access Token');
-    return;
-  }
-
-  if (raw.includes('%23') || raw.includes('%3D') || raw.includes('%26')) {
-    try { raw = decodeURIComponent(raw); } catch (e) {}
-  }
-
-  let accessToken = raw;
-  let idToken = null;
-
-  if (raw.includes('access_token=')) {
-    let paramStr = raw;
-    if (raw.includes('#')) {
-      paramStr = raw.split('#')[1];
-    } else if (raw.includes('?')) {
-      paramStr = raw.split('?')[1];
-    }
-    const params = new URLSearchParams(paramStr);
-    accessToken = params.get('access_token') || raw;
-    idToken = params.get('id_token');
-  } else if (raw.startsWith('eyJ') && raw.includes(' ')) {
-    const parts = raw.split(/\s+/);
-    accessToken = parts[0];
-    if (parts[1] && parts[1].startsWith('eyJ')) idToken = parts[1];
-  }
-
-  const submitBtn = document.getElementById('btnTokenSubmit');
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'กำลังตรวจสอบ Token...';
-  }
-
-  try {
-    const res = await apiFetch('/api/auth/token-login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accessToken, idToken, region })
-    });
-
-    const data = await res.json();
-    if (data.sessionId) {
-      setStoredSid(data.sessionId);
-    }
-    if (data.authPack) {
-      setStoredAuthPack(data.authPack);
-    } else if (data.auth) {
-      setStoredAuthPack(data.auth);
-    }
-
-    if (!data.ok) {
-      throw new Error(data.error || 'Token ไม่ถูกต้องหรือหมดอายุ');
-    }
-
-    const meRes = await apiFetch('/api/auth/me');
-    const meData = await meRes.json();
-    if (meData.ok && meData.loggedIn) {
-      currentUser = meData.user;
-      renderUserHeader(meData.user);
-      await loadStore();
-    } else {
-      await checkAuth();
-    }
-  } catch (err) {
-    showAlert(tokenAlert, err.message || 'เข้าสู่ระบบไม่สำเร็จ');
-  } finally {
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'เข้าสู่ระบบด้วย Token';
-    }
-  }
+  const raw = rawInput ? rawInput.value.trim() : '';
+  processTokenString(raw, tokenAlert);
 });
 
 // Load Storefront Data
@@ -1374,7 +1369,7 @@ function renderDailyShop(skins) {
           <div class="skin-price-tag">
             <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
             <span>${(skin.price || 0).toLocaleString()}</span>
-            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")} ⚡</span>
+            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")}</span>
           </div>
           <button class="btn btn-primary btn-sm btn-inspect"><span>ดูเอฟเฟกต์ & สี</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
@@ -1575,7 +1570,7 @@ function renderBundles(bundles) {
             ${savings > 0 ? `<span class="bundle-savings-tag">ประหยัด ${savings.toLocaleString()} ฿</span>` : ''}
           </div>
           <button class="btn btn-bundle-calc" data-vp="${bundlePrice}" title="เปิดระบบคำนวณแพ็กเกจ OverTopup สำหรับบันเดิลนี้">
-            <span>⚡ เทียบราคา OverTopup</span>
+            <span>เทียบราคา OverTopup</span>
           </button>
         ` : ''}
       </div>
@@ -1619,7 +1614,7 @@ function renderBundles(bundles) {
           <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
           <span>${itemPrice.toLocaleString()}</span>
           ${itemPrice > 0 ? `
-            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${itemPrice}">${opt.shortTag || ("~" + Math.round(itemPrice * 0.238) + " ฿")} ⚡</span>
+            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${itemPrice}">${opt.shortTag || ("~" + Math.round(itemPrice * 0.238) + " ฿")}</span>
           ` : ''}
         </div>
       `;
@@ -1704,12 +1699,12 @@ window.openBundleModal = function(b) {
   if (comboEl) comboEl.textContent = opt.comboText || `${opt.totalPrice.toLocaleString()} ฿`;
 
   const vpGainEl = document.getElementById("modalBundleVpGain");
-  if (vpGainEl) vpGainEl.textContent = `💎 ได้รับ ${opt.totalVp.toLocaleString()} VP`;
+  if (vpGainEl) vpGainEl.textContent = `ได้รับ ${opt.totalVp.toLocaleString()} VP`;
 
   const vpLeftoverEl = document.getElementById("modalBundleVpLeftover");
   if (vpLeftoverEl) {
     if (opt.leftoverVp > 0) {
-      vpLeftoverEl.textContent = `✨ เหลือ +${opt.leftoverVp.toLocaleString()} VP ในไอดี`;
+      vpLeftoverEl.textContent = `คงเหลือ +${opt.leftoverVp.toLocaleString()} VP ในไอดี`;
       vpLeftoverEl.style.display = "inline-flex";
     } else {
       vpLeftoverEl.style.display = "none";
@@ -1718,7 +1713,7 @@ window.openBundleModal = function(b) {
 
   const savingsTagEl = document.getElementById("modalBundleSavingsTag");
   if (savingsTagEl) {
-    savingsTagEl.textContent = savings > 0 ? `⚡ ประหยัดได้ ~${savings.toLocaleString()} ฿ จากเติมในเกม` : "⚡ เรทคุ้มกว่าเติมตรงในเกม";
+    savingsTagEl.textContent = savings > 0 ? `ประหยัดได้ ~${savings.toLocaleString()} ฿ จากเติมในเกม` : "เรทคุ้มกว่าเติมตรงในเกม";
   }
 
   const btnBundleCompare = document.getElementById("btnBundleInspectCompareStores");
@@ -1781,7 +1776,7 @@ window.openBundleModal = function(b) {
               <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
               <span>${itemPrice.toLocaleString()}</span>
               ${itemPrice > 0 ? `
-                <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${itemOpt.comboText}" data-vp="${itemPrice}">${itemOpt.shortTag} ⚡</span>
+                <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${itemOpt.comboText}" data-vp="${itemPrice}">${itemOpt.shortTag}</span>
               ` : ""}
             </div>
             <button class="btn btn-primary btn-sm btn-inspect">
@@ -1863,7 +1858,7 @@ function renderNightMarket(nm) {
             <span class="original-price">${offer.originalPrice.toLocaleString()}</span>
             <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
             <span style="color:var(--val-gold)">${offer.discountedPrice.toLocaleString()}</span>
-            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")} ⚡</span>
+            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")}</span>
           </div>
           <button class="btn btn-primary btn-sm btn-inspect"><span>ดูสกิน & สี</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
@@ -1891,7 +1886,14 @@ window.openSkinByUuid = async function(uuid) {
 };
 
 // Open Interactive Skin / Item Modal
-function openSkinModal(skin) {
+function openSkinModal(skinOrUuid) {
+  let skin = skinOrUuid;
+  if (typeof skinOrUuid === 'string') {
+    skin = (playerInventoryData && playerInventoryData.skins?.find(s => s.uuid === skinOrUuid)) ||
+           (currentStore?.dailyOffers?.find(s => s.uuid === skinOrUuid)) ||
+           catalogSkins.find(s => s.uuid === skinOrUuid) ||
+           { uuid: skinOrUuid, name: 'Valorant Skin' };
+  }
   currentInspectedSkin = skin;
   playTacticalAudio('inspect');
   
@@ -1903,12 +1905,13 @@ function openSkinModal(skin) {
   if (skinNameEl) skinNameEl.textContent = skin.name || 'Valorant Item';
   
   const tierNameEl = document.getElementById('modalTierName');
-  if (tierNameEl) tierNameEl.textContent = skin.tier?.name || skin.itemType || 'Edition';
+  if (tierNameEl) tierNameEl.textContent = skin.tier?.name || skin.contentTier?.name || skin.itemType || 'Edition';
   
   const tierIconEl = document.getElementById('modalTierIcon');
+  const tierIcon = skin.tier?.displayIcon || skin.contentTier?.displayIcon || '';
   if (tierIconEl) {
-    if (skin.tier?.displayIcon) {
-      tierIconEl.src = skin.tier.displayIcon;
+    if (tierIcon) {
+      tierIconEl.src = tierIcon;
       tierIconEl.classList.remove('hidden');
     } else {
       tierIconEl.classList.add('hidden');
@@ -1943,17 +1946,17 @@ function openSkinModal(skin) {
     const savingsEl = document.getElementById("modalSkinSavingsTag");
 
     if (comboBadgeEl) comboBadgeEl.textContent = opt.comboText || `${opt.totalPrice.toLocaleString()} ฿`;
-    if (vpGainEl) vpGainEl.textContent = `💎 ได้รับ ${opt.totalVp.toLocaleString()} VP`;
+    if (vpGainEl) vpGainEl.textContent = `ได้รับ ${opt.totalVp.toLocaleString()} VP`;
     if (vpLeftoverEl) {
       if (opt.leftoverVp > 0) {
-        vpLeftoverEl.textContent = `✨ เหลือ +${opt.leftoverVp.toLocaleString()} VP ในไอดี`;
+        vpLeftoverEl.textContent = `คงเหลือ +${opt.leftoverVp.toLocaleString()} VP ในไอดี`;
         vpLeftoverEl.style.display = "inline-flex";
       } else {
         vpLeftoverEl.style.display = "none";
       }
     }
     if (savingsEl) {
-      savingsEl.textContent = savings > 0 ? `⚡ ประหยัดได้ ~${savings.toLocaleString()} ฿` : "⚡ เรทคุ้มกว่าเติมตรงในเกม";
+      savingsEl.textContent = savings > 0 ? `ประหยัดได้ ~${savings.toLocaleString()} ฿` : "เรทคุ้มกว่าเติมตรงในเกม";
     }
 
     compareBar.classList.remove("hidden");
@@ -2244,10 +2247,15 @@ btnLogout?.addEventListener('click', async () => {
 
 // Navigation Mode Switching (Unified Desktop & Mobile Bottom Nav)
 const btnTabStore = document.getElementById('btnTabStore');
+const btnTabInventory = document.getElementById('btnTabInventory');
+const btnTabCrosshairs = document.getElementById('btnTabCrosshairs');
 const btnTabCareer = document.getElementById('btnTabCareer');
 const btnTabAgents = document.getElementById('btnTabAgents');
 const btnTabCatalog = document.getElementById('btnTabCatalog');
 const btnMobOpenVp = document.getElementById('btnMobOpenVp');
+
+const inventorySection = document.getElementById('inventorySection');
+const crosshairsSection = document.getElementById('crosshairsSection');
 
 function triggerSectionAnimation(el) {
   if (!el) return;
@@ -2262,6 +2270,8 @@ function switchAppMode(mode) {
 
   // Update top desktop tabs
   btnTabStore?.classList.toggle('active', mode === 'store');
+  btnTabInventory?.classList.toggle('active', mode === 'inventory');
+  btnTabCrosshairs?.classList.toggle('active', mode === 'crosshairs');
   btnTabCareer?.classList.toggle('active', mode === 'career');
   btnTabAgents?.classList.toggle('active', mode === 'agents');
   btnTabCatalog?.classList.toggle('active', mode === 'catalog');
@@ -2275,6 +2285,8 @@ function switchAppMode(mode) {
   careerSection?.classList.add('hidden');
   agentsSection?.classList.add('hidden');
   storeSection?.classList.add('hidden');
+  inventorySection?.classList.add('hidden');
+  crosshairsSection?.classList.add('hidden');
 
   if (mode === 'store') {
     if (currentUser) {
@@ -2286,6 +2298,28 @@ function switchAppMode(mode) {
       storeSection?.classList.add('hidden');
       triggerSectionAnimation(loginSection);
     }
+  } else if (mode === 'inventory') {
+    if (currentUser) {
+      inventorySection?.classList.remove('hidden');
+      loginSection?.classList.add('hidden');
+      triggerSectionAnimation(inventorySection);
+      loadPlayerInventory();
+    } else {
+      inventorySection?.classList.remove('hidden');
+      loginSection?.classList.add('hidden');
+      triggerSectionAnimation(inventorySection);
+      renderInventoryNotLoggedInPrompt();
+    }
+  } else if (mode === 'crosshairs') {
+    loginSection?.classList.add('hidden');
+    storeSection?.classList.add('hidden');
+    careerSection?.classList.add('hidden');
+    agentsSection?.classList.add('hidden');
+    catalogSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.remove('hidden');
+    triggerSectionAnimation(crosshairsSection);
+    loadProCrosshairs();
   } else if (mode === 'career') {
     if (currentUser) {
       careerSection?.classList.remove('hidden');
@@ -2302,6 +2336,8 @@ function switchAppMode(mode) {
     storeSection?.classList.add('hidden');
     careerSection?.classList.add('hidden');
     catalogSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
     agentsSection?.classList.remove('hidden');
     triggerSectionAnimation(agentsSection);
     loadAgentsEncyclopedia();
@@ -2310,6 +2346,8 @@ function switchAppMode(mode) {
     storeSection?.classList.add('hidden');
     careerSection?.classList.add('hidden');
     agentsSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
     catalogSection?.classList.remove('hidden');
     triggerSectionAnimation(catalogSection);
     resetAndLoadCatalog();
@@ -2317,6 +2355,8 @@ function switchAppMode(mode) {
 }
 
 btnTabStore?.addEventListener('click', () => switchAppMode('store'));
+btnTabInventory?.addEventListener('click', () => switchAppMode('inventory'));
+btnTabCrosshairs?.addEventListener('click', () => switchAppMode('crosshairs'));
 btnTabCareer?.addEventListener('click', () => switchAppMode('career'));
 btnTabAgents?.addEventListener('click', () => switchAppMode('agents'));
 btnTabCatalog?.addEventListener('click', () => switchAppMode('catalog'));
@@ -3454,7 +3494,7 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
         <div class="best-agent-meta">
           <div class="best-agent-title-row">
             <h3 class="agent-title-large">${agentName}</h3>
-            <span class="agent-mastery-tag">👑 MVP AGENT</span>
+            <span class="agent-mastery-tag">MVP AGENT</span>
           </div>
           <div class="best-agent-subtitle">
             <span>ลงเล่นไป <strong>${bestAgent.games}</strong> แมตช์</span>
@@ -3541,10 +3581,10 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
         </div>
       </div>
       <div class="recom-info-details">
-        <div class="recom-badge-top">⚡ AI แนะนำตัวละครที่เข้ากับสไตล์ของคุณ:</div>
+        <div class="recom-badge-top">AI แนะนำตัวละครที่เข้ากับสไตล์ของคุณ:</div>
         <h3 class="recom-agent-name">${recomName}</h3>
         <p class="recom-strategy-advice">${recomAdvice}</p>
-        <div class="recom-action-hint">🔍 แตะเพื่อดูเทคนิค &amp; สกิลของ ${recomName} ↗️</div>
+        <div class="recom-action-hint">แตะเพื่อดูเทคนิค &amp; สกิลของ ${recomName}</div>
       </div>
     </div>
   `;
@@ -3763,7 +3803,7 @@ function updateReplayCanvas() {
         const avatar = k.victimAgent?.displayIcon || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png';
         marker.innerHTML = `
           <img src="${avatar}" class="marker-agent-avatar" alt="${k.victimName}">
-          ${isPast ? '<span class="marker-death-cross">✕</span>' : ''}
+          ${isPast ? '<span class="marker-death-cross"></span>' : ''}
         `;
         marker.title = `${k.victimName} (${isPast ? 'Eliminated' : 'Alive'})`;
         markersLayer.appendChild(marker);
@@ -4157,7 +4197,7 @@ const DEFAULT_VP_STORES = {
     trustLevel: "ร้านค้าจดทะเบียนทางการ OverTopup",
     type: "partner",
     accentColor: "#00F5D4",
-    logoIcon: "⚡",
+    logoIcon: "",
     webUrl: "https://www.overtopup.com/th/game-topup/valorant",
     paymentMethods: ["PromptPay QR", "โอนผ่านธนาคาร", "TrueMoney"],
     description: "เติมเกม Valorant สะดวก รวดเร็ว เพียงกรอก Riot ID ไทย รับ VP อัตโนมัติในเกม",
@@ -4200,7 +4240,7 @@ const DEFAULT_VP_STORES = {
     trustLevel: "Direct Riot In-Game Client",
     type: "official",
     accentColor: "#FF4655",
-    logoIcon: "🔴",
+    logoIcon: "",
     webUrl: "https://playvalorant.com",
     paymentMethods: ["PromptPay QR", "TrueMoney Wallet", "บัตรเครดิต/เดบิต", "AIS / Dtac / True"],
     description: "เติมตรงผ่านหน้าร้านค้าในเกม VALORANT เรทมาตรฐานสากลของ Riot Games",
@@ -4332,9 +4372,9 @@ function calculateAllStoresLocal(targetVp, currentWalletVp, deductWallet) {
     res.rank = index + 1;
     if (res.storeId === "overtopup") {
       res.isCheapest = true;
-      res.rankTitle = "🏆 Over Topup (ถูกที่สุด ประหยัดกว่าเติมในเกม)";
+      res.rankTitle = "Over Topup (ประหยัดที่สุด)";
     } else {
-      res.rankTitle = "🔴 Riot Games Official (ราคาปกติในเกม)";
+      res.rankTitle = "Riot Games Official (ราคาปกติในเกม)";
     }
   });
 
@@ -4410,7 +4450,7 @@ async function updateVpCalculator() {
   if (neededDisplay) {
     neededDisplay.textContent = `${neededVp.toLocaleString()} VP`;
     if (neededVp === 0 && targetVp > 0) {
-      neededDisplay.textContent = "0 VP (มีพอแล้ว! 🎉)";
+      neededDisplay.textContent = "0 VP (มีพอแล้ว)";
       neededDisplay.style.color = "var(--val-cyan)";
     } else {
       neededDisplay.style.color = "var(--val-gold)";
@@ -4446,13 +4486,13 @@ function renderVpComparisonResults(result) {
   const winnerSavingsTagEl = document.getElementById("winnerSavingsTag");
   const winnerComboNoteEl = document.getElementById("winnerComboNote");
 
-  if (winnerStoreNameEl) winnerStoreNameEl.textContent = "⚡ Over Topup (overtopup.com)";
+  if (winnerStoreNameEl) winnerStoreNameEl.textContent = "Over Topup (overtopup.com)";
   if (winnerStoreTagEl) winnerStoreTagEl.textContent = "เติมเข้า Riot ID ไทย อัตโนมัติ • PromptPay / โอนธนาคาร";
   if (winnerPriceThbEl) winnerPriceThbEl.textContent = `~${winner.totalPrice.toLocaleString()}`;
 
   if (winnerSavingsTagEl) {
     if (result.maxSavingsThb > 0) {
-      winnerSavingsTagEl.textContent = `⚡ ประหยัดได้ ${result.maxSavingsThb.toLocaleString()} ฿ (-${result.maxSavingsPct}% จากเติมในเกม)`;
+      winnerSavingsTagEl.textContent = `ประหยัดได้ ${result.maxSavingsThb.toLocaleString()} ฿ (-${result.maxSavingsPct}% จากเติมในเกม)`;
       winnerSavingsTagEl.style.display = "inline-block";
     } else {
       winnerSavingsTagEl.textContent = "ราคาใกล้เคียงกับในเกม";
@@ -4463,9 +4503,9 @@ function renderVpComparisonResults(result) {
   if (winnerComboNoteEl) {
     if (winner.combination && winner.combination.length > 0) {
       const comboTxt = winner.combination.map(c => `${c.count}x ${c.package.tag} (${c.subtotalPrice}฿)`).join(" + ");
-      winnerComboNoteEl.innerHTML = `<span>📦 แพ็กเกจที่แนะนำบน OverTopup: <strong>${comboTxt}</strong> (ได้รับรวม <strong>${winner.totalVp.toLocaleString()} VP</strong>, เหลือ <strong>${winner.leftoverVp.toLocaleString()} VP</strong> หลังซื้อ)</span>`;
+      winnerComboNoteEl.innerHTML = `<span>แพ็กเกจที่แนะนำบน OverTopup: <strong>${comboTxt}</strong> (ได้รับรวม <strong>${winner.totalVp.toLocaleString()} VP</strong>, เหลือ <strong>${winner.leftoverVp.toLocaleString()} VP</strong> หลังซื้อ)</span>`;
     } else {
-      winnerComboNoteEl.innerHTML = `<span>🎉 คุณมี VP ในกระเป๋าเพียงพอสำหรับซื้อสกินนี้แล้ว ไม่จำเป็นต้องเติมเงินเพิ่ม!</span>`;
+      winnerComboNoteEl.innerHTML = `<span>คุณมี VP ในกระเป๋าเพียงพอสำหรับซื้อสกินนี้แล้ว ไม่จำเป็นต้องเติมเงินเพิ่ม!</span>`;
     }
   }
 
@@ -4487,9 +4527,9 @@ function renderVpComparisonResults(result) {
     card.innerHTML = `
       <div class="store-card-header">
         <div class="store-header-left">
-          <span class="store-rank-badge ${isOver ? "rank-1" : "rank-other"}">${isOver ? "🏆 ถูกที่สุด (OverTopup)" : "🔴 เติมในเกม (ราคาปกติ)"}</span>
+          <span class="store-rank-badge ${isOver ? "rank-1" : "rank-other"}">${isOver ? "อันดับ 1 (OverTopup)" : "ราคาปกติ (ในเกม)"}</span>
           <div>
-            <div class="store-name-title">${st.logoIcon || "🛒"} ${st.name}</div>
+            <div class="store-name-title">${st.logoIcon || ""} ${st.name}</div>
             <span class="store-trust-pill">${st.badge} • ${st.trustLevel}</span>
           </div>
         </div>
@@ -4500,7 +4540,7 @@ function renderVpComparisonResults(result) {
       </div>
 
       <div class="store-combo-box">
-        <span class="store-combo-label">📦 แพ็กเกจที่ต้องกดซื้อ:</span>
+        <span class="store-combo-label">แพ็กเกจที่ต้องกดซื้อ:</span>
         <div class="store-combo-list">${comboSummary}</div>
       </div>
 
@@ -4517,7 +4557,7 @@ function renderVpComparisonResults(result) {
 
       ${isOver ? `
         <a href="https://www.overtopup.com/th/game-topup/valorant" target="_blank" rel="noopener noreferrer" class="store-action-btn" style="background:var(--val-cyan); color:#080B10; font-weight:800;">
-          <span>⚡ สั่งซื้อที่ OverTopup (overtopup.com) ↗️</span>
+          <span>สั่งซื้อที่ OverTopup (overtopup.com)</span>
         </a>
       ` : `
         <div style="font-size:11px; color:var(--val-gray); text-align:center; padding:4px 0;">เติมผ่านหน้าร้านค้าในเกม VALORANT (F10 / กดที่ไอคอน VP)</div>
@@ -4545,7 +4585,7 @@ async function loadAllStoresMatrix() {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td><strong>${pkg.vp.toLocaleString()} VP</strong></td>
-      <td class="matrix-cheapest-cell"><strong>${pkg.price.toLocaleString()} ฿ ⚡</strong></td>
+      <td class="matrix-cheapest-cell"><strong>${pkg.price.toLocaleString()} ฿ [BEST]</strong></td>
       <td style="color:var(--val-gray); font-weight:600;">${officialSol.totalPrice.toLocaleString()} ฿</td>
       <td style="color:var(--val-gold); font-weight:700;">+${savings.toLocaleString()} ฿</td>
       <td><span class="hero-savings-pill" style="font-size:10.5px;">-${savingsPct}%</span></td>
@@ -4629,7 +4669,7 @@ function initVpCompareModule() {
     playTacticalAudio("click");
     const wishlistUuids = Array.from(wishlistSet || []);
     if (wishlistUuids.length === 0) {
-      alert("คุณยังไม่มีสกินที่ติดดาว ⭐ Wishlist ไว้ในรายการ");
+      alert("คุณยังไม่มีสกินที่บันทึก Wishlist ไว้ในรายการ");
       return;
     }
 
@@ -4764,3 +4804,599 @@ function observeScrollElements() {
 // Observe on initial load and periodically when new cards render
 observeScrollElements();
 setInterval(observeScrollElements, 800);
+
+// ==========================================================
+// 1. PLAYER INVENTORY & ACCOUNT VALUATION MODULE
+// ==========================================================
+let playerInventoryData = null;
+let filteredInvSkins = [];
+
+function renderInventoryNotLoggedInPrompt() {
+  const grid = document.getElementById('invSkinsGrid');
+  const vpEl = document.getElementById('invTotalVp');
+  const thbOverEl = document.getElementById('invTotalThbOver');
+  const thbRiotEl = document.getElementById('invTotalThbRiot');
+  const countEl = document.getElementById('invTotalSkinsCount');
+  const tierBreakdownEl = document.getElementById('invTierBreakdown');
+
+  if (vpEl) vpEl.innerHTML = `0 <span class="unit-vp">VP</span>`;
+  if (thbOverEl) thbOverEl.textContent = `~0 ฿`;
+  if (thbRiotEl) thbRiotEl.textContent = `~0 ฿`;
+  if (countEl) countEl.innerHTML = `0 <span class="unit-vp">ชิ้น</span>`;
+  if (tierBreakdownEl) tierBreakdownEl.innerHTML = '';
+
+  if (grid) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 40px 20px; text-align: center; background: rgba(0,0,0,0.4); border: 1px solid rgba(245,211,108,0.3); border-radius: 12px;">
+        <div style="font-family:var(--font-heading); font-size:22px; font-weight:800; color:var(--val-gold); margin-bottom:8px;">
+          กรุณาเข้าสู่ระบบเพื่อดึงคลังสกินของไอดีคุณ
+        </div>
+        <p style="color:#C0D0E0; font-size:13px; max-width:480px; margin:0 auto 18px auto; line-height:1.6;">
+          ระบบจะเชื่อมต่อไปยัง Riot Games เพื่อสแกนสกินทั้งหมดที่คุณเป็นเจ้าของ คำนวณมูลค่าไอดีรวมเป็นเงินบาท และระบุสกินที่คุณกำลังสวมใส่อยู่
+        </p>
+        <button type="button" class="btn btn-primary" onclick="switchAppMode('store')" style="padding:10px 24px; font-size:14px; font-weight:700;">
+          ไปหน้าเข้าสู่ระบบ (Google / Social)
+        </button>
+      </div>
+    `;
+  }
+}
+
+async function loadPlayerInventory(forceRefresh = false) {
+  const grid = document.getElementById('invSkinsGrid');
+  if (!grid) return;
+
+  if (playerInventoryData && !forceRefresh) {
+    renderInventoryView(playerInventoryData);
+    return;
+  }
+
+  grid.innerHTML = `
+    <div class="catalog-loading-state" style="grid-column: 1 / -1; padding: 60px 20px; text-align: center;">
+      <div class="loading-spinner"></div>
+      <div style="font-family:var(--font-heading); font-size:18px; font-weight:700; color:var(--val-cyan); margin-top:14px; letter-spacing:1px;">
+        กำลังตรวจสอบคลังสกินและประเมินมูลค่าไอดีจาก Riot Games...
+      </div>
+      <div style="font-size:12px; color:var(--val-gray); margin-top:4px;">ระบบกำลังสแกนไอเทมที่ครอบครองทั้งหมด</div>
+    </div>
+  `;
+
+  try {
+    const res = await apiFetch('/api/inventory');
+    const data = await res.json();
+
+    if (!data.ok || !data.inventory) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">ไม่สามารถโหลดคลังสกินได้ (${escapeHtml(data.error || 'กรุณาลองใหม่อีกครั้ง')})</div>`;
+      return;
+    }
+
+    playerInventoryData = data.inventory;
+    populateInventoryWeaponFilter(playerInventoryData);
+    renderInventoryView(playerInventoryData);
+  } catch (err) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">เกิดข้อผิดพลาดในการเชื่อมต่อคลังสกิน: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function renderInventoryView(inv) {
+  // 1. Render Highlights
+  const vpEl = document.getElementById('invTotalVp');
+  const thbOverEl = document.getElementById('invTotalThbOver');
+  const thbRiotEl = document.getElementById('invTotalThbRiot');
+  const countEl = document.getElementById('invTotalSkinsCount');
+  const tierBreakdownEl = document.getElementById('invTierBreakdown');
+
+  if (vpEl) vpEl.innerHTML = `${(inv.totalVpValue || 0).toLocaleString()} <span class="unit-vp">VP</span>`;
+  if (thbOverEl) thbOverEl.textContent = `~${(inv.estimatedThbOverTopup || 0).toLocaleString()} ฿`;
+  if (thbRiotEl) thbRiotEl.textContent = `~${(inv.estimatedThbRiotOfficial || 0).toLocaleString()} ฿`;
+  if (countEl) countEl.innerHTML = `${(inv.totalSkinsCount || 0).toLocaleString()} <span class="unit-vp">ชิ้น</span>`;
+
+  // 2. Render Tier Breakdown Chips
+  if (tierBreakdownEl && inv.tierBreakdown) {
+    const tb = inv.tierBreakdown;
+    tierBreakdownEl.innerHTML = `
+      <div class="inv-tier-chip"><span class="tier-dot" style="background:#F5D36C;"></span>Ultra: <strong>${tb.ultra || 0}</strong></div>
+      <div class="inv-tier-chip"><span class="tier-dot" style="background:#FF9900;"></span>Exclusive: <strong>${tb.exclusive || 0}</strong></div>
+      <div class="inv-tier-chip"><span class="tier-dot" style="background:#B366FF;"></span>Premium: <strong>${tb.premium || 0}</strong></div>
+      <div class="inv-tier-chip"><span class="tier-dot" style="background:#2ECC71;"></span>Deluxe: <strong>${tb.deluxe || 0}</strong></div>
+      <div class="inv-tier-chip"><span class="tier-dot" style="background:#3498DB;"></span>Select: <strong>${tb.select || 0}</strong></div>
+    `;
+  }
+
+  filterAndRenderInventoryGrid();
+}
+
+function populateInventoryWeaponFilter(inv) {
+  const select = document.getElementById('filterInvWeapon');
+  if (!select || !inv.weaponBreakdown) return;
+
+  const currentVal = select.value;
+  select.innerHTML = '<option value="all">อาวุธทั้งหมด (All Weapons)</option>';
+
+  Object.entries(inv.weaponBreakdown)
+    .sort((a, b) => b[1].count - a[1].count)
+    .forEach(([weapon, info]) => {
+      const opt = document.createElement('option');
+      opt.value = weapon;
+      opt.textContent = `${weapon} (${info.count} สกิน • ${info.totalVp.toLocaleString()} VP)`;
+      select.appendChild(opt);
+    });
+
+  if (currentVal) select.value = currentVal;
+}
+
+function filterAndRenderInventoryGrid() {
+  const grid = document.getElementById('invSkinsGrid');
+  if (!grid || !playerInventoryData) return;
+
+  const search = (document.getElementById('invSearchInput')?.value || '').toLowerCase().trim();
+  const weaponFilter = document.getElementById('filterInvWeapon')?.value || 'all';
+  const sort = document.getElementById('filterInvSort')?.value || 'equipped';
+
+  let list = [...(playerInventoryData.skins || [])];
+
+  if (search) {
+    list = list.filter(s => 
+      (s.name || '').toLowerCase().includes(search) || 
+      (s.weaponType || '').toLowerCase().includes(search) ||
+      (s.contentTier?.name || '').toLowerCase().includes(search)
+    );
+  }
+
+  if (weaponFilter !== 'all') {
+    list = list.filter(s => (s.weaponType || '').toLowerCase() === weaponFilter.toLowerCase());
+  }
+
+  if (sort === 'equipped') {
+    list.sort((a, b) => {
+      if (b.isEquipped !== a.isEquipped) return b.isEquipped ? 1 : -1;
+      return (b.estimatedVpPrice || 0) - (a.estimatedVpPrice || 0);
+    });
+  } else if (sort === 'price_desc') {
+    list.sort((a, b) => (b.estimatedVpPrice || 0) - (a.estimatedVpPrice || 0));
+  } else if (sort === 'price_asc') {
+    list.sort((a, b) => (a.estimatedVpPrice || 0) - (b.estimatedVpPrice || 0));
+  } else if (sort === 'name_asc') {
+    list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  }
+
+  if (list.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 50px 20px; text-align: center;">
+        <div style="font-size:16px; color:var(--val-gray);">ไม่พบสกินที่ตรงกับเงื่อนไขการค้นหาในคลังของคุณ</div>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = '';
+  list.forEach(skin => {
+    const card = document.createElement('div');
+    card.className = `skin-card inv-skin-card ${skin.isEquipped ? 'is-equipped-card' : ''}`;
+    card.dataset.uuid = skin.uuid;
+
+    const tierName = skin.contentTier?.name || skin.tier?.name || 'Standard Edition';
+    const tierColor = skin.contentTier?.color || skin.tier?.highlightColor || '#ff4655';
+    const tierIcon = skin.contentTier?.displayIcon || skin.tier?.displayIcon || '';
+    const imgUrl = skin.displayIcon || (skin.chromas && skin.chromas[0]?.displayIcon) || (skin.levels && skin.levels[0]?.displayIcon) || skin.weaponIcon || 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
+    const isStandard = skin.isStandardDefault || (skin.name || '').toLowerCase().startsWith('standard ');
+    const priceFormatted = (skin.estimatedVpPrice || 0) > 0 
+      ? (skin.estimatedVpPrice.toLocaleString() + ' VP') 
+      : (isStandard ? 'Standard' : 'Reward');
+
+    const chromasCount = skin.chromas ? skin.chromas.length : 1;
+    const hasVideo = skin.hasVideo || (skin.levels && skin.levels.some(l => l.streamedVideo));
+
+    card.style.setProperty('--card-tier-color', tierColor);
+    card.style.setProperty('--card-tier-glow', tierColor + '40');
+
+    card.innerHTML = `
+      ${skin.isEquipped ? '<div class="inv-equipped-badge">EQUIPPED / ใช้งานอยู่</div>' : ''}
+      <div class="skin-tier-indicator" style="background-color: ${tierColor};"></div>
+      
+      <div class="skin-card-header">
+        <div class="skin-tier-info">
+          ${tierIcon ? `<img src="${tierIcon}" alt="" class="skin-tier-icon">` : ''}
+          <span class="skin-tier-name">${escapeHtml(tierName)}</span>
+        </div>
+        <div class="skin-features-badge">
+          ${chromasCount > 1 ? `<span class="badge-feat">${chromasCount} สี</span>` : ''}
+          ${hasVideo ? '<span class="badge-feat"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:middle; margin-right:3px;"><polygon points="5 3 19 12 5 21 5 3"/></svg> วิดีโอ VFX</span>' : ''}
+        </div>
+      </div>
+
+      <div class="skin-image-box">
+        <img src="${imgUrl}" alt="${escapeHtml(skin.name)}" class="skin-render-img" loading="lazy" onerror="this.onerror=null; this.src='https://media.valorant-api.com/weapons/skins/default/displayicon.png';">
+      </div>
+
+      <div class="skin-card-footer">
+        <div class="skin-name" title="${escapeHtml(skin.name)}">${escapeHtml(skin.name)}</div>
+        <div class="skin-meta-row">
+          <div class="skin-price-tag">
+            ${(skin.estimatedVpPrice || 0) > 0 ? '<img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">' : ''}
+            <span>${priceFormatted}</span>
+          </div>
+          <button class="btn btn-primary btn-sm btn-inspect" title="ดูสีปืนและคลิป Finisher">
+            <span>ตรวจสกิน</span>
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      playTacticalAudio('inspect');
+      openSkinModal(skin);
+    });
+
+    grid.appendChild(card);
+  });
+
+  observeScrollElements();
+}
+
+// Inventory Search & Filter Listeners
+document.getElementById('invSearchInput')?.addEventListener('input', (e) => {
+  const val = e.target.value;
+  const clearBtn = document.getElementById('btnClearInvSearch');
+  if (clearBtn) clearBtn.classList.toggle('hidden', !val);
+  filterAndRenderInventoryGrid();
+});
+
+document.getElementById('btnClearInvSearch')?.addEventListener('click', () => {
+  const input = document.getElementById('invSearchInput');
+  if (input) input.value = '';
+  document.getElementById('btnClearInvSearch')?.classList.add('hidden');
+  filterAndRenderInventoryGrid();
+});
+
+document.getElementById('filterInvWeapon')?.addEventListener('change', () => {
+  playTacticalAudio('click');
+  filterAndRenderInventoryGrid();
+});
+
+document.getElementById('filterInvSort')?.addEventListener('change', () => {
+  playTacticalAudio('click');
+  filterAndRenderInventoryGrid();
+});
+
+document.getElementById('btnRefreshInventory')?.addEventListener('click', () => {
+  playTacticalAudio('click');
+  loadPlayerInventory(true);
+});
+
+// ==========================================================
+// 2. PRO PLAYER CROSSHAIRS & CANVAS GENERATOR MODULE
+// ==========================================================
+let allCrosshairsList = [];
+let currentChCategory = 'all';
+
+function parseCrosshairCode(codeStr) {
+  if (!codeStr || typeof codeStr !== 'string') return null;
+
+  const parts = codeStr.trim().split(';');
+  const settings = {
+    color: '#00FFFF',
+    outlines: true,
+    outlineThickness: 1,
+    outlineOpacity: 1,
+    centerDot: false,
+    centerDotSize: 2,
+    centerDotOpacity: 1,
+    showInnerLines: true,
+    innerThickness: 1,
+    innerLength: 4,
+    innerOffset: 2,
+    innerOpacity: 1,
+    showOuterLines: false,
+    outerThickness: 1,
+    outerLength: 2,
+    outerOffset: 10,
+    outerOpacity: 1
+  };
+
+  const colorMap = {
+    '0': '#FFFFFF',
+    '1': '#00FF00',
+    '2': '#7FFF00',
+    '3': '#DFFF00',
+    '4': '#FFFF00',
+    '5': '#00FFFF',
+    '6': '#FF00FF',
+    '7': '#FF4655'
+  };
+
+  let inPrimary = false;
+  for (let i = 0; i < parts.length; i++) {
+    const key = parts[i];
+    const val = parts[i + 1];
+    if (key === 'P') { inPrimary = true; continue; }
+    if (key === 'A' || key === 'S') { inPrimary = false; }
+    
+    if (inPrimary) {
+      if (key === 'c' && colorMap[val]) settings.color = colorMap[val];
+      else if (key === 'u' && val) settings.color = '#' + val.slice(0, 6);
+      else if (key === 'h') settings.outlines = val !== '0';
+      else if (key === 't') settings.outlineThickness = parseFloat(val) || 1;
+      else if (key === 'o') settings.outlineOpacity = parseFloat(val) || 1;
+      else if (key === 'd') settings.centerDot = val === '1';
+      else if (key === 'z') settings.centerDotSize = parseFloat(val) || 2;
+      else if (key === 'a') settings.centerDotOpacity = parseFloat(val) || 1;
+      else if (key === '0b') settings.showInnerLines = val !== '0';
+      else if (key === '0t') settings.innerThickness = parseFloat(val) || 1;
+      else if (key === '0l') settings.innerLength = parseFloat(val) || 4;
+      else if (key === '0o') settings.innerOffset = parseFloat(val) || 2;
+      else if (key === '0a') settings.innerOpacity = parseFloat(val) || 1;
+      else if (key === '1b') settings.showOuterLines = val === '1';
+      else if (key === '1t') settings.outerThickness = parseFloat(val) || 1;
+      else if (key === '1l') settings.outerLength = parseFloat(val) || 2;
+      else if (key === '1o') settings.outerOffset = parseFloat(val) || 10;
+      else if (key === '1a') settings.outerOpacity = parseFloat(val) || 1;
+    }
+  }
+  return settings;
+}
+
+function drawCrosshairOnCanvas(canvas, codeStr) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const w = canvas.width;
+  const h = canvas.height;
+  const cx = Math.floor(w / 2);
+  const cy = Math.floor(h / 2);
+
+  // Background gradient & tactical grid
+  ctx.fillStyle = '#0B1018';
+  ctx.fillRect(0, 0, w, h);
+
+  // Subtle grid
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let x = 0; x < w; x += 16) {
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+  }
+  for (let y = 0; y < h; y += 16) {
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+  }
+  ctx.stroke();
+
+  // Subtle Target Guide Rings
+  ctx.strokeStyle = 'rgba(0, 245, 212, 0.12)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+  ctx.arc(cx, cy, 48, 0, Math.PI * 2);
+  ctx.stroke();
+
+  const cfg = parseCrosshairCode(codeStr);
+  if (!cfg) return;
+
+  const color = cfg.color || '#00FFFF';
+  const outlines = cfg.outlines;
+  const outThick = cfg.outlineThickness;
+
+  function drawRectWithOutline(x, y, rw, rh, opacity) {
+    if (outlines) {
+      ctx.fillStyle = `rgba(0, 0, 0, ${cfg.outlineOpacity})`;
+      ctx.fillRect(x - outThick, y - outThick, rw + outThick * 2, rh + outThick * 2);
+    }
+    ctx.fillStyle = color;
+    ctx.globalAlpha = opacity;
+    ctx.fillRect(x, y, rw, rh);
+    ctx.globalAlpha = 1.0;
+  }
+
+  // Draw Center Dot
+  if (cfg.centerDot) {
+    const s = Math.max(1, cfg.centerDotSize);
+    const half = Math.floor(s / 2);
+    drawRectWithOutline(cx - half, cy - half, s, s, cfg.centerDotOpacity);
+  }
+
+  // Draw Inner Lines
+  if (cfg.showInnerLines && cfg.innerLength > 0) {
+    const t = Math.max(1, cfg.innerThickness);
+    const l = cfg.innerLength;
+    const off = cfg.innerOffset;
+    const halfT = Math.floor(t / 2);
+
+    // Top
+    drawRectWithOutline(cx - halfT, cy - off - l, t, l, cfg.innerOpacity);
+    // Bottom
+    drawRectWithOutline(cx - halfT, cy + off, t, l, cfg.innerOpacity);
+    // Left
+    drawRectWithOutline(cx - off - l, cy - halfT, l, t, cfg.innerOpacity);
+    // Right
+    drawRectWithOutline(cx + off, cy - halfT, l, t, cfg.innerOpacity);
+  }
+
+  // Draw Outer Lines
+  if (cfg.showOuterLines && cfg.outerLength > 0) {
+    const t = Math.max(1, cfg.outerThickness);
+    const l = cfg.outerLength;
+    const off = cfg.outerOffset;
+    const halfT = Math.floor(t / 2);
+
+    // Top
+    drawRectWithOutline(cx - halfT, cy - off - l, t, l, cfg.outerOpacity);
+    // Bottom
+    drawRectWithOutline(cx - halfT, cy + off, t, l, cfg.outerOpacity);
+    // Left
+    drawRectWithOutline(cx - off - l, cy - halfT, l, t, cfg.outerOpacity);
+    // Right
+    drawRectWithOutline(cx + off, cy - halfT, l, t, cfg.outerOpacity);
+  }
+}
+
+async function loadProCrosshairs() {
+  const grid = document.getElementById('crosshairsGrid');
+  if (!grid) return;
+
+  if (allCrosshairsList.length > 0) {
+    filterAndRenderCrosshairs();
+    return;
+  }
+
+  grid.innerHTML = `
+    <div class="catalog-loading-state" style="grid-column: 1 / -1; padding: 50px 20px; text-align: center;">
+      <div class="loading-spinner"></div>
+      <div style="font-family:var(--font-heading); font-size:18px; font-weight:700; color:var(--val-cyan); margin-top:14px;">
+        กำลังโหลดฐานข้อมูลเป้าเล็งโปรเพลเยอร์...
+      </div>
+    </div>
+  `;
+
+  try {
+    const res = await fetch('/api/crosshairs');
+    const data = await res.json();
+    if (data.ok && data.crosshairs) {
+      allCrosshairsList = data.crosshairs;
+      filterAndRenderCrosshairs();
+
+      // Set initial custom tester
+      const customInput = document.getElementById('customCrosshairInput');
+      const customCanvas = document.getElementById('customChCanvas');
+      if (customInput && customCanvas && allCrosshairsList[0]) {
+        customInput.value = allCrosshairsList[0].code;
+        drawCrosshairOnCanvas(customCanvas, allCrosshairsList[0].code);
+      }
+    }
+  } catch (err) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">ไม่สามารถโหลดฐานข้อมูลเป้าเล็งได้: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function filterAndRenderCrosshairs() {
+  const grid = document.getElementById('crosshairsGrid');
+  if (!grid) return;
+
+  const search = (document.getElementById('crosshairSearchInput')?.value || '').toLowerCase().trim();
+  let list = allCrosshairsList;
+
+  if (currentChCategory !== 'all') {
+    list = list.filter(c => c.category === currentChCategory);
+  }
+
+  if (search) {
+    list = list.filter(c => 
+      c.player.toLowerCase().includes(search) ||
+      c.team.toLowerCase().includes(search) ||
+      c.role.toLowerCase().includes(search) ||
+      c.style.toLowerCase().includes(search)
+    );
+  }
+
+  if (list.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 50px 20px; text-align: center;">
+        <div style="font-size:16px; color:var(--val-gray);">ไม่พบเป้าเล็งของโปรเพลเยอร์ที่ตรงกับการค้นหา</div>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = '';
+  list.forEach(ch => {
+    const card = document.createElement('div');
+    card.className = 'crosshair-card';
+
+    card.innerHTML = `
+      <div class="ch-card-header">
+        <div>
+          <div class="ch-player-name">${escapeHtml(ch.player)}</div>
+          <div class="ch-player-team">${escapeHtml(ch.team)} • ${escapeHtml(ch.role)}</div>
+        </div>
+        <div class="ch-team-badge">${escapeHtml(ch.teamLogo || 'PRO')}</div>
+      </div>
+
+      <div class="ch-canvas-stage">
+        <canvas width="260" height="120" class="card-ch-canvas" id="canvas_${ch.id}"></canvas>
+      </div>
+
+      <div class="ch-meta-row">
+        <span class="ch-style-tag">${escapeHtml(ch.style)}</span>
+        <span style="color:${ch.colorHex}; font-weight:700;">${escapeHtml(ch.colorName)}</span>
+      </div>
+
+      <div class="ch-desc-text">${escapeHtml(ch.description)}</div>
+
+      <button class="ch-copy-btn" data-code="${escapeHtml(ch.code)}">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span>คัดลอกโค้ดเป้าเล็ง</span>
+      </button>
+    `;
+
+    grid.appendChild(card);
+
+    // Render Canvas
+    const canvas = card.querySelector(`#canvas_${ch.id}`);
+    if (canvas) {
+      drawCrosshairOnCanvas(canvas, ch.code);
+    }
+  });
+
+  // Attach copy listeners
+  grid.querySelectorAll('.ch-copy-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const code = btn.dataset.code;
+      if (!code) return;
+
+      playTacticalAudio('click');
+      navigator.clipboard.writeText(code).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>คัดลอกสำเร็จ! นำไปวางในเกมได้เลย</span>
+        `;
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span>คัดลอกโค้ดเป้าเล็ง</span>
+          `;
+        }, 2200);
+      });
+    });
+  });
+
+  observeScrollElements();
+}
+
+// Category Pills Handler for Crosshairs
+document.querySelectorAll('.ch-cat-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    playTacticalAudio('tab');
+    document.querySelectorAll('.ch-cat-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    currentChCategory = pill.dataset.cat || 'all';
+    filterAndRenderCrosshairs();
+  });
+});
+
+document.getElementById('crosshairSearchInput')?.addEventListener('input', () => {
+  filterAndRenderCrosshairs();
+});
+
+document.getElementById('btnPreviewCustomCh')?.addEventListener('click', () => {
+  playTacticalAudio('click');
+  const input = document.getElementById('customCrosshairInput');
+  const canvas = document.getElementById('customChCanvas');
+  if (input && canvas && input.value.trim()) {
+    drawCrosshairOnCanvas(canvas, input.value.trim());
+  }
+});
+
+document.getElementById('customCrosshairInput')?.addEventListener('input', (e) => {
+  const canvas = document.getElementById('customChCanvas');
+  if (canvas && e.target.value.trim()) {
+    drawCrosshairOnCanvas(canvas, e.target.value.trim());
+  }
+});
+
+// Auto preload crosshairs on app start
+setTimeout(loadProCrosshairs, 200);

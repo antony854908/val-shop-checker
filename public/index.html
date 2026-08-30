@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=6.0">
+  <link rel="stylesheet" href="style.css?v=6.1">
 </head>
 <body>
   <!-- Ambient Atmospheric Effects -->
@@ -45,7 +45,7 @@
         </div>
         <button id="btnOpenVpCalc" class="btn btn-pill btn-calc" title="ระบบเปรียบเทียบราคาเงินจริงกับ VP ร้านไหนเติมถูกสุด">
           <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" width="14" height="14">
-          <span>🏷️ เทียบราคาเติม VP (OverTopup)</span>
+          <span>เทียบราคาเติม VP (OverTopup)</span>
         </button>
         <button id="btnToggleSoundEffects" class="btn btn-pill btn-sound-toggle" title="เปิด/ปิดเสียงเอฟเฟกต์ (SFX)">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" class="icon-sound-on"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
@@ -65,6 +65,18 @@
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
           </span>
           <span class="tab-label">ร้านค้าไอดี (Store)</span>
+        </button>
+        <button id="btnTabInventory" class="mode-tab-btn tab-highlight-gold">
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </span>
+          <span class="tab-label">สกินที่เรามี &amp; มูลค่าไอดี (Inventory)</span>
+        </button>
+        <button id="btnTabCrosshairs" class="mode-tab-btn tab-highlight-cyan">
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="2"/></svg>
+          </span>
+          <span class="tab-label">เป้าเล็งโปร (Pro Crosshairs)</span>
         </button>
         <button id="btnTabCareer" class="mode-tab-btn">
           <span class="tab-icon">
@@ -136,6 +148,22 @@
           <p class="hero-desc">ดูสกินที่สุ่มขายในไอดีของคุณ ยอดเงินคงเหลือ และตรวจสอบเอฟเฟกต์/Finisher</p>
         </div>
 
+        <!-- Quick Non-Login Feature Jump Strip -->
+        <div class="guest-features-strip" style="display:flex; justify-content:center; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-pill" onclick="switchAppMode('catalog')" style="font-size:12px; padding:6px 14px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/></svg>
+            <span>ดูคลังสกิน 1,380+ สกิน (ไม่ต้องล็อกอิน)</span>
+          </button>
+          <button type="button" class="btn btn-pill" onclick="switchAppMode('crosshairs')" style="font-size:12px; padding:6px 14px; background:rgba(0,245,212,0.08); border:1px solid rgba(0,245,212,0.25); color:var(--val-cyan);">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><circle cx="12" cy="12" r="2"/></svg>
+            <span>ดูเป้าเล็งโปรเพลเยอร์ 16 คน (ไม่ต้องล็อกอิน)</span>
+          </button>
+          <button type="button" class="btn btn-pill" onclick="switchAppMode('agents')" style="font-size:12px; padding:6px 14px; background:rgba(255,70,85,0.08); border:1px solid rgba(255,70,85,0.25); color:var(--val-red);">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>ดูโมเดล 3D Agents 29+ ตัว (ไม่ต้องล็อกอิน)</span>
+          </button>
+        </div>
+
         <!-- Login Method Navigation -->
         <div class="login-method-nav">
           <button class="tab-btn active" data-tab="google-login">
@@ -176,7 +204,13 @@
                   <div class="btn-riot-icon-cluster">
                     <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
                   </div>
-                  <span class="btn-riot-text">1. กดเปิดหน้าล็อกอิน Riot (Google / Social) ↗️</span>
+                  <span class="btn-riot-text">1. กดเปิดหน้าล็อกอิน Riot (Google / Social)</span>
+                </a>
+                <div style="font-size:11px; color:#95acc0; margin-top:8px; line-height:1.5;">
+                  * หากกดแล้วเด้งไปหน้า 404 ทันที แสดงว่าเบราว์เซอร์จำการล็อกอินของคุณไว้แล้ว (สำเร็จแล้ว) ให้คัดลอกลิงก์ด้านบนสุดของหน้า 404 มาวางใน STEP 02 ได้เลย
+                </div>
+                <a href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1&prompt=login" target="_blank" rel="noopener noreferrer" style="display:inline-block; font-size:11px; color:var(--val-cyan); text-decoration:underline; margin-top:6px;">
+                  หรือคลิกที่นี่หากต้องการเปลี่ยนไอดี / เลือกบัญชี Google อื่น (Force Login)
                 </a>
               </div>
 
@@ -192,16 +226,16 @@
                   <span>เมื่อล็อกอินเสร็จ หน้าเว็บจะขึ้น <strong>404 Not Found</strong> (ปกติ 100%) ให้คัดลอกลิงก์ด้านบนสุดมาวาง:</span>
                 </div>
 
-                <div class="terminal-action-row">
+                <form id="quickGoogleForm" class="terminal-action-row" onsubmit="return false;">
                   <div class="terminal-field-wrap">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="terminal-prefix-icon"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                    <input type="text" id="quickPasteInput" placeholder="วางลิงก์ URL หรือ Token ที่นี่ (หรือกดปุ่มวาง)..." class="terminal-text-input" autocomplete="off" spellcheck="false">
+                    <input type="text" id="quickPasteInput" placeholder="วางลิงก์ URL หรือ Token ที่นี่..." class="terminal-text-input" autocomplete="off" spellcheck="false">
                   </div>
-                  <button type="button" id="btnAutoPaste" class="btn-terminal-action">
+                  <button type="submit" id="btnAutoPaste" class="btn-terminal-action">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-                    <span>วาง &amp; เข้าสู่ระบบทันที ⚡</span>
+                    <span>วาง &amp; เข้าสู่ระบบทันที</span>
                   </button>
-                </div>
+                </form>
               </div>
 
             </div>
@@ -704,6 +738,148 @@
         </div>
       </section>
 
+      <!-- ================= MY INVENTORY & ACCOUNT VALUATION ================= -->
+      <section id="inventorySection" class="inventory-dashboard-view hidden">
+        
+        <!-- Account Valuation Banner -->
+        <div class="inventory-valuation-banner">
+          <div class="valuation-top-row">
+            <div class="valuation-brand">
+              <div class="valuation-badge-tag">ACCOUNT VALUATION &amp; INVENTORY</div>
+              <h2 class="valuation-heading">คลังสกินของฉัน &amp; มูลค่าไอดีรวม</h2>
+              <p class="valuation-sub">ประเมินมูลค่าสกินอาวุธทั้งหมดที่ครอบครองในบัญชีของคุณ</p>
+            </div>
+            <button id="btnRefreshInventory" class="btn btn-secondary btn-sm" title="รีเฟรชคลังสกิน">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+              <span>รีเฟรชคลัง</span>
+            </button>
+          </div>
+
+          <!-- Valuation Highlights Cards -->
+          <div class="valuation-stats-grid">
+            <div class="val-stat-card card-glow-gold">
+              <div class="stat-icon-wrap">
+                <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" width="28" height="28">
+              </div>
+              <div class="stat-content">
+                <div class="stat-label">มูลค่าสกินรวมในไอดี</div>
+                <div class="stat-value" id="invTotalVp">0 <span class="unit-vp">VP</span></div>
+                <div class="stat-sub">คำนวณจากราคามาตรฐานของสกินที่ครอบครอง</div>
+              </div>
+            </div>
+
+            <div class="val-stat-card card-glow-cyan">
+              <div class="stat-icon-wrap">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
+              <div class="stat-content">
+                <div class="stat-label">เทียบมูลค่าเงินจริง (OverTopup)</div>
+                <div class="stat-value text-cyan" id="invTotalThbOver">~0 ฿</div>
+                <div class="stat-sub">เทียบเรทเติมตรงในเกม: <span id="invTotalThbRiot" class="text-gold">~0 ฿</span></div>
+              </div>
+            </div>
+
+            <div class="val-stat-card card-glow-red">
+              <div class="stat-icon-wrap">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              </div>
+              <div class="stat-content">
+                <div class="stat-label">จำนวนสกินที่ครอบครอง</div>
+                <div class="stat-value text-red" id="invTotalSkinsCount">0 <span class="unit-vp">ชิ้น</span></div>
+                <div class="stat-sub">รวมสกินปืน &amp; มีด (ไม่รวมสกินเริ่มต้น)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tier Breakdown Bar -->
+          <div class="inv-tier-breakdown-bar" id="invTierBreakdown">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Inventory Filter & Search Bar -->
+        <div class="catalog-filter-bar inv-filter-bar">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" class="search-icon-svg">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="invSearchInput" placeholder="ค้นหาสกินในคลังของคุณ (เช่น Vandal, Prime, Kuronami...)" class="search-input-field">
+            <button id="btnClearInvSearch" class="btn-search-clear hidden">&times;</button>
+          </div>
+
+          <div class="dropdown-filter-group">
+            <select id="filterInvWeapon" class="modern-select">
+              <option value="all">อาวุธทั้งหมด (All Weapons)</option>
+            </select>
+
+            <select id="filterInvSort" class="modern-select">
+              <option value="equipped">สกินที่กำลังใช้งานก่อน (Equipped First)</option>
+              <option value="price_desc">ราคา VP สูงสุด (Highest Value)</option>
+              <option value="price_asc">ราคา VP ต่ำสุด</option>
+              <option value="name_asc">ชื่อ A-Z</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Inventory Grid -->
+        <div id="invSkinsGrid" class="skins-card-grid">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ================= PRO PLAYER CROSSHAIRS ================= -->
+      <section id="crosshairsSection" class="crosshairs-dashboard-view hidden">
+        
+        <div class="crosshairs-hero-banner">
+          <div class="crosshair-hero-left">
+            <div class="badge-tag-official">PRO PLAYER DATABASE &amp; GENERATOR</div>
+            <h2 class="section-title">คลังเป้าเล็งโปรเพลเยอร์ระดับโลก</h2>
+            <p class="section-desc">รวมโค้ดเป้าเล็งของนักแข่งระดับท็อป VCT, แชมป์โลก Champions, และโปรเพลเยอร์ไทย พร้อมพรีวิวสดและปุ่มคัดลอกโค้ดไปวางในเกมทันที</p>
+          </div>
+
+          <!-- Quick Interactive Tester Box -->
+          <div class="crosshair-quick-tester">
+            <div class="tester-title">ทดสอบโค้ดเป้าเล็งของคุณเอง (Custom Code Tester)</div>
+            <div class="tester-input-row">
+              <input type="text" id="customCrosshairInput" placeholder="วางโค้ดเป้าเล็ง VALORANT ที่นี่ (เช่น 0;s;1;P;c;5;...)" class="modern-input custom-ch-input">
+              <button id="btnPreviewCustomCh" class="btn btn-primary btn-sm">พรีวิว</button>
+            </div>
+            <div class="tester-canvas-preview-wrap">
+              <canvas id="customChCanvas" width="220" height="120" class="ch-preview-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Crosshairs Filter Bar -->
+        <div class="crosshair-category-pills">
+          <button class="ch-cat-pill active" data-cat="all">ทั้งหมด (All Pros)</button>
+          <button class="ch-cat-pill" data-cat="champions">แชมป์โลก (Champions MVPs)</button>
+          <button class="ch-cat-pill" data-cat="thai-pros">โปรไทย (Thai Pros)</button>
+          <button class="ch-cat-pill" data-cat="sentinels">Sentinels (SEN)</button>
+          <button class="ch-cat-pill" data-cat="paper-rex">Paper Rex (PRX)</button>
+          <button class="ch-cat-pill" data-cat="fnatic">Fnatic (FNC)</button>
+          <button class="ch-cat-pill" data-cat="americas">Americas</button>
+          <button class="ch-cat-pill" data-cat="emea">EMEA</button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="crosshair-search-bar">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" class="search-icon-svg">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="crosshairSearchInput" placeholder="ค้นหาโปรเพลเยอร์, ทีม, หรือรูปแบบเป้า (เช่น TenZ, Aspas, Jinggg, Dot...)" class="search-input-field">
+          </div>
+        </div>
+
+        <!-- Crosshair Cards Grid -->
+        <div id="crosshairsGrid" class="crosshairs-card-grid">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
     </main>
 
     <!-- ================= SKIN INSPECTOR MODAL ================= -->
@@ -776,24 +952,24 @@
           <div class="skin-price-comparison-bar" id="modalSkinPriceCompareBar">
             <div class="skin-price-compare-info">
               <div class="skin-price-compare-title">
-                <span class="overtopup-bolt-icon">⚡</span>
+                <span class="overtopup-bolt-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block; vertical-align:middle;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
                 <span id="modalOverTopupHeaderTitle">คำนวณแพ็กเกจ OverTopup ที่ต้องเติมสำหรับปืนนี้:</span>
               </div>
               <div class="skin-price-compare-values" id="modalSkinPriceCompareVal">
                 <div class="overtopup-combo-badge" id="modalSkinOverTopupCombo">1x แพ็กเกจ 2,050 VP (489 ฿)</div>
                 <div class="overtopup-metric-pills">
-                  <span class="pill-vp-gain" id="modalSkinVpGain">💎 ได้รับ 2,050 VP</span>
-                  <span class="pill-vp-leftover" id="modalSkinVpLeftover">✨ เหลือ +275 VP ในไอดี</span>
-                  <span class="pill-savings" id="modalSkinSavingsTag">⚡ ประหยัด ~111 ฿ จากเติมในเกม</span>
+                  <span class="pill-vp-gain" id="modalSkinVpGain">ได้รับ 2,050 VP</span>
+                  <span class="pill-vp-leftover" id="modalSkinVpLeftover">คงเหลือ +275 VP ในไอดี</span>
+                  <span class="pill-savings" id="modalSkinSavingsTag"> ประหยัด ~111 ฿ จากเติมในเกม</span>
                 </div>
               </div>
             </div>
             <div class="skin-price-compare-actions">
               <a id="btnDirectOverTopupLink" href="https://www.overtopup.com/th/game-topup/valorant" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm btn-glow" title="เปิดหน้าเว็บ OverTopup เพื่อเติมเงินทันที">
-                <span>⚡ ไปเติมที่ OverTopup (overtopup.com) ↗️</span>
+                <span>ไปเติมที่ OverTopup (overtopup.com)</span>
               </a>
               <button id="btnInspectCompareStores" class="btn btn-secondary btn-sm" title="เปิดระบบเปรียบเทียบทุกแพ็กเกจ">
-                <span>📊 ดูตารางราคาทุกแพ็ก</span>
+                <span>ดูตารางราคาทุกแพ็ก</span>
               </button>
             </div>
           </div>
@@ -865,24 +1041,24 @@
           <div class="skin-price-comparison-bar bundle-compare-bar" id="modalBundlePriceCompareBar">
             <div class="skin-price-compare-info">
               <div class="skin-price-compare-title">
-                <span class="overtopup-bolt-icon">⚡</span>
+                <span class="overtopup-bolt-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block; vertical-align:middle;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
                 <span>คำนวณแพ็กเกจ OverTopup ที่ต้องเติมสำหรับชุดรวมนี้:</span>
               </div>
               <div class="skin-price-compare-values">
                 <div class="overtopup-combo-badge" id="modalBundleOverTopupCombo">1x 7,150 VP + 1x 2,050 VP + 1x 475 VP (2,321 ฿)</div>
                 <div class="overtopup-metric-pills">
-                  <span class="pill-vp-gain" id="modalBundleVpGain">💎 ได้รับ 9,675 VP</span>
-                  <span class="pill-vp-leftover" id="modalBundleVpLeftover">✨ เหลือ +175 VP ในไอดี</span>
-                  <span class="pill-savings" id="modalBundleSavingsTag">⚡ ประหยัด ~529 ฿ จากเติมในเกม</span>
+                  <span class="pill-vp-gain" id="modalBundleVpGain">ได้รับ 9,675 VP</span>
+                  <span class="pill-vp-leftover" id="modalBundleVpLeftover">คงเหลือ +175 VP ในไอดี</span>
+                  <span class="pill-savings" id="modalBundleSavingsTag"> ประหยัด ~529 ฿ จากเติมในเกม</span>
                 </div>
               </div>
             </div>
             <div class="skin-price-compare-actions">
               <a href="https://www.overtopup.com/th/game-topup/valorant" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm btn-glow" title="เปิดหน้าเว็บ OverTopup เพื่อเติมเงินทันที">
-                <span>⚡ ไปเติมที่ OverTopup (overtopup.com) ↗️</span>
+                <span>ไปเติมที่ OverTopup (overtopup.com)</span>
               </a>
               <button id="btnBundleInspectCompareStores" class="btn btn-secondary btn-sm" title="เปิดระบบเปรียบเทียบทุกแพ็กเกจ">
-                <span>📊 ดูตารางราคาทุกแพ็ก</span>
+                <span>ดูตารางราคาทุกแพ็ก</span>
               </button>
             </div>
           </div>
@@ -1121,15 +1297,15 @@
         <div class="modal-subnav-bar">
           <button id="btnVpModeOptimizer" class="subnav-tab-btn active" data-vpmode="optimizer">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-            <span>🎯 คำนวณแพ็กเกจ OverTopup ที่ประหยัดที่สุด</span>
+            <span>คำนวณแพ็กเกจ OverTopup ที่ประหยัดที่สุด</span>
           </button>
           <button id="btnVpModeMatrix" class="subnav-tab-btn" data-vpmode="matrix">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
-            <span>📊 ตารางราคา OverTopup ทุกแพ็กเกจ (28 แพ็ก)</span>
+            <span>ตารางราคา OverTopup ทุกแพ็กเกจ (28 แพ็ก)</span>
           </button>
           <button id="btnVpModeCustom" class="subnav-tab-btn" data-vpmode="custom">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
-            <span>⚡ ไปที่เว็บ OverTopup (overtopup.com)</span>
+            <span>ไปที่เว็บ OverTopup (overtopup.com)</span>
           </button>
         </div>
 
@@ -1147,13 +1323,13 @@
                   <input type="number" id="inputCalcVp" placeholder="เช่น 1775, 2175, 7100..." class="modern-input" min="1" value="1775">
                   <div class="calc-quick-pull-dropdown">
                     <button id="btnCalcPullWishlist" class="btn btn-secondary btn-sm" title="คำนวณจากยอดรวมสกินที่ติดดาว Wishlist ทั้งหมด">
-                      ⭐ ดึงจาก Wishlist
+                       ดึงจาก Wishlist
                     </button>
                     <button id="btnCalcPullDailyShop" class="btn btn-secondary btn-sm" title="คำนวณจากยอดสกินร้านค้าประจำวัน">
-                      🛒 ดึงร้านค้ารายวัน
+                       ดึงร้านค้ารายวัน
                     </button>
                     <button id="btnCalcPullBundle" class="btn btn-secondary btn-sm" title="คำนวณจากยอดรวมของชุดบันเดิลเด่น (Featured Bundle)">
-                      📦 ดึงราคาบันเดิลเด่น
+                       ดึงราคาบันเดิลเด่น
                     </button>
                   </div>
                 </div>
@@ -1200,7 +1376,7 @@
               <!-- Top Winner Highlight Hero Banner (OverTopup) -->
               <div class="cheapest-store-hero-banner" id="cheapestStoreHero">
                 <div class="hero-winner-badge">
-                  <span class="winner-crown">⚡</span>
+                  <span class="winner-crown">TOP</span>
                   <span id="winnerBadgeTitle">เติมผ่าน OVERTOPUP (ถูกกว่าเติมในเกม)</span>
                 </div>
                 <div class="hero-winner-content">
@@ -1213,12 +1389,12 @@
                       <span id="winnerPriceThb">~489</span> <span class="thb-unit">บาท (THB)</span>
                     </div>
                     <div class="hero-savings-pill" id="winnerSavingsTag">
-                      ⚡ ประหยัดได้ 111 ฿ (-18.5% จากเติมในเกม)
+ประหยัดได้ 111 ฿ (-18.5% จากเติมในเกม)
                     </div>
                   </div>
                 </div>
                 <div class="hero-combo-note" id="winnerComboNote">
-                  <span>📦 แพ็กเกจที่แนะนำบน OverTopup: <strong>1x 2,050 VP (489฿)</strong> (ได้รับ 2,050 VP, เหลือ 275 VP ในไอดี)</span>
+                  <span>แพ็กเกจที่แนะนำบน OverTopup: <strong>1x 2,050 VP (489฿)</strong> (ได้รับ 2,050 VP, เหลือ 275 VP ในไอดี)</span>
                 </div>
               </div>
             </div>
@@ -1250,7 +1426,7 @@
                 <thead>
                   <tr>
                     <th>แพ็กเกจ VP</th>
-                    <th>ราคา OverTopup ⚡</th>
+                    <th>ราคา OverTopup (THB)</th>
                     <th>ราคาเติมในเกม (ทางการ)</th>
                     <th>ประหยัดได้ (บาท)</th>
                     <th>ส่วนลด %</th>
@@ -1276,7 +1452,7 @@
               </div>
 
               <div class="overtopup-info-details" style="background:rgba(0,0,0,0.4); border:1px solid rgba(0,245,212,0.2); border-radius:8px; padding:16px; margin-bottom:14px;">
-                <h5 style="color:var(--val-gold); margin-bottom:8px; font-size:13px;">🛡️ ขั้นตอนการเติมเกมบน OverTopup:</h5>
+                <h5 style="color:var(--val-gold); margin-bottom:8px; font-size:13px;">ขั้นตอนการเติมเกมบน OverTopup:</h5>
                 <ol style="color:#d0e0f0; font-size:12px; line-height:1.7; padding-left:20px; margin:0 0 14px 0;">
                   <li>เปิดเว็บไซต์ <strong>https://www.overtopup.com/th/game-topup/valorant</strong></li>
                   <li>กรอก <strong>Riot ID (GameName#TAG)</strong> บัญชีไทยของคุณ</li>
@@ -1286,7 +1462,7 @@
                 </ol>
                 
                 <a href="https://www.overtopup.com/th/game-topup/valorant" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="width:100%; justify-content:center; padding:10px; font-size:13px; font-weight:700; display:flex; align-items:center; gap:8px;">
-                  <span>⚡ เปิดเว็บไซต์ OverTopup (overtopup.com) เพื่อเติมเงินทันที ↗️</span>
+                  <span>เปิดเว็บไซต์ OverTopup (overtopup.com) เพื่อเติมเงินทันที</span>
                 </a>
               </div>
             </div>
@@ -1319,11 +1495,11 @@
         <div class="modal-subnav-bar">
           <button id="btnTutorialTabMobile" class="subnav-tab-btn active" data-tutdevice="mobile">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-            <span>📱 วิธีทำบนมือถือ (Android &amp; iPhone)</span>
+            <span>วิธีทำบนมือถือ (Android &amp; iPhone)</span>
           </button>
           <button id="btnTutorialTabPc" class="subnav-tab-btn" data-tutdevice="pc">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            <span>💻 วิธีทำบนคอมพิวเตอร์ (PC / Laptop)</span>
+            <span>วิธีทำบนคอมพิวเตอร์ (PC / Laptop)</span>
           </button>
         </div>
 
@@ -1353,9 +1529,9 @@
                 <p>ในหน้า Riot Games ให้กดที่ <strong>ไอคอน Google (รูปตัว G)</strong> หรือเลือก Apple / Xbox ตามที่บัญชีของคุณผูกไว้</p>
                 <div class="tut-provider-icons-row">
                   <span class="provider-chip"><svg viewBox="0 0 24 24" width="14" height="14"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg> Google</span>
-                  <span class="provider-chip">🍏 Apple</span>
-                  <span class="provider-chip">🎮 Xbox</span>
-                  <span class="provider-chip">👤 Riot ID</span>
+                  <span class="provider-chip">Apple</span>
+                  <span class="provider-chip"> Xbox</span>
+                  <span class="provider-chip">Riot ID</span>
                 </div>
               </div>
             </div>
@@ -1371,7 +1547,7 @@
                   <div class="tut-diagram-phone">
                     <div class="diagram-url-bar">
                       <span class="url-text">playvalorant.com/opt_in#access_token=...</span>
-                      <span class="url-copy-btn">📑 กดคัดลอก</span>
+                      <span class="url-copy-btn">กดคัดลอก</span>
                     </div>
                     <div class="diagram-screen-404">
                       <span>404 - PAGE NOT FOUND</span>
@@ -1380,7 +1556,7 @@
                   </div>
                   <ol class="tut-list-steps">
                     <li>แตะที่ <strong>แถบที่อยู่ URL ด้านบนสุด</strong> ของเบราว์เซอร์</li>
-                    <li>แตะที่ <strong>ไอคอนคัดลอก (Copy 📑)</strong> หรือเลือกทั้งหมด &gt; คัดลอก</li>
+                    <li>แตะที่ <strong>ไอคอนคัดลอก (Copy)</strong> หรือเลือกทั้งหมด &gt; คัดลอก</li>
                   </ol>
                 </div>
 
@@ -1426,16 +1602,16 @@
             <p>คุณสามารถลองกดปุ่มด้านล่างเพื่อทดสอบคัดลอกรูปแบบ URL และนำไปวาง:</p>
             <div class="sandbox-actions">
               <button type="button" id="btnTestCopyExample" class="btn btn-secondary btn-sm">
-                📋 ทดลองคัดลอกลิงก์ตัวอย่าง
+ทดลองคัดลอกลิงก์ตัวอย่าง
               </button>
-              <span id="testCopyFeedback" class="test-copy-status hidden">✅ คัดลอกแล้ว! ลองกดปุ่มวางในหน้าร้านค้า</span>
+              <span id="testCopyFeedback" class="test-copy-status hidden">คัดลอกแล้ว! ลองกดปุ่มวางในหน้าร้านค้า</span>
             </div>
           </div>
 
           <!-- Tutorial Actions -->
           <div class="tutorial-footer-actions">
             <a id="btnTutorialOpenRiot" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-glow">
-              <span>🚀 เข้าใจแล้ว! เปิดหน้าล็อกอิน Riot ทันที</span>
+              <span>เข้าใจแล้ว! เปิดหน้าล็อกอิน Riot ทันที</span>
             </a>
             <button type="button" id="btnTutorialClose" class="btn btn-secondary">
               <span>ปิดคู่มือ</span>
@@ -1458,6 +1634,14 @@
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
         <span>ร้านค้า</span>
       </button>
+      <button type="button" class="mobile-nav-item" data-tab="inventory" id="mobTabInventory">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <span>สกินที่เรามี</span>
+      </button>
+      <button type="button" class="mobile-nav-item" data-tab="crosshairs" id="mobTabCrosshairs">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="2"/></svg>
+        <span>เป้าเล็งโปร</span>
+      </button>
       <button type="button" class="mobile-nav-item" data-tab="career" id="mobTabCareer">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
         <span>สถิติ</span>
@@ -1471,13 +1655,13 @@
         <span>คลังสกิน</span>
       </button>
       <button type="button" class="mobile-nav-item btn-mob-bolt" id="btnMobOpenVp">
-        <span class="mob-bolt-icon">⚡</span>
+        <span class="mob-bolt-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block; vertical-align:middle;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
         <span>เติม VP</span>
       </button>
     </nav>
 
   </div>
 
-  <script src="app.js?v=6.0"></script>
+  <script src="app.js?v=6.1"></script>
 </body>
 </html>
