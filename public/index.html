@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=5.8">
+  <link rel="stylesheet" href="style.css?v=5.9">
 </head>
 <body>
   <!-- Ambient Atmospheric Effects -->
@@ -143,239 +143,52 @@
       <!-- ================= LOGIN SECTION ================= -->
       <section id="loginSection" class="section-card login-card-hero">
         <div class="card-hero-header">
-          <div class="badge-tag">AUTHENTICATION</div>
+          <div class="badge-tag">AUTHENTICATION PROTOCOL</div>
           <h2>เข้าสู่ระบบ VALORANT STORE</h2>
-          <p class="hero-desc">ดูสกินที่สุ่มขายในไอดีของคุณ ยอดเงินคงเหลือ และตรวจสอบเอฟเฟกต์/Finisher</p>
+          <p class="hero-desc">เข้าสู่ระบบเพื่อดู 4 สกินประจำวัน, ตลาด Night Market, สกินในคลัง และยอดเงินคงเหลือของไอดีคุณ</p>
         </div>
 
-        <!-- Quick Non-Login Feature Jump Strip -->
-        <div class="guest-features-strip" style="display:flex; justify-content:center; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-          <button type="button" class="btn btn-pill" onclick="switchAppMode('catalog')" style="font-size:12px; padding:6px 14px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/></svg>
-            <span>ดูคลังสกิน 1,380+ สกิน (ไม่ต้องล็อกอิน)</span>
-          </button>
-          <button type="button" class="btn btn-pill" onclick="switchAppMode('crosshairs')" style="font-size:12px; padding:6px 14px; background:rgba(0,245,212,0.08); border:1px solid rgba(0,245,212,0.25); color:var(--val-cyan);">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><circle cx="12" cy="12" r="2"/></svg>
-            <span>ดูเป้าเล็งโปรเพลเยอร์ 16 คน (ไม่ต้องล็อกอิน)</span>
-          </button>
-          <button type="button" class="btn btn-pill" onclick="switchAppMode('agents')" style="font-size:12px; padding:6px 14px; background:rgba(255,70,85,0.08); border:1px solid rgba(255,70,85,0.25); color:var(--val-red);">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>ดูโมเดล 3D Agents 29+ ตัว (ไม่ต้องล็อกอิน)</span>
-          </button>
-        </div>
-
-        <!-- Login Method Navigation -->
-        <div class="login-method-nav">
-          <button class="tab-btn active" data-tab="google-login">
-            <svg viewBox="0 0 24 24" width="16" height="16"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
-            <span>Google / Social Login</span>
-          </button>
-          <button class="tab-btn" data-tab="riot-login">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <span>Riot Username & Password</span>
-          </button>
-          <button class="tab-btn" data-tab="token-login">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            <span>วาง Token / URL</span>
-          </button>
-        </div>
-
-        <!-- Tab 1: Google & Social Login (Sleek High-Impact Workflow) -->
-        <div id="tabGoogleLogin" class="tab-content active">
-          <div class="google-auth-box">
+        <div class="google-auth-box">
+          <div class="tactical-login-card">
             
-            <!-- Sleek Official Authentication Strip -->
-            <div class="auth-protocol-badge">
-              <span class="pulse-status-dot"></span>
-              <span>AUTHENTICATION PROTOCOL • RIOT OFFICIAL (100% SAFE)</span>
-            </div>
-
-            <!-- Main Stage Card -->
-            <div class="tactical-login-card">
-              
-              <!-- STEP 1: Big Official Trigger -->
-              <div class="login-action-box">
-                <div class="action-box-header">
-                  <span class="action-step-pill">STEP 01</span>
-                  <h4>เปิดหน้าระบบล็อกอิน Riot Games ทางการ</h4>
-                </div>
-                <p class="action-box-desc">เข้าสู่ระบบด้วย Google, Apple, Facebook, Xbox หรือ Riot ID ในแท็บใหม่</p>
-                <a id="btnOpenRiotGoogle" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1" target="_blank" rel="noopener noreferrer" class="btn-riot-action-main">
-                  <div class="btn-riot-icon-cluster">
-                    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
-                  </div>
-                  <span class="btn-riot-text">1. กดเปิดหน้าล็อกอิน Riot (Google / Social)</span>
-                </a>
-                <div style="font-size:11px; color:#95acc0; margin-top:8px; line-height:1.5;">
-                  * หากกดแล้วเด้งไปหน้า 404 ทันที แสดงว่าเบราว์เซอร์จำการล็อกอินของคุณไว้แล้ว (สำเร็จแล้ว) ให้คัดลอกลิงก์ด้านบนสุดของหน้า 404 มาวางใน STEP 02 ได้เลย
-                </div>
-                <a href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1&prompt=login" target="_blank" rel="noopener noreferrer" style="display:inline-block; font-size:11px; color:var(--val-cyan); text-decoration:underline; margin-top:6px;">
-                  หรือคลิกที่นี่หากต้องการเปลี่ยนไอดี / เลือกบัญชี Google อื่น (Force Login)
-                </a>
+            <!-- STEP 1 -->
+            <div class="login-action-box">
+              <div class="action-box-header">
+                <span class="action-step-pill">STEP 01</span>
+                <h4>กดเปิดหน้าต่างล็อกอินทางการของ Riot Games</h4>
               </div>
-
-              <!-- STEP 2: Unified Input Terminal -->
-              <div class="login-action-box highlight-terminal">
-                <div class="action-box-header">
-                  <span class="action-step-pill cyan">STEP 02</span>
-                  <h4>คัดลอก URL หน้า 404 แล้วกดวางเพื่อเข้าสู่ระบบ</h4>
+              <p class="action-box-desc">เข้าสู่ระบบด้วย Google, Apple, Facebook, Xbox หรือ Riot ID ในแท็บใหม่</p>
+              <a id="btnOpenRiotGoogle" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1" target="_blank" rel="noopener noreferrer" class="btn-riot-action-main">
+                <div class="btn-riot-icon-cluster">
+                  <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
                 </div>
-                
-                <div class="mini-guide-callout">
-                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                  <span>เมื่อล็อกอินเสร็จ หน้าเว็บจะขึ้น <strong>404 Not Found</strong> (ปกติ 100%) ให้คัดลอกลิงก์ด้านบนสุดมาวาง:</span>
-                </div>
-
-                <form id="quickGoogleForm" class="terminal-action-row" onsubmit="return false;">
-                  <div class="terminal-field-wrap">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="terminal-prefix-icon"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                    <input type="text" id="quickPasteInput" placeholder="วางลิงก์ URL หรือ Token ที่นี่..." class="terminal-text-input" autocomplete="off" spellcheck="false">
-                  </div>
-                  <button type="submit" id="btnAutoPaste" class="btn-terminal-action">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-                    <span>วาง &amp; เข้าสู่ระบบทันที</span>
-                  </button>
-                </form>
-              </div>
-
-            </div>
-
-            <!-- Google Login Alert Box -->
-            <div id="googleAlert" class="alert-box hidden"></div>
-
-            <!-- Footer Help & Tutorial Links -->
-            <div class="auth-stage-footer">
-              <button type="button" id="btnOpenGoogleTutorial" class="btn-link-tutorial">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                <span>ดูภาพและวิธีสอนทีละขั้นตอน (Visual Tutorial)</span>
-              </button>
-              <div class="auth-security-tag">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                <span>TLS 1.3 Riot Encryption</span>
+                <span class="btn-riot-text">1. กดล็อกอินผ่าน Riot Games (Google / Social)</span>
+              </a>
+              <div style="font-size:11px; color:#8ea0b5; margin-top:8px; line-height:1.5;">
+                * เมื่อล็อกอินเสร็จ หน้าจอจะขึ้น <strong>404 Not Found</strong> (ปกติ 100%) ให้คัดลอก URL ด้านบนสุดมาวางใน STEP 02
               </div>
             </div>
 
-          </div>
-        </div>
+            <!-- STEP 2 -->
+            <div class="login-action-box highlight-terminal">
+              <div class="action-box-header">
+                <span class="action-step-pill cyan">STEP 02</span>
+                <h4>คัดลอก URL หน้า 404 แล้วกดวางเพื่อเข้าสู่ระบบ</h4>
+              </div>
 
-        <!-- Tab 2: Standard Riot Login -->
-        <div id="tabRiotLogin" class="tab-content hidden">
-          <div style="background: rgba(255, 70, 85, 0.1); border: 1px solid rgba(255, 70, 85, 0.35); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; color: #ffccd0; line-height: 1.5;">
-            <div style="font-weight: 700; color: #ff4655; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span>คำแนะนำสำหรับการใช้งาน:</span>
-            </div>
-            <span>หากเข้าใช้งานผ่านเว็บ Vercel ทาง Riot Games จะบล็อกการส่งรหัสผ่าน แนะนำให้ใช้แท็บแรก <strong>"Google / Social Login"</strong> หรือหากต้องการใส่รหัสผ่านโดยตรง ให้เปิดผ่านไอคอน <strong>"VALORANT Store Checker"</strong> บนหน้า Desktop ของคอมคุณ (Localhost)</span>
-          </div>
-
-          <form id="riotLoginForm" class="modern-form">
-            <div class="form-row">
-              <label for="loginUsername">Riot ID / Username (ชื่อผู้ใช้)</label>
-              <input type="text" id="loginUsername" placeholder="กรอกชื่อผู้ใช้ Riot Games" required autocomplete="username" class="modern-input">
-            </div>
-
-            <div class="form-row">
-              <label for="loginPassword">Password (รหัสผ่าน)</label>
-              <div class="password-input-group">
-                <input type="password" id="loginPassword" placeholder="กรอกรหัสผ่าน" required autocomplete="current-password" class="modern-input">
-                <button type="button" id="togglePassword" class="btn-pwd-eye" title="แสดง/ซ่อนรหัส">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <form id="quickGoogleForm" class="terminal-action-row" onsubmit="return false;">
+                <div class="terminal-field-wrap">
+                  <input type="text" id="quickPasteInput" placeholder="วางลิงก์ URL หน้า 404 ที่นี่..." class="terminal-text-input" autocomplete="off" spellcheck="false">
+                </div>
+                <button type="submit" id="btnAutoPaste" class="btn-terminal-action">
+                  <span>เข้าสู่ระบบทันที</span>
                 </button>
-              </div>
+              </form>
             </div>
 
-            <div class="form-row">
-              <label for="loginRegion">เซิร์ฟเวอร์ (Region)</label>
-              <select id="loginRegion" class="modern-select">
-                <option value="ap" selected>Asia Pacific (AP / ไทย / เอเชีย)</option>
-                <option value="na">North America (NA)</option>
-                <option value="eu">Europe (EU)</option>
-                <option value="kr">Korea (KR)</option>
-                <option value="latam">Latin America (LATAM)</option>
-                <option value="br">Brazil (BR)</option>
-              </select>
-            </div>
-
-            <div id="loginAlert" class="alert-box hidden"></div>
-
-            <button type="submit" id="btnLoginSubmit" class="btn btn-primary btn-block btn-glow">
-              <span class="btn-text">เข้าสู่ระบบ (LOGIN)</span>
-              <span class="spinner hidden"></span>
-            </button>
-          </form>
-        </div>
-
-        <!-- 2FA Modal / Box within Login -->
-        <div id="mfaBox" class="mfa-box hidden">
-          <div class="mfa-header-area">
-            <div style="display:flex; align-items:center; gap:8px; justify-content:center; margin-bottom:4px;">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--val-cyan)" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <h3 style="margin:0;">ยืนยันตัวตนสองชั้น (2FA Verification)</h3>
-            </div>
-            <p id="mfaDesc">กรุณากรอกรหัส 6 หลักที่ได้รับทางอีเมลหรือแอป Authenticator</p>
-          </div>
-          <form id="mfaForm" class="modern-form">
-            <div class="form-row">
-              <input type="text" id="mfaCode" class="modern-input mfa-center-input" placeholder="000000" maxlength="8" autocomplete="one-time-code" required>
-            </div>
-            <div id="mfaAlert" class="alert-box hidden"></div>
-            <div class="form-actions-split">
-              <button type="submit" id="btnMfaSubmit" class="btn btn-primary">ยืนยันรหัส 2FA</button>
-              <button type="button" id="btnMfaCancel" class="btn btn-secondary">ยกเลิก</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Tab 3: Token / Social / Manual Ingestion -->
-        <div id="tabTokenLogin" class="tab-content hidden">
-          <div class="social-guide-box">
-            <p>คุณสามารถคัดลอก Access Token หรือ URL เต็มที่ได้จากการล็อกอิน Riot แล้วนำมาวางได้ทันที:</p>
           </div>
 
-          <form id="tokenLoginForm" class="modern-form">
-            <div class="form-row">
-              <label for="inputAccessToken">Access Token หรือ URL เต็ม</label>
-              <textarea id="inputAccessToken" rows="3" placeholder="วาง Access Token หรือ URL ที่คัดลอกมา" class="modern-input" required></textarea>
-            </div>
-
-            <div class="form-row">
-              <label for="tokenRegion">เซิร์ฟเวอร์ (Region)</label>
-              <select id="tokenRegion" class="modern-select">
-                <option value="ap" selected>Asia Pacific (AP / ไทย)</option>
-                <option value="na">North America (NA)</option>
-                <option value="eu">Europe (EU)</option>
-                <option value="kr">Korea (KR)</option>
-              </select>
-            </div>
-
-            <div id="tokenAlert" class="alert-box hidden"></div>
-
-            <button type="submit" id="btnTokenSubmit" class="btn btn-primary btn-block btn-glow">
-              เข้าสู่ระบบด้วย Token
-            </button>
-          </form>
-        </div>
-
-        <!-- Security Features Banner -->
-        <div class="security-features-row">
-          <div class="sec-badge">
-            <span class="sec-icon">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--val-cyan)" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </span>
-            <span class="sec-text">เข้ารหัส TLS ตรงกับ Riot Games</span>
-          </div>
-          <div class="sec-badge">
-            <span class="sec-icon">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--val-gold)" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </span>
-            <span class="sec-text">Persistent Session จดจำไอดีถาวร</span>
-          </div>
-          <div class="sec-badge">
-            <span class="sec-icon">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--val-red)" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            </span>
-            <span class="sec-text">ไม่เก็บรหัสผ่าน ปลอดภัย 100%</span>
-          </div>
+          <div id="googleAlert" class="alert-box hidden"></div>
         </div>
       </section>
 
@@ -1662,6 +1475,6 @@
 
   </div>
 
-  <script src="app.js?v=5.8"></script>
+  <script src="app.js?v=5.9"></script>
 </body>
 </html>
