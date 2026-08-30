@@ -5423,22 +5423,27 @@ async function loadGuestStorePreview() {
   try {
     const res = await fetch('/api/featured');
     const data = await res.json();
-    if (data.ok) {
-      if (data.featuredBundles && data.featuredBundles.length > 0) {
-        renderBundles(data.featuredBundles);
-      }
-      if (data.featuredSkins && data.featuredSkins.length > 0) {
-        renderDailyShop(data.featuredSkins);
-      }
+    if (data.ok && data.featuredBundles && data.featuredBundles.length > 0) {
+      renderBundles(data.featuredBundles);
     }
-  } catch (e) {
-    try {
-      const fallbackRes = await fetch('/api/skins/all?limit=4');
-      const fallbackData = await fallbackRes.json();
-      if (fallbackData.ok && fallbackData.skins) {
-        renderDailyShop(fallbackData.skins.slice(0, 4));
-      }
-    } catch (e2) {}
+  } catch (e) {}
+
+  // If not logged in, show clear login prompt in daily shop grid
+  const grid = document.getElementById('dailySkinsGrid');
+  if (grid && !currentUser) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 40px 20px; text-align: center; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,70,85,0.25); border-radius: 12px;">
+        <div style="font-family:var(--font-heading); font-size:20px; font-weight:800; color:var(--val-red); margin-bottom:6px;">
+          กรุณาเข้าสู่ระบบเพื่อดึง 4 สกินประจำวันของไอดีคุณ
+        </div>
+        <p style="color:#C0D0E0; font-size:13px; max-width:480px; margin:0 auto 16px auto; line-height:1.5;">
+          ระบบจะเชื่อมต่อไปยังเซิร์ฟเวอร์ Riot Games เพื่อดึงร้านค้า 4 สกินสดประจำวันของบัญชีคุณ
+        </p>
+        <button type="button" class="btn btn-primary" onclick="window.scrollTo({top:0, behavior:'smooth'})" style="padding:8px 20px; font-size:13px; font-weight:700;">
+          ไปที่กล่องเข้าสู่ระบบด้านบน (Google / Social)
+        </button>
+      </div>
+    `;
   }
 }
 
