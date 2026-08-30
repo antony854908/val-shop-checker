@@ -2289,14 +2289,14 @@ function switchAppMode(mode) {
   crosshairsSection?.classList.add('hidden');
 
   if (mode === 'store') {
+    storeSection?.classList.remove('hidden');
+    triggerSectionAnimation(storeSection);
     if (currentUser) {
-      storeSection?.classList.remove('hidden');
       loginSection?.classList.add('hidden');
-      triggerSectionAnimation(storeSection);
+      loadStore();
     } else {
       loginSection?.classList.remove('hidden');
-      storeSection?.classList.add('hidden');
-      triggerSectionAnimation(loginSection);
+      loadGuestStorePreview();
     }
   } else if (mode === 'inventory') {
     if (currentUser) {
@@ -5398,5 +5398,25 @@ document.getElementById('customCrosshairInput')?.addEventListener('input', (e) =
   }
 });
 
-// Auto preload crosshairs on app start
-setTimeout(loadProCrosshairs, 200);
+async function loadGuestStorePreview() {
+  if (currentUser) return;
+  try {
+    const grid = document.getElementById('dailySkinsGrid');
+    if (grid && (!grid.children || grid.children.length === 0 || grid.querySelector('.empty-msg'))) {
+      const res = await fetch('/api/skins/all?limit=4');
+      const data = await res.json();
+      if (data.ok && data.skins) {
+        renderDailyShop(data.skins.slice(0, 4));
+      }
+    }
+  } catch (e) {}
+}
+
+// Preload all interactive modules on app startup
+setTimeout(() => {
+  loadWeaponsList();
+  loadProCrosshairs();
+  loadCatalogSkins(false);
+  loadAgentsEncyclopedia();
+  loadGuestStorePreview();
+}, 100);
