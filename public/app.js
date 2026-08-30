@@ -1047,12 +1047,32 @@ function renderUserHeader(user) {
 function showLoginView() {
   currentUser = null;
   userHeader?.classList.add('hidden');
-  storeSection?.classList.add('hidden');
-  inventorySection?.classList.add('hidden');
-  careerSection?.classList.add('hidden');
-  if (currentAppMode === 'store' || currentAppMode === 'career' || currentAppMode === 'inventory') {
+
+  if (currentAppMode === 'store') {
     loginSection?.classList.remove('hidden');
+    storeSection?.classList.remove('hidden');
+    loadGuestStorePreview();
+  } else if (currentAppMode === 'inventory') {
+    loginSection?.classList.add('hidden');
+    inventorySection?.classList.remove('hidden');
+    renderInventoryNotLoggedInPrompt();
+  } else if (currentAppMode === 'crosshairs') {
+    loginSection?.classList.add('hidden');
+    crosshairsSection?.classList.remove('hidden');
+    loadProCrosshairs();
+  } else if (currentAppMode === 'agents') {
+    loginSection?.classList.add('hidden');
+    agentsSection?.classList.remove('hidden');
+    loadAgentsEncyclopedia();
+  } else if (currentAppMode === 'catalog') {
+    loginSection?.classList.add('hidden');
+    catalogSection?.classList.remove('hidden');
+    resetAndLoadCatalog();
+  } else if (currentAppMode === 'career') {
+    loginSection?.classList.remove('hidden');
+    careerSection?.classList.add('hidden');
   }
+
   mfaBox?.classList.add('hidden');
   riotLoginForm?.classList.remove('hidden');
 }

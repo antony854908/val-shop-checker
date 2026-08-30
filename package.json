@@ -1,6 +1,6 @@
 {
   "name": "val-shop-checker",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "description": "VALORANT Store, Inventory & Crosshairs Inspector HD - Check daily store, account worth valuation, pro crosshairs, 3D agents, and OverTopup VP pricing.",
   "main": "server.js",
   "scripts": {
