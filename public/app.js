@@ -768,19 +768,31 @@ async function processTokenString(rawText, alertEl) {
       throw new Error(data.error || 'Token ไม่ถูกต้องหรือหมดอายุ');
     }
 
-    // Success! Immediately fetch profile and load store
-    const meRes = await apiFetch('/api/auth/me');
-    const meData = await meRes.json();
-    if (meData.ok && meData.loggedIn) {
-      currentUser = meData.user;
-      renderUserHeader(meData.user);
-      switchAppMode('store');
-      await loadStore();
-      // Preload inventory in background
-      loadPlayerInventory(true).catch(() => {});
-    } else {
-      await checkAuth();
+    if (data.sessionId) {
+      setStoredSid(data.sessionId);
     }
+    if (data.authPack) {
+      setStoredAuthPack(data.authPack);
+    } else if (data.auth) {
+      setStoredAuthPack(data.auth);
+    }
+
+    // Immediately activate logged in state and switch to store!
+    currentUser = data.user || data.auth;
+    renderUserHeader(currentUser);
+    switchAppMode('store');
+    playTacticalAudio('login');
+
+    // Fetch live store, wallet balances and inventory concurrently
+    loadStore();
+    loadPlayerInventory(true).catch(() => {});
+
+    apiFetch('/api/auth/me').then(r => r.json()).then(meData => {
+      if (meData.ok && meData.user) {
+        currentUser = meData.user;
+        renderUserHeader(meData.user);
+      }
+    }).catch(() => {});
   } catch (err) {
     showAlert(alertTarget, (err.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง') + ' <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">[ดูวิธีคัดลอกลิงก์]</a>');
   } finally {

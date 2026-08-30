@@ -308,6 +308,13 @@ app.post('/api/auth/token-login', authRateLimitMiddleware, async (req, res) => {
       sessionId: req.valSession.id,
       auth: authData,
       authPack: authPackBase64,
+      user: {
+        gameName: authData.gameName,
+        tagLine: authData.tagLine,
+        region: authData.region,
+        level: 1,
+        wallet: { vp: 0, rp: 0, kc: 0 }
+      },
       message: 'เข้าสู่ระบบด้วย Token สำเร็จ'
     });
   } catch (err) {
@@ -346,11 +353,10 @@ async function completeUserSession(sessionId, tokens, userRegion) {
 
   const authData = {
     accessToken: tokens.accessToken,
-    idToken: tokens.idToken,
     entitlementsToken,
     puuid: userInfo.puuid,
     region: finalRegion,
-    country: userInfo.country,
+    country: userInfo.country || 'tha',
     gameName: nameData.gameName || 'Agent',
     tagLine: nameData.tagLine || 'VAL'
   };
