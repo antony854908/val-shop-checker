@@ -1886,7 +1886,14 @@ window.openSkinByUuid = async function(uuid) {
 };
 
 // Open Interactive Skin / Item Modal
-function openSkinModal(skin) {
+function openSkinModal(skinOrUuid) {
+  let skin = skinOrUuid;
+  if (typeof skinOrUuid === 'string') {
+    skin = (playerInventoryData && playerInventoryData.skins?.find(s => s.uuid === skinOrUuid)) ||
+           (currentStore?.dailyOffers?.find(s => s.uuid === skinOrUuid)) ||
+           catalogSkins.find(s => s.uuid === skinOrUuid) ||
+           { uuid: skinOrUuid, name: 'Valorant Skin' };
+  }
   currentInspectedSkin = skin;
   playTacticalAudio('inspect');
   
@@ -1898,12 +1905,13 @@ function openSkinModal(skin) {
   if (skinNameEl) skinNameEl.textContent = skin.name || 'Valorant Item';
   
   const tierNameEl = document.getElementById('modalTierName');
-  if (tierNameEl) tierNameEl.textContent = skin.tier?.name || skin.itemType || 'Edition';
+  if (tierNameEl) tierNameEl.textContent = skin.tier?.name || skin.contentTier?.name || skin.itemType || 'Edition';
   
   const tierIconEl = document.getElementById('modalTierIcon');
+  const tierIcon = skin.tier?.displayIcon || skin.contentTier?.displayIcon || '';
   if (tierIconEl) {
-    if (skin.tier?.displayIcon) {
-      tierIconEl.src = skin.tier.displayIcon;
+    if (tierIcon) {
+      tierIconEl.src = tierIcon;
       tierIconEl.classList.remove('hidden');
     } else {
       tierIconEl.classList.add('hidden');
@@ -4967,17 +4975,20 @@ function filterAndRenderInventoryGrid() {
     card.className = `skin-card inv-skin-card ${skin.isEquipped ? 'is-equipped-card' : ''}`;
     card.dataset.uuid = skin.uuid;
 
-    const tierName = skin.contentTier?.name || 'Standard Edition';
-    const tierColor = skin.contentTier?.color || '#FFFFFF';
-    const tierIcon = skin.contentTier?.displayIcon || '';
-    const imgUrl = skin.displayIcon || 'assets/icon-192.png';
+    const tierName = skin.contentTier?.name || skin.tier?.name || 'Standard Edition';
+    const tierColor = skin.contentTier?.color || skin.tier?.highlightColor || '#5a9fe2';
+    const tierIcon = skin.contentTier?.displayIcon || skin.tier?.displayIcon || '';
+    const imgUrl = skin.displayIcon || (skin.chromas && skin.chromas[0]?.displayIcon) || (skin.levels && skin.levels[0]?.displayIcon) || skin.weaponIcon || 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
     const isStandard = skin.isStandardDefault || (skin.name || '').toLowerCase().startsWith('standard ');
     const priceFormatted = (skin.estimatedVpPrice || 0) > 0 
       ? (skin.estimatedVpPrice.toLocaleString() + ' VP') 
-      : (isStandard ? 'Standard / เริ่มต้น' : 'Battlepass / Reward');
+      : (isStandard ? 'Standard / เริ่มต้น' : 'Reward');
+
+    card.style.setProperty('--card-tier-color', tierColor);
+    card.style.setProperty('--card-tier-glow', tierColor + '40');
 
     card.innerHTML = `
-      ${skin.isEquipped ? '<div class="inv-equipped-badge">EQUIPPED</div>' : ''}
+      ${skin.isEquipped ? '<div class="inv-equipped-badge">EQUIPPED / ใช้งานอยู่</div>' : ''}
       <div class="skin-tier-indicator" style="background-color: ${tierColor};"></div>
       
       <div class="skin-card-header">
@@ -4989,15 +5000,15 @@ function filterAndRenderInventoryGrid() {
       </div>
 
       <div class="skin-image-box">
-        <img src="${imgUrl}" alt="${escapeHtml(skin.name)}" class="skin-render-img" loading="lazy">
+        <img src="${imgUrl}" alt="${escapeHtml(skin.name)}" class="skin-render-img" loading="lazy" onerror="this.onerror=null; this.src='https://media.valorant-api.com/weapons/skins/default/displayicon.png';">
       </div>
 
       <div class="skin-card-footer">
         <div class="skin-name" title="${escapeHtml(skin.name)}">${escapeHtml(skin.name)}</div>
         <div class="skin-price-row">
           <div class="skin-price-box">
-            ${(skin.estimatedVpPrice || 0) > 0 ? '<img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="vp-symbol">' : ''}
-            <span class="price-number" style="font-size:12px; font-weight:700;">${priceFormatted}</span>
+            ${(skin.estimatedVpPrice || 0) > 0 ? '<img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="vp-symbol" style="width:12px;height:12px;">' : ''}
+            <span class="price-number" style="font-size:12px; font-weight:700; color:${(skin.estimatedVpPrice || 0) > 0 ? 'var(--val-gold)' : 'var(--val-gray)'};">${priceFormatted}</span>
           </div>
           <button class="btn btn-sm btn-inspect" title="ดูสีปืนและคลิป Finisher">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -5007,9 +5018,9 @@ function filterAndRenderInventoryGrid() {
       </div>
     `;
 
-    card.addEventListener('click', (e) => {
+    card.addEventListener('click', () => {
       playTacticalAudio('inspect');
-      window.openSkinModal?.(skin.uuid);
+      openSkinModal(skin);
     });
 
     grid.appendChild(card);
