@@ -778,16 +778,24 @@ async function processTokenString(rawText, alertEl) {
     switchAppMode('store');
     playTacticalAudio('login');
 
-    // Fetch live store, wallet balances and inventory concurrently
-    loadStore();
-    loadPlayerInventory(true).catch(() => {});
+    if (data.store) {
+      currentStore = data.store;
+      dailyRemaining = data.store.dailyRemainingSeconds || getSecondsUntilShopReset();
+      renderDailyShop(data.store.dailyOffers || []);
+      renderBundles(data.store.featuredBundles || []);
+      renderNightMarket(data.store.nightMarket);
+      startTimers();
+    } else {
+      loadStore();
+    }
 
-    apiFetch('/api/auth/me').then(r => r.json()).then(meData => {
-      if (meData.ok && meData.user) {
-        currentUser = meData.user;
-        renderUserHeader(meData.user);
-      }
-    }).catch(() => {});
+    if (data.inventory) {
+      playerInventoryData = data.inventory;
+      populateInventoryWeaponFilter(playerInventoryData);
+      renderInventoryView(playerInventoryData);
+    } else {
+      loadPlayerInventory(true).catch(() => {});
+    }
   } catch (err) {
     showAlert(alertTarget, (err.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง') + ' <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">[ดูวิธีคัดลอกลิงก์]</a>');
   } finally {

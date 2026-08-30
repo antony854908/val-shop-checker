@@ -303,6 +303,22 @@ app.post('/api/auth/token-login', authRateLimitMiddleware, async (req, res) => {
     });
     res.setHeader('X-Val-Auth-Pack', authPackBase64);
 
+    let storefront = null;
+    let wallet = { vp: 0, rp: 0, kc: 0 };
+    let inventory = null;
+    try {
+      const [sf, wl, inv] = await Promise.all([
+        valorantApi.getStorefront(authData.puuid, authData.region, authData.accessToken, authData.entitlementsToken).catch(() => null),
+        valorantApi.getWallet(authData.puuid, authData.region, authData.accessToken, authData.entitlementsToken).catch(() => ({ vp: 0, rp: 0, kc: 0 })),
+        valorantApi.getPlayerInventory(authData.puuid, authData.region, authData.accessToken, authData.entitlementsToken).catch(() => null)
+      ]);
+      storefront = sf;
+      if (wl) wallet = wl;
+      inventory = inv;
+    } catch (e) {
+      console.error('[Token Login Data Fetch Error]:', e.message);
+    }
+
     res.json({
       ok: true,
       sessionId: req.valSession.id,
@@ -313,8 +329,10 @@ app.post('/api/auth/token-login', authRateLimitMiddleware, async (req, res) => {
         tagLine: authData.tagLine,
         region: authData.region,
         level: 1,
-        wallet: { vp: 0, rp: 0, kc: 0 }
+        wallet: { vp: wallet.vp || 0, rp: wallet.rp || 0, kc: wallet.kc || 0 }
       },
+      store: storefront,
+      inventory: inventory,
       message: 'เข้าสู่ระบบด้วย Token สำเร็จ'
     });
   } catch (err) {
