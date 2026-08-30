@@ -626,46 +626,6 @@ class SkinCatalog {
     return this.bundles.get(uuid.toLowerCase()) || null;
   }
 
-  getFeaturedBundlesList() {
-    const popularNames = ['Mystbloom', 'Kuronami', 'Evori', 'Araxys', 'Nocturnum', 'Overdrive'];
-    const list = [];
-    for (const name of popularNames) {
-      for (const b of this.bundles.values()) {
-        if (b.name && b.name.toLowerCase().includes(name.toLowerCase()) && (b.displayIcon || b.displayIcon2)) {
-          const items = [];
-          for (const s of this.uniqueSkinsList) {
-            if (s.name && s.name.toLowerCase().includes(name.toLowerCase())) {
-              const isMelee = (s.weaponType || '').includes('Melee') || s.name.toLowerCase().includes('knife') || s.name.toLowerCase().includes('blade');
-              items.push({
-                uuid: s.uuid,
-                name: s.name,
-                itemType: s.weaponType || 'Weapon Skin',
-                isWeaponSkin: true,
-                displayIcon: s.displayIcon,
-                skin: s,
-                basePrice: isMelee ? 4350 : 2175,
-                discountedPrice: isMelee ? 4350 : 2175
-              });
-            }
-          }
-          list.push({
-            id: b.uuid,
-            name: b.name,
-            subName: b.subName || 'Featured Valorant Collection',
-            displayIcon: b.displayIcon2 || b.displayIcon,
-            verticalPromoImage: b.verticalPromoImage,
-            price: 8700,
-            totalDiscountedCost: 8700,
-            remainingDurationInSeconds: 86400 * 5,
-            items: items.slice(0, 5)
-          });
-          break;
-        }
-      }
-    }
-    return list;
-  }
-
   getWeaponsList() {
     return this.weaponsList;
   }

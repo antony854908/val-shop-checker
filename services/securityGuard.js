@@ -126,27 +126,31 @@ function validateTokenInput(body) {
     return { ok: false, error: 'กรุณาระบุ Access Token หรือวาง URL' };
   }
 
-  let raw = (accessToken || '').trim().replace(/^["'\s]+|["'\s]+$/g, '');
+  let raw = accessToken.trim();
   if (raw.includes('%23') || raw.includes('%3D') || raw.includes('%26')) {
     try { raw = decodeURIComponent(raw); } catch (e) {}
   }
 
-  const accessMatch = raw.match(/access_token=([a-zA-Z0-9_\-\.]+)/);
-  if (accessMatch) {
-    accessToken = accessMatch[1].trim();
-  } else if (raw.startsWith('eyJ')) {
-    const parts = raw.split(/[\s&]+/);
-    accessToken = parts[0].replace(/^access_token=/, '').trim();
-    if (!idToken && parts[1] && parts[1].startsWith('eyJ')) {
+  if (raw.includes('access_token=')) {
+    let paramStr = raw;
+    if (raw.includes('#')) {
+      paramStr = raw.split('#')[1];
+    } else if (raw.includes('?')) {
+      paramStr = raw.split('?')[1];
+    }
+    const params = new URLSearchParams(paramStr);
+    const extractedAccess = params.get('access_token');
+    const extractedId = params.get('id_token');
+    if (extractedAccess) accessToken = extractedAccess.trim();
+    if (extractedId) idToken = extractedId.trim();
+  } else if (raw.startsWith('eyJ') && raw.includes(' ')) {
+    const parts = raw.split(/\s+/);
+    accessToken = parts[0].trim();
+    if (parts[1] && parts[1].startsWith('eyJ')) {
       idToken = parts[1].trim();
     }
   } else {
-    accessToken = raw.trim();
-  }
-
-  const idMatch = raw.match(/id_token=([a-zA-Z0-9_\-\.]+)/);
-  if (idMatch) {
-    idToken = idMatch[1].trim();
+    accessToken = raw;
   }
 
   if (!accessToken || accessToken.length < 20) {

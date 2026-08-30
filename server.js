@@ -9,7 +9,6 @@ const skinCatalog = require('./services/skinCatalog');
 const riotAuth = require('./services/riotAuth');
 const valorantApi = require('./services/valorantApi');
 const vpPricing = require('./services/vpPricing');
-const crosshairs = require('./services/crosshairs');
 const {
   authRateLimitMiddleware,
   apiRateLimitMiddleware,
@@ -96,15 +95,7 @@ app.use(cors({
 app.use(cookieParser(config.SESSION_SECRET));
 app.use(express.json({ limit: '256kb' }));
 app.use(express.urlencoded({ limit: '256kb', extended: false }));
-app.use(express.static(path.join(__dirname, 'public'), {
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.html') || filePath.endsWith('sw.js')) {
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-    }
-  }
-}));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Ensure skin catalog is initialized (supports both serverless & standalone)
 app.use(async (req, res, next) => {
@@ -308,13 +299,6 @@ app.post('/api/auth/token-login', authRateLimitMiddleware, async (req, res) => {
       sessionId: req.valSession.id,
       auth: authData,
       authPack: authPackBase64,
-      user: {
-        gameName: authData.gameName,
-        tagLine: authData.tagLine,
-        region: authData.region,
-        level: 1,
-        wallet: { vp: 0, rp: 0, kc: 0 }
-      },
       message: 'เข้าสู่ระบบด้วย Token สำเร็จ'
     });
   } catch (err) {
@@ -353,10 +337,11 @@ async function completeUserSession(sessionId, tokens, userRegion) {
 
   const authData = {
     accessToken: tokens.accessToken,
+    idToken: tokens.idToken,
     entitlementsToken,
     puuid: userInfo.puuid,
     region: finalRegion,
-    country: userInfo.country || 'tha',
+    country: userInfo.country,
     gameName: nameData.gameName || 'Agent',
     tagLine: nameData.tagLine || 'VAL'
   };
@@ -450,46 +435,6 @@ app.get('/api/shop', async (req, res) => {
   }
 });
 
-// Endpoint: Get Player Inventory & Account Valuation
-app.get('/api/inventory', async (req, res) => {
-  const auth = req.valSession.auth;
-  if (!auth) {
-    return res.status(401).json({ ok: false, error: 'กรุณาเข้าสู่ระบบก่อนดูคลังสกินและมูลค่าไอดี' });
-  }
-
-  try {
-    const inventory = await valorantApi.getPlayerInventory(
-      auth.puuid,
-      auth.region,
-      auth.accessToken,
-      auth.entitlementsToken
-    );
-
-    res.json({
-      ok: true,
-      inventory
-    });
-  } catch (err) {
-    console.error('[Inventory Error]:', err.message);
-    if (err.code === 'TOKEN_EXPIRED') {
-      sessionStore.updateSession(req.valSession.id, { auth: null });
-      return res.status(401).json({ ok: false, error: 'Access Token หมดอายุ กรุณาเข้าสู่ระบบใหม่' });
-    }
-    res.status(500).json({ ok: false, error: err.message || 'ไม่สามารถโหลดคลังสกินได้' });
-  }
-});
-
-// Endpoint: Get Pro Player Crosshairs Database
-app.get('/api/crosshairs', (req, res) => {
-  const { category, search } = req.query;
-  const list = crosshairs.getAllCrosshairs(category, search);
-  res.json({
-    ok: true,
-    crosshairs: list,
-    total: list.length
-  });
-});
-
 // Endpoint: Get Player MMR & Competitive Rank
 app.get('/api/career/mmr', async (req, res) => {
   const auth = req.valSession.auth;
@@ -579,15 +524,6 @@ app.get('/api/match/:matchId', async (req, res) => {
     res.status(500).json({ ok: false, error: err.message || 'ไม่สามารถโหลดรายละเอียดแมตช์ได้' });
   }
 });
-// Endpoint: Get Live Featured Bundles (Available for all visitors without login!)
-app.get('/api/featured', (req, res) => {
-  const bundles = skinCatalog.getFeaturedBundlesList ? skinCatalog.getFeaturedBundlesList() : [];
-  res.json({
-    ok: true,
-    featuredBundles: bundles
-  });
-});
-
 // Endpoint: Get All Playable Agents
 app.get('/api/agents', (req, res) => {
   const agents = skinCatalog.getAllAgents();
