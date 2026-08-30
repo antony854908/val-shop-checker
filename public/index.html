@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=6.3">
+  <link rel="stylesheet" href="style.css?v=6.4">
 </head>
 <body>
   <!-- Ambient Atmospheric Effects -->
@@ -393,9 +393,27 @@
           </div>
           <div class="dash-timer-card">
             <span class="timer-tag">รีเซ็ตในอีก</span>
-            <span id="dailyTimer" class="timer-digits">--:--:--</span>
+            <span id="dailyTimer" class="timer-digits">21:11:00</span>
           </div>
         </div>
+
+        <script>
+          (function() {
+            function updateShopResetTimer() {
+              var now = new Date();
+              var nextReset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + (now.getUTCHours() >= 0 ? 1 : 0), 0, 0, 0));
+              var diff = Math.max(0, Math.floor((nextReset.getTime() - now.getTime()) / 1000));
+              var h = Math.floor(diff / 3600);
+              var m = Math.floor((diff % 3600) / 60);
+              var s = Math.floor(diff % 60);
+              var text = [h, m, s].map(function(v) { return v.toString().padStart(2, '0'); }).join(':');
+              var el = document.getElementById('dailyTimer');
+              if (el) el.textContent = text;
+            }
+            updateShopResetTimer();
+            setInterval(updateShopResetTimer, 1000);
+          })();
+        </script>
 
         <!-- Daily 4 Skins Grid -->
         <div id="dailySkinsGrid" class="skins-card-grid">
@@ -432,7 +450,7 @@
             </div>
             <div class="dash-timer-card">
               <span class="timer-tag">ระยะเวลาคงเหลือ</span>
-              <span id="bundleTimer" class="timer-digits">--:--:--</span>
+              <span id="bundleTimer" class="timer-digits">5 วัน 12:45:00</span>
             </div>
           </div>
           <div id="bundleContent" class="bundle-display-card">
@@ -1662,6 +1680,6 @@
 
   </div>
 
-  <script src="app.js?v=6.3"></script>
+  <script src="app.js?v=6.4"></script>
 </body>
 </html>
