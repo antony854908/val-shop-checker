@@ -4977,7 +4977,7 @@ function filterAndRenderInventoryGrid() {
       : (isStandard ? 'Standard / เริ่มต้น' : 'Battlepass / Reward');
 
     card.innerHTML = `
-      ${skin.isEquipped ? '<div class="inv-equipped-badge">EQUIPPED / กำลังใช้งาน</div>' : ''}
+      ${skin.isEquipped ? '<div class="inv-equipped-badge">EQUIPPED</div>' : ''}
       <div class="skin-tier-indicator" style="background-color: ${tierColor};"></div>
       
       <div class="skin-card-header">
@@ -4993,12 +4993,11 @@ function filterAndRenderInventoryGrid() {
       </div>
 
       <div class="skin-card-footer">
-        <h3 class="skin-title" title="${escapeHtml(skin.name)}">${escapeHtml(skin.name)}</h3>
+        <div class="skin-name" title="${escapeHtml(skin.name)}">${escapeHtml(skin.name)}</div>
         <div class="skin-price-row">
-
           <div class="skin-price-box">
             ${(skin.estimatedVpPrice || 0) > 0 ? '<img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="vp-symbol">' : ''}
-            <span class="price-number" style="font-size:13px; font-weight:700;">${priceFormatted}</span>
+            <span class="price-number" style="font-size:12px; font-weight:700;">${priceFormatted}</span>
           </div>
           <button class="btn btn-sm btn-inspect" title="ดูสีปืนและคลิป Finisher">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
