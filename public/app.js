@@ -892,10 +892,10 @@ function getSecondsUntilShopReset() {
   return diff > 0 ? diff : 86400;
 }
 
-let dailyRemaining = getSecondsUntilShopReset();
-let bundleRemaining = 86400 * 5 + 43200;
-let nmRemaining = 0;
-let timerInterval = null;
+dailyRemaining = getSecondsUntilShopReset();
+bundleRemaining = 86400 * 5 + 43200;
+nmRemaining = 0;
+timerInterval = null;
 
 // Format Seconds to HH:MM:SS (or DD:HH:MM:SS for long timers)
 function formatTime(seconds) {
