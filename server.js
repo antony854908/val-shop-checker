@@ -579,6 +579,17 @@ app.get('/api/match/:matchId', async (req, res) => {
     res.status(500).json({ ok: false, error: err.message || 'ไม่สามารถโหลดรายละเอียดแมตช์ได้' });
   }
 });
+// Endpoint: Get Live Featured Bundles & Highlights (Available for all visitors without login!)
+app.get('/api/featured', (req, res) => {
+  const bundles = skinCatalog.getFeaturedBundlesList ? skinCatalog.getFeaturedBundlesList() : [];
+  const topSkins = skinCatalog.uniqueSkinsList.filter(s => !s.isStandardDefault).slice(0, 4);
+  res.json({
+    ok: true,
+    featuredBundles: bundles,
+    featuredSkins: topSkins
+  });
+});
+
 // Endpoint: Get All Playable Agents
 app.get('/api/agents', (req, res) => {
   const agents = skinCatalog.getAllAgents();

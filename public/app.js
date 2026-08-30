@@ -5401,15 +5401,25 @@ document.getElementById('customCrosshairInput')?.addEventListener('input', (e) =
 async function loadGuestStorePreview() {
   if (currentUser) return;
   try {
-    const grid = document.getElementById('dailySkinsGrid');
-    if (grid && (!grid.children || grid.children.length === 0 || grid.querySelector('.empty-msg'))) {
-      const res = await fetch('/api/skins/all?limit=4');
-      const data = await res.json();
-      if (data.ok && data.skins) {
-        renderDailyShop(data.skins.slice(0, 4));
+    const res = await fetch('/api/featured');
+    const data = await res.json();
+    if (data.ok) {
+      if (data.featuredBundles && data.featuredBundles.length > 0) {
+        renderBundles(data.featuredBundles);
+      }
+      if (data.featuredSkins && data.featuredSkins.length > 0) {
+        renderDailyShop(data.featuredSkins);
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    try {
+      const fallbackRes = await fetch('/api/skins/all?limit=4');
+      const fallbackData = await fallbackRes.json();
+      if (fallbackData.ok && fallbackData.skins) {
+        renderDailyShop(fallbackData.skins.slice(0, 4));
+      }
+    } catch (e2) {}
+  }
 }
 
 // Preload all interactive modules on app startup
