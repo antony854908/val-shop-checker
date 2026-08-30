@@ -699,7 +699,10 @@ window.addEventListener('visibilitychange', async () => {
   }
 });
 
+let isSubmittingToken = false;
+
 async function processTokenString(rawText, alertEl) {
+  if (isSubmittingToken) return;
   const alertTarget = alertEl || googleAlert || document.getElementById('loginAlert') || document.getElementById('tokenAlert');
   let cleanText = (rawText || '').trim().replace(/^["'\s]+|["'\s]+$/g, '');
 
@@ -720,7 +723,7 @@ async function processTokenString(rawText, alertEl) {
   let accessToken = null;
   let idToken = null;
 
-  const accessMatch = cleanText.match(/access_token=([a-zA-Z0-9_\-\.]+)/);
+  const accessMatch = cleanText.match(/access_token=([^&]+)/);
   if (accessMatch) {
     accessToken = accessMatch[1].trim();
   } else if (cleanText.startsWith('eyJ')) {
@@ -731,7 +734,7 @@ async function processTokenString(rawText, alertEl) {
     accessToken = cleanText.trim();
   }
 
-  const idMatch = cleanText.match(/id_token=([a-zA-Z0-9_\-\.]+)/);
+  const idMatch = cleanText.match(/id_token=([^&]+)/);
   if (idMatch) {
     idToken = idMatch[1].trim();
   }
@@ -741,6 +744,7 @@ async function processTokenString(rawText, alertEl) {
     return;
   }
 
+  isSubmittingToken = true;
   hideAlert(alertTarget);
   if (btnAutoPaste) {
     btnAutoPaste.disabled = true;
@@ -755,15 +759,6 @@ async function processTokenString(rawText, alertEl) {
     });
 
     const data = await res.json();
-    if (data.sessionId) {
-      setStoredSid(data.sessionId);
-    }
-    if (data.authPack) {
-      setStoredAuthPack(data.authPack);
-    } else if (data.auth) {
-      setStoredAuthPack(data.auth);
-    }
-
     if (!data.ok) {
       throw new Error(data.error || 'Token ไม่ถูกต้องหรือหมดอายุ');
     }
@@ -796,6 +791,7 @@ async function processTokenString(rawText, alertEl) {
   } catch (err) {
     showAlert(alertTarget, (err.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง') + ' <br><a href="javascript:void(0)" onclick="window.openGoogleTutorialModal?.()" style="color:var(--val-cyan); text-decoration:underline; font-weight:700; display:inline-block; margin-top:4px;">[ดูวิธีคัดลอกลิงก์]</a>');
   } finally {
+    isSubmittingToken = false;
     if (btnAutoPaste) {
       btnAutoPaste.disabled = false;
       btnAutoPaste.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> <span>วาง & เข้าสู่ระบบทันที</span>`;
