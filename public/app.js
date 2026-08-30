@@ -4976,13 +4976,16 @@ function filterAndRenderInventoryGrid() {
     card.dataset.uuid = skin.uuid;
 
     const tierName = skin.contentTier?.name || skin.tier?.name || 'Standard Edition';
-    const tierColor = skin.contentTier?.color || skin.tier?.highlightColor || '#5a9fe2';
+    const tierColor = skin.contentTier?.color || skin.tier?.highlightColor || '#ff4655';
     const tierIcon = skin.contentTier?.displayIcon || skin.tier?.displayIcon || '';
     const imgUrl = skin.displayIcon || (skin.chromas && skin.chromas[0]?.displayIcon) || (skin.levels && skin.levels[0]?.displayIcon) || skin.weaponIcon || 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
     const isStandard = skin.isStandardDefault || (skin.name || '').toLowerCase().startsWith('standard ');
     const priceFormatted = (skin.estimatedVpPrice || 0) > 0 
       ? (skin.estimatedVpPrice.toLocaleString() + ' VP') 
-      : (isStandard ? 'Standard / เริ่มต้น' : 'Reward');
+      : (isStandard ? 'Standard' : 'Reward');
+
+    const chromasCount = skin.chromas ? skin.chromas.length : 1;
+    const hasVideo = skin.hasVideo || (skin.levels && skin.levels.some(l => l.streamedVideo));
 
     card.style.setProperty('--card-tier-color', tierColor);
     card.style.setProperty('--card-tier-glow', tierColor + '40');
@@ -4992,11 +4995,14 @@ function filterAndRenderInventoryGrid() {
       <div class="skin-tier-indicator" style="background-color: ${tierColor};"></div>
       
       <div class="skin-card-header">
-        <div class="tier-badge-pill" style="border-color: ${tierColor}; color: ${tierColor};">
-          ${tierIcon ? `<img src="${tierIcon}" alt="tier" class="tier-icon-small">` : ''}
-          <span>${escapeHtml(tierName)}</span>
+        <div class="skin-tier-info">
+          ${tierIcon ? `<img src="${tierIcon}" alt="" class="skin-tier-icon">` : ''}
+          <span class="skin-tier-name">${escapeHtml(tierName)}</span>
         </div>
-        <div class="skin-weapon-tag">${escapeHtml(skin.weaponType || 'Weapon')}</div>
+        <div class="skin-features-badge">
+          ${chromasCount > 1 ? `<span class="badge-feat">${chromasCount} สี</span>` : ''}
+          ${hasVideo ? '<span class="badge-feat"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:middle; margin-right:3px;"><polygon points="5 3 19 12 5 21 5 3"/></svg> วิดีโอ VFX</span>' : ''}
+        </div>
       </div>
 
       <div class="skin-image-box">
@@ -5005,14 +5011,14 @@ function filterAndRenderInventoryGrid() {
 
       <div class="skin-card-footer">
         <div class="skin-name" title="${escapeHtml(skin.name)}">${escapeHtml(skin.name)}</div>
-        <div class="skin-price-row">
-          <div class="skin-price-box">
-            ${(skin.estimatedVpPrice || 0) > 0 ? '<img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="vp-symbol" style="width:12px;height:12px;">' : ''}
-            <span class="price-number" style="font-size:12px; font-weight:700; color:${(skin.estimatedVpPrice || 0) > 0 ? 'var(--val-gold)' : 'var(--val-gray)'};">${priceFormatted}</span>
+        <div class="skin-meta-row">
+          <div class="skin-price-tag">
+            ${(skin.estimatedVpPrice || 0) > 0 ? '<img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">' : ''}
+            <span>${priceFormatted}</span>
           </div>
-          <button class="btn btn-sm btn-inspect" title="ดูสีปืนและคลิป Finisher">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <button class="btn btn-primary btn-sm btn-inspect" title="ดูสีปืนและคลิป Finisher">
             <span>ตรวจสกิน</span>
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
       </div>
