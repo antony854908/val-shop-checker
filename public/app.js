@@ -876,9 +876,29 @@ function hideAlert(el) {
   if (el) el.classList.add('hidden');
 }
 
-// Format Seconds to HH:MM:SS
+// Calculate Real-Time VALORANT Global Shop Reset (00:00 UTC / 07:00 AM Bangkok)
+function getSecondsUntilShopReset() {
+  const now = new Date();
+  const nextReset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + (now.getUTCHours() >= 0 ? 1 : 0), 0, 0, 0));
+  const diff = Math.floor((nextReset.getTime() - now.getTime()) / 1000);
+  return diff > 0 ? diff : 86400;
+}
+
+let dailyRemaining = getSecondsUntilShopReset();
+let bundleRemaining = 86400 * 5 + 43200;
+let nmRemaining = 0;
+let timerInterval = null;
+
+// Format Seconds to HH:MM:SS (or DD:HH:MM:SS for long timers)
 function formatTime(seconds) {
   if (seconds <= 0) return '00:00:00';
+  if (seconds >= 86400) {
+    const days = Math.floor(seconds / 86400);
+    const h = Math.floor((seconds % 86400) / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    return `${days} วัน ${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
@@ -888,24 +908,35 @@ function formatTime(seconds) {
 // Start Countdown Timers
 function startTimers() {
   if (timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
+
+  const updateTimerDisplays = () => {
     if (dailyRemaining > 0) {
       dailyRemaining--;
-      const el = document.getElementById('dailyTimer');
-      if (el) el.textContent = formatTime(dailyRemaining);
+    } else {
+      dailyRemaining = getSecondsUntilShopReset();
     }
+    const el = document.getElementById('dailyTimer');
+    if (el) el.textContent = formatTime(dailyRemaining);
+
     if (bundleRemaining > 0) {
       bundleRemaining--;
-      const el = document.getElementById('bundleTimer');
-      if (el) el.textContent = formatTime(bundleRemaining);
+      const bEl = document.getElementById('bundleTimer');
+      if (bEl) bEl.textContent = formatTime(bundleRemaining);
     }
+
     if (nmRemaining > 0) {
       nmRemaining--;
       const nmEl = document.getElementById('nmTimer');
       if (nmEl) nmEl.textContent = formatTime(nmRemaining);
     }
-  }, 1000);
+  };
+
+  updateTimerDisplays();
+  timerInterval = setInterval(updateTimerDisplays, 1000);
 }
+
+// Start real-time timers immediately
+startTimers();
 
 // Check Existing Session & Auto-Restore (Permanent Persistent Auth)
 async function checkAuth() {
@@ -5398,5 +5429,22 @@ document.getElementById('customCrosshairInput')?.addEventListener('input', (e) =
   }
 });
 
-// Auto preload crosshairs on app start
-setTimeout(loadProCrosshairs, 200);
+async function loadGuestStorePreview() {
+  if (currentUser) return;
+  try {
+    const res = await fetch('/api/featured');
+    const data = await res.json();
+    if (data.ok && data.featuredBundles && data.featuredBundles.length > 0) {
+      renderBundles(data.featuredBundles);
+    }
+  } catch (e) {}
+}
+
+// Preload interactive modules & featured store on startup
+setTimeout(() => {
+  loadWeaponsList();
+  loadProCrosshairs();
+  loadCatalogSkins(false);
+  loadAgentsEncyclopedia();
+  loadGuestStorePreview();
+}, 100);
