@@ -192,7 +192,7 @@
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
-                <span class="saved-accounts-title">เลือกล็อกอินจากบัญชีในเครื่องนี้</span>
+                <span class="saved-accounts-title">บัญชีในเครื่องนี้</span>
               </div>
               <span id="savedAccountsCount" class="saved-accounts-count-badge">0 บัญชี</span>
             </div>
@@ -264,13 +264,18 @@
 
             <!-- Riot ID Sign-in -->
             <a id="btnOpenRiotGoogle" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1&prompt=login" target="_blank" rel="noopener noreferrer" class="btn-riot-main-signin">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
-                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                <polyline points="10 17 15 12 10 7"/>
-                <line x1="15" y1="12" x2="3" y2="12"/>
-              </svg>
-              <span>เข้าสู่ระบบด้วย Riot ID / อื่นๆ</span>
-              <svg class="riot-arrow-icon" viewBox="0 0 24 24" fill="currentColor">
+              <div class="btn-riot-brand-badge">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                  <polyline points="10 17 15 12 10 7"/>
+                  <line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+              </div>
+              <div class="btn-signin-labels">
+                <span class="btn-signin-title">เข้าสู่ระบบด้วย Riot ID / อื่นๆ</span>
+                <span class="btn-signin-desc">Riot Account, Apple, Facebook, Xbox</span>
+              </div>
+              <svg class="riot-arrow-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                 <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </a>

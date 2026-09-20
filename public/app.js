@@ -913,13 +913,13 @@ function renderSavedAccounts() {
             <div class="account-meta-row">
               <span class="account-badge-region">${escapeHtml((acc.region || 'AP').toUpperCase())}</span>
               ${acc.level ? `<span class="account-badge-lvl">LVL ${acc.level}</span>` : ''}
-              <span class="account-badge-provider">${isGoogle ? 'Google Sign-in' : 'Riot ID'}</span>
+              <span class="account-badge-provider">${isGoogle ? 'Google' : 'Riot'}</span>
             </div>
           </div>
         </div>
         <div class="account-card-right">
           <button type="button" class="btn-account-switch" data-action="switch" data-puuid="${escapeHtml(acc.puuid)}" title="เข้าสู่ระบบด้วยบัญชีนี้">
-            <span>เข้าสู่ระบบ</span>
+            <span class="btn-acc-label">เข้าสู่ระบบ</span>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
           <button type="button" class="btn-account-remove" data-action="remove" data-puuid="${escapeHtml(acc.puuid)}" title="ลบบัญชีนี้ออกจากเครื่อง">
@@ -930,10 +930,10 @@ function renderSavedAccounts() {
     `;
   }).join('');
 
-  listEl.querySelectorAll('[data-action="switch"]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const puuid = btn.getAttribute('data-puuid');
+  listEl.querySelectorAll('.saved-account-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('[data-action="remove"]')) return;
+      const puuid = card.getAttribute('data-puuid');
       if (puuid) switchAccount(puuid);
     });
   });
