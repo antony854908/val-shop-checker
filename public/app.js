@@ -51,6 +51,34 @@ function setStoredAuthPack(rawVal) {
   } catch (e) {}
 }
 
+// Get User Current VP Credit in Account reliably
+function getCurrentWalletVp() {
+  if (currentUser?.wallet?.vp !== undefined && currentUser.wallet.vp !== null) {
+    const v = parseInt(currentUser.wallet.vp, 10);
+    if (!isNaN(v)) return Math.max(0, v);
+  }
+  if (typeof currentUserData !== 'undefined' && currentUserData?.wallet?.vp !== undefined && currentUserData.wallet.vp !== null) {
+    const v = parseInt(currentUserData.wallet.vp, 10);
+    if (!isNaN(v)) return Math.max(0, v);
+  }
+  const el = document.getElementById('walletVp');
+  if (el && el.textContent) {
+    const raw = el.textContent.replace(/[^0-9]/g, '');
+    if (raw) {
+      const v = parseInt(raw, 10);
+      if (!isNaN(v)) return Math.max(0, v);
+    }
+  }
+  try {
+    const cached = localStorage.getItem('val_cached_wallet_vp');
+    if (cached !== null) {
+      const v = parseInt(cached, 10);
+      if (!isNaN(v)) return Math.max(0, v);
+    }
+  } catch (e) {}
+  return 0;
+}
+
 // XSS Sanitizer for dynamic client text rendering
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
@@ -1326,12 +1354,48 @@ const OVERTOPUP_PACKAGES = [
   { vp: 22000, price: 4964, tag: "22,000 VP" }
 ];
 
-window.calculateOptimalOverTopup = function(targetVp) {
+window.calculateOptimalOverTopup = function(targetVp, deductWallet = true, customWalletVp = null) {
   if (!targetVp || targetVp <= 0) {
-    return { totalPrice: 0, totalVp: 0, leftoverVp: 0, comboText: "", shortTag: "", comboList: [] };
+    return {
+      bestCost: 0,
+      totalPrice: 0,
+      totalVp: 0,
+      leftoverVp: 0,
+      neededVp: 0,
+      walletVp: 0,
+      targetVp: 0,
+      hasEnoughVp: true,
+      comboText: "มี VP เพียงพอแล้ว",
+      shortTag: "0฿",
+      comboList: []
+    };
   }
+
+  const walletVp = customWalletVp !== null
+    ? Math.max(0, parseInt(customWalletVp, 10) || 0)
+    : (deductWallet ? getCurrentWalletVp() : 0);
+
+  const neededVp = deductWallet ? Math.max(0, targetVp - walletVp) : targetVp;
+
+  if (neededVp === 0) {
+    const leftoverVp = walletVp - targetVp;
+    return {
+      bestCost: 0,
+      totalPrice: 0,
+      totalVp: 0,
+      leftoverVp,
+      neededVp: 0,
+      walletVp,
+      targetVp,
+      hasEnoughVp: true,
+      comboText: `มี VP ในไอดี ${walletVp.toLocaleString()} VP เพียงพอแล้ว (หลังซื้อจะเหลือ ${leftoverVp.toLocaleString()} VP)`,
+      shortTag: "มี VP พอ (0฿)",
+      comboList: []
+    };
+  }
+
   const pkgs = [...OVERTOPUP_PACKAGES].sort((a, b) => a.price - b.price);
-  const searchLimit = targetVp + 22000 + 100;
+  const searchLimit = neededVp + 22000 + 100;
   const dp = new Array(searchLimit + 1);
   dp[0] = { cost: 0, prevV: -1, pkgIndex: -1 };
 
@@ -1349,7 +1413,7 @@ window.calculateOptimalOverTopup = function(targetVp) {
 
   let bestV = -1;
   let minCost = Infinity;
-  for (let v = targetVp; v <= searchLimit; v++) {
+  for (let v = neededVp; v <= searchLimit; v++) {
     if (dp[v] && dp[v].cost < minCost) {
       minCost = dp[v].cost;
       bestV = v;
@@ -1360,13 +1424,20 @@ window.calculateOptimalOverTopup = function(targetVp) {
 
   if (bestV === -1 || minCost === Infinity) {
     const largest = pkgs[pkgs.length - 1];
-    const count = Math.ceil(targetVp / largest.vp);
+    const count = Math.ceil(neededVp / largest.vp);
+    const topupVp = count * largest.vp;
+    const finalLeftover = (walletVp + topupVp) - targetVp;
     return {
+      bestCost: count * largest.price,
       totalPrice: count * largest.price,
-      totalVp: count * largest.vp,
-      leftoverVp: (count * largest.vp) - targetVp,
-      comboText: `${count}x แพ็ก ${largest.tag} (${(count * largest.price).toLocaleString()}฿)`,
-      shortTag: `${count}x ${largest.tag} (${(count * largest.price).toLocaleString()}฿)`,
+      totalVp: topupVp,
+      leftoverVp: finalLeftover,
+      neededVp,
+      walletVp,
+      targetVp,
+      hasEnoughVp: false,
+      comboText: `${count}x แพ็ก ${largest.tag} (${(count * largest.price).toLocaleString()}฿)${walletVp > 0 ? ` [หัก ${walletVp.toLocaleString()} VP ในไอดี]` : ''}`,
+      shortTag: `~${(count * largest.price).toLocaleString()}฿`,
       comboList: [{ count, pkg: largest }]
     };
   }
@@ -1389,13 +1460,19 @@ window.calculateOptimalOverTopup = function(targetVp) {
     });
   }
   comboList.sort((a, b) => b.pkg.vp - a.pkg.vp);
-  const comboText = comboList.map(c => `${c.count}x แพ็ก ${c.pkg.tag} (${c.subtotalPrice.toLocaleString()}฿)`).join(" + ");
-  const shortTag = comboList.map(c => `${c.count}x ${c.pkg.tag}`).join("+") + ` (${minCost.toLocaleString()}฿)`;
+  const comboText = comboList.map(c => `${c.count}x แพ็ก ${c.pkg.tag} (${c.subtotalPrice.toLocaleString()}฿)`).join(" + ") + (walletVp > 0 ? ` [หัก ${walletVp.toLocaleString()} VP ในไอดี]` : '');
+  const shortTag = `~${minCost.toLocaleString()}฿`;
+  const finalLeftover = (walletVp + bestV) - targetVp;
 
   return {
+    bestCost: minCost,
     totalPrice: minCost,
     totalVp: bestV,
-    leftoverVp: bestV - targetVp,
+    leftoverVp: finalLeftover,
+    neededVp,
+    walletVp,
+    targetVp,
+    hasEnoughVp: false,
     comboText,
     shortTag,
     comboList
@@ -1421,7 +1498,8 @@ function renderDailyShop(skins) {
 
   validSkins.forEach((skin, idx) => {
     const skinPrice = skin.price || 0;
-    const opt = window.calculateOptimalOverTopup(skinPrice);
+    const walletVp = getCurrentWalletVp();
+    const opt = window.calculateOptimalOverTopup(skinPrice, true, walletVp);
     const tierColor = skin.tier?.highlightColor || '#ff4655';
     const card = document.createElement('div');
     card.className = 'skin-card';
@@ -1461,7 +1539,7 @@ function renderDailyShop(skins) {
           <div class="skin-price-tag">
             <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
             <span>${(skin.price || 0).toLocaleString()}</span>
-            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")}</span>
+            <span class="skin-thb-quick-tag ${opt.hasEnoughVp ? 'covered' : ''}" title="${opt.hasEnoughVp ? `มี VP ในไอดีพอแล้ว (${walletVp.toLocaleString()} VP)` : (walletVp > 0 ? `คำนวณเติมเพิ่ม ${opt.neededVp.toLocaleString()} VP (หัก ${walletVp.toLocaleString()} VP ในไอดีแล้ว) จาก OverTopup: ${opt.comboText}` : `แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}`)}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")}${!opt.hasEnoughVp && walletVp > 0 ? `<span class="tag-deduct-chip">หัก ${walletVp.toLocaleString()} VP</span>` : ''}</span>
           </div>
           <button class="btn btn-primary btn-sm btn-inspect"><span>ดูเอฟเฟกต์ & สี</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
@@ -1690,7 +1768,8 @@ function renderBundles(bundles) {
       const itemBadge = isSkin ? (item.itemType || 'สกินปืน') : (item.itemType || 'ไอเทม');
       const actionText = isSkin ? '<span class="bundle-inspect-hint">กดดูเอฟเฟกต์ & สี</span>' : '<span class="bundle-inspect-hint">แตะเพื่อดูรูปภาพ HD</span>';
       const itemPrice = item.discountedPrice || item.basePrice || 0;
-      const opt = window.calculateOptimalOverTopup(itemPrice);
+      const walletVp = getCurrentWalletVp();
+      const opt = window.calculateOptimalOverTopup(itemPrice, true, walletVp);
 
       const miniItem = document.createElement('div');
       miniItem.className = 'bundle-mini-item';
@@ -1706,7 +1785,7 @@ function renderBundles(bundles) {
           <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
           <span>${itemPrice.toLocaleString()}</span>
           ${itemPrice > 0 ? `
-            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${itemPrice}">${opt.shortTag || ("~" + Math.round(itemPrice * 0.238) + " ฿")}</span>
+            <span class="skin-thb-quick-tag ${opt.hasEnoughVp ? 'covered' : ''}" title="${opt.hasEnoughVp ? `มี VP ในไอดีพอแล้ว (${walletVp.toLocaleString()} VP)` : (walletVp > 0 ? `คำนวณเติมเพิ่ม ${opt.neededVp.toLocaleString()} VP (หัก ${walletVp.toLocaleString()} VP ในไอดีแล้ว)` : `แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}`)}" data-vp="${itemPrice}">${opt.shortTag || ("~" + Math.round(itemPrice * 0.238) + " ฿")}${!opt.hasEnoughVp && walletVp > 0 ? `<span class="tag-deduct-chip">หัก ${walletVp.toLocaleString()} VP</span>` : ''}</span>
           ` : ''}
         </div>
       `;
@@ -1837,7 +1916,8 @@ window.openBundleModal = function(b) {
       const chromasCount = s?.chromas ? s.chromas.length : 1;
       const hasVideo = s?.hasVideo || (s?.levels && s.levels.some(l => l.streamedVideo));
       const itemPrice = item.discountedPrice || item.basePrice || 0;
-      const itemOpt = window.calculateOptimalOverTopup(itemPrice);
+      const walletVp = getCurrentWalletVp();
+      const itemOpt = window.calculateOptimalOverTopup(itemPrice, true, walletVp);
 
       const card = document.createElement("div");
       card.className = "skin-card";
@@ -1868,7 +1948,7 @@ window.openBundleModal = function(b) {
               <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
               <span>${itemPrice.toLocaleString()}</span>
               ${itemPrice > 0 ? `
-                <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${itemOpt.comboText}" data-vp="${itemPrice}">${itemOpt.shortTag}</span>
+                <span class="skin-thb-quick-tag ${itemOpt.hasEnoughVp ? 'covered' : ''}" title="${itemOpt.hasEnoughVp ? `มี VP ในไอดีพอแล้ว (${walletVp.toLocaleString()} VP)` : (walletVp > 0 ? `คำนวณเติมเพิ่ม ${itemOpt.neededVp.toLocaleString()} VP (หัก ${walletVp.toLocaleString()} VP ในไอดีแล้ว)` : `แพ็กเกจ OverTopup แนะนำ: ${itemOpt.comboText}`)}" data-vp="${itemPrice}">${itemOpt.shortTag}${!itemOpt.hasEnoughVp && walletVp > 0 ? `<span class="tag-deduct-chip">หัก ${walletVp.toLocaleString()} VP</span>` : ''}</span>
               ` : ""}
             </div>
             <button class="btn btn-primary btn-sm btn-inspect">
@@ -1924,7 +2004,8 @@ function renderNightMarket(nm) {
     const safeIcon = offer.displayIcon || 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
     const starred = isWishlisted(offer.uuid);
     const skinPrice = offer.discountedPrice || 0;
-    const opt = window.calculateOptimalOverTopup(skinPrice);
+    const walletVp = getCurrentWalletVp();
+    const opt = window.calculateOptimalOverTopup(skinPrice, true, walletVp);
 
     card.innerHTML = `
       <button class="btn-wishlist-star ${starred ? 'starred' : ''}" data-uuid="${offer.uuid.toLowerCase()}" title="${starred ? 'อยู่ในรายการที่อยากได้' : 'เพิ่มในรายการที่อยากได้'}">
@@ -1950,7 +2031,7 @@ function renderNightMarket(nm) {
             <span class="original-price">${offer.originalPrice.toLocaleString()}</span>
             <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
             <span style="color:var(--val-gold)">${offer.discountedPrice.toLocaleString()}</span>
-            <span class="skin-thb-quick-tag" title="แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")}</span>
+            <span class="skin-thb-quick-tag ${opt.hasEnoughVp ? 'covered' : ''}" title="${opt.hasEnoughVp ? `มี VP ในไอดีพอแล้ว (${walletVp.toLocaleString()} VP)` : (walletVp > 0 ? `คำนวณเติมเพิ่ม ${opt.neededVp.toLocaleString()} VP (หัก ${walletVp.toLocaleString()} VP ในไอดีแล้ว) จาก OverTopup: ${opt.comboText}` : `แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}`)}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")}${!opt.hasEnoughVp && walletVp > 0 ? `<span class="tag-deduct-chip">หัก ${walletVp.toLocaleString()} VP</span>` : ''}</span>
           </div>
           <button class="btn btn-primary btn-sm btn-inspect"><span>ดูสกิน & สี</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
@@ -2028,8 +2109,9 @@ function openSkinModal(skinOrUuid) {
   const btnInspectCompare = document.getElementById('btnInspectCompareStores');
 
   if (displayPrice && displayPrice > 0 && compareBar) {
-    const opt = window.calculateOptimalOverTopup(displayPrice);
-    const inGameEstimate = Math.round(displayPrice * 0.300);
+    const walletVp = getCurrentWalletVp();
+    const opt = window.calculateOptimalOverTopup(displayPrice, true, walletVp);
+    const inGameEstimate = Math.round(opt.neededVp * 0.300);
     const savings = Math.max(0, inGameEstimate - opt.totalPrice);
 
     const comboBadgeEl = document.getElementById("modalSkinOverTopupCombo");
@@ -2037,18 +2119,32 @@ function openSkinModal(skinOrUuid) {
     const vpLeftoverEl = document.getElementById("modalSkinVpLeftover");
     const savingsEl = document.getElementById("modalSkinSavingsTag");
 
-    if (comboBadgeEl) comboBadgeEl.textContent = opt.comboText || `${opt.totalPrice.toLocaleString()} ฿`;
-    if (vpGainEl) vpGainEl.textContent = `ได้รับ ${opt.totalVp.toLocaleString()} VP`;
-    if (vpLeftoverEl) {
-      if (opt.leftoverVp > 0) {
-        vpLeftoverEl.textContent = `คงเหลือ +${opt.leftoverVp.toLocaleString()} VP ในไอดี`;
+    if (opt.hasEnoughVp) {
+      if (comboBadgeEl) comboBadgeEl.textContent = `มี VP ในไอดีพอแล้ว (${walletVp.toLocaleString()} VP) ไม่ต้องเติมเงินเพิ่ม`;
+      if (vpGainEl) vpGainEl.textContent = `ใช้ ${displayPrice.toLocaleString()} VP`;
+      if (vpLeftoverEl) {
+        vpLeftoverEl.textContent = `คงเหลือในไอดี ${opt.leftoverVp.toLocaleString()} VP`;
         vpLeftoverEl.style.display = "inline-flex";
-      } else {
-        vpLeftoverEl.style.display = "none";
       }
-    }
-    if (savingsEl) {
-      savingsEl.textContent = savings > 0 ? `ประหยัดได้ ~${savings.toLocaleString()} ฿` : "เรทคุ้มกว่าเติมตรงในเกม";
+      if (savingsEl) {
+        savingsEl.textContent = `จ่าย 0 ฿ (ใช้เครดิตในไอดี)`;
+      }
+    } else {
+      if (comboBadgeEl) comboBadgeEl.textContent = opt.comboText || `${opt.totalPrice.toLocaleString()} ฿`;
+      if (vpGainEl) vpGainEl.textContent = `เติมเพิ่ม ${opt.neededVp.toLocaleString()} VP (ได้รับ ${opt.totalVp.toLocaleString()} VP)`;
+      if (vpLeftoverEl) {
+        if (opt.leftoverVp > 0) {
+          vpLeftoverEl.textContent = `คงเหลือ +${opt.leftoverVp.toLocaleString()} VP ในไอดี`;
+          vpLeftoverEl.style.display = "inline-flex";
+        } else {
+          vpLeftoverEl.style.display = "none";
+        }
+      }
+      if (savingsEl) {
+        savingsEl.textContent = walletVp > 0
+          ? `ประหยัดขึ้นมาก (หัก ${walletVp.toLocaleString()} VP แล้ว)`
+          : (savings > 0 ? `ประหยัดได้ ~${savings.toLocaleString()} ฿` : "เรทคุ้มกว่าเติมตรงในเกม");
+      }
     }
 
     compareBar.classList.remove("hidden");
@@ -4562,6 +4658,11 @@ window.openVpCompareModal = function(presetVp = null) {
   const modal = document.getElementById("vpCalcModal");
   if (!modal) return;
 
+  const currentWalletInput = document.getElementById("inputCalcCurrentVp");
+  if (currentWalletInput && !currentWalletInput.dataset.userEdited) {
+    currentWalletInput.value = getCurrentWalletVp();
+  }
+
   if (presetVp !== null && !isNaN(presetVp) && presetVp > 0) {
     const input = document.getElementById("inputCalcVp");
     if (input) input.value = presetVp;
@@ -4589,11 +4690,13 @@ async function updateVpCalculator() {
   const targetVp = parseInt(inputEl?.value || "1775", 10) || 0;
   
   let walletVp = 0;
-  if (typeof currentUserData !== "undefined" && currentUserData?.wallet?.vp !== undefined) {
-    walletVp = currentUserData.wallet.vp;
+  const currentWalletInput = document.getElementById("inputCalcCurrentVp");
+  if (currentWalletInput && currentWalletInput.value !== "") {
+    const custom = parseInt(currentWalletInput.value, 10);
+    if (!isNaN(custom)) walletVp = Math.max(0, custom);
   } else {
-    const walletText = document.getElementById("walletVp")?.textContent?.replace(/,/g, "");
-    walletVp = parseInt(walletText, 10) || 0;
+    walletVp = getCurrentWalletVp();
+    if (currentWalletInput) currentWalletInput.value = walletVp;
   }
 
   const deductWallet = document.getElementById("checkDeductWallet")?.checked ?? true;
@@ -4605,16 +4708,19 @@ async function updateVpCalculator() {
   if (targetVpDisplay) targetVpDisplay.textContent = `${targetVp.toLocaleString()} VP`;
 
   const walletDisplay = document.getElementById("calcWalletBalance");
-  if (walletDisplay) walletDisplay.textContent = `${walletVp.toLocaleString()} VP`;
+  if (walletDisplay) {
+    walletDisplay.textContent = `${walletVp.toLocaleString()} VP`;
+    walletDisplay.style.color = walletVp > 0 ? "var(--val-cyan)" : "var(--val-gray)";
+  }
 
   const neededVp = deductWallet ? Math.max(0, targetVp - walletVp) : targetVp;
   const neededDisplay = document.getElementById("calcNeededVp");
   if (neededDisplay) {
-    neededDisplay.textContent = `${neededVp.toLocaleString()} VP`;
     if (neededVp === 0 && targetVp > 0) {
-      neededDisplay.textContent = "0 VP (มีพอแล้ว)";
-      neededDisplay.style.color = "var(--val-cyan)";
+      neededDisplay.textContent = "0 VP (มี VP ในไอดีพอแล้ว)";
+      neededDisplay.style.color = "#34d399";
     } else {
+      neededDisplay.textContent = `${neededVp.toLocaleString()} VP`;
       neededDisplay.style.color = "var(--val-gold)";
     }
   }
@@ -4642,6 +4748,11 @@ function renderVpComparisonResults(result) {
   const winner = result.cheapestStore;
   if (!winner) return;
 
+  const targetVp = result.targetVp || 0;
+  const currentWallet = result.currentWalletVp || 0;
+  const deduct = result.deductWallet;
+  const neededVp = result.neededVp ?? (deduct ? Math.max(0, targetVp - currentWallet) : targetVp);
+
   const winnerStoreNameEl = document.getElementById("winnerStoreName");
   const winnerStoreTagEl = document.getElementById("winnerStoreTag");
   const winnerPriceThbEl = document.getElementById("winnerPriceThb");
@@ -4650,15 +4761,42 @@ function renderVpComparisonResults(result) {
 
   if (winnerStoreNameEl) winnerStoreNameEl.textContent = "Over Topup (overtopup.com)";
   if (winnerStoreTagEl) winnerStoreTagEl.textContent = "เติมเข้า Riot ID ไทย อัตโนมัติ • PromptPay / โอนธนาคาร";
-  if (winnerPriceThbEl) winnerPriceThbEl.textContent = `~${winner.totalPrice.toLocaleString()}`;
 
-  if (winnerSavingsTagEl) {
-    if (result.maxSavingsThb > 0) {
-      winnerSavingsTagEl.textContent = `ประหยัดได้ ${result.maxSavingsThb.toLocaleString()} ฿ (-${result.maxSavingsPct}% จากเติมในเกม)`;
+  if (winner.totalPrice === 0 && neededVp === 0) {
+    if (winnerPriceThbEl) winnerPriceThbEl.textContent = `0 ฿`;
+    if (winnerSavingsTagEl) {
+      winnerSavingsTagEl.textContent = `ไม่ต้องเติมเงินเพิ่ม (มี VP ในไอดีเพียงพอแล้ว)`;
       winnerSavingsTagEl.style.display = "inline-block";
-    } else {
-      winnerSavingsTagEl.textContent = "ราคาใกล้เคียงกับในเกม";
-      winnerSavingsTagEl.style.display = "inline-block";
+      winnerSavingsTagEl.style.color = "#34d399";
+    }
+    if (winnerComboNoteEl) {
+      const leftover = Math.max(0, currentWallet - targetVp);
+      winnerComboNoteEl.innerHTML = `<span style="color:var(--val-cyan);">คุณมี VP ในไอดี <strong>${currentWallet.toLocaleString()} VP</strong> เพียงพอสำหรับซื้อรายการนี้ (${targetVp.toLocaleString()} VP) แล้ว โดยไม่ต้องเติมเงินเพิ่ม • หลังซื้อจะเหลือ <strong>${leftover.toLocaleString()} VP</strong></span>`;
+    }
+  } else {
+    if (winnerPriceThbEl) winnerPriceThbEl.textContent = `~${winner.totalPrice.toLocaleString()}`;
+    if (winnerSavingsTagEl) {
+      if (currentWallet > 0 && deduct) {
+        winnerSavingsTagEl.textContent = `ราคาถูกลงเหลือเพียง ~${winner.totalPrice.toLocaleString()} ฿ (หักเครดิตในไอดี ${currentWallet.toLocaleString()} VP แล้ว)`;
+        winnerSavingsTagEl.style.display = "inline-block";
+        winnerSavingsTagEl.style.color = "var(--val-gold)";
+      } else if (result.maxSavingsThb > 0) {
+        winnerSavingsTagEl.textContent = `ประหยัดได้ ${result.maxSavingsThb.toLocaleString()} ฿ (-${result.maxSavingsPct}% จากเติมในเกม)`;
+        winnerSavingsTagEl.style.display = "inline-block";
+      } else {
+        winnerSavingsTagEl.textContent = "ราคาใกล้เคียงกับในเกม";
+        winnerSavingsTagEl.style.display = "inline-block";
+      }
+    }
+
+    if (winnerComboNoteEl) {
+      if (winner.combination && winner.combination.length > 0) {
+        const comboTxt = winner.combination.map(c => `${c.count}x ${c.package.tag} (${c.subtotalPrice}฿)`).join(" + ");
+        const deductNote = (currentWallet > 0 && deduct) ? `โดยหักลบเครดิตในไอดี ${currentWallet.toLocaleString()} VP แล้ว ` : '';
+        winnerComboNoteEl.innerHTML = `<span>แพ็กเกจที่แนะนำบน OverTopup: <strong>${comboTxt}</strong> (สำหรับเติมเพิ่มเพียง <strong>${neededVp.toLocaleString()} VP</strong> ${deductNote}• หลังซื้อจะเหลือ <strong>${winner.leftoverVp.toLocaleString()} VP</strong>)</span>`;
+      } else {
+        winnerComboNoteEl.innerHTML = `<span>คุณมี VP ในกระเป๋าเพียงพอสำหรับซื้อสกินนี้แล้ว ไม่จำเป็นต้องเติมเงินเพิ่ม!</span>`;
+      }
     }
   }
 
@@ -4824,6 +4962,27 @@ function initVpCompareModule() {
   document.getElementById("checkDeductWallet")?.addEventListener("change", () => {
     playTacticalAudio("click");
     updateVpCalculator();
+  });
+
+  // Pull User Wallet VP Button
+  document.getElementById("btnPullUserWalletVp")?.addEventListener("click", () => {
+    playTacticalAudio("click");
+    const currentWalletInput = document.getElementById("inputCalcCurrentVp");
+    if (currentWalletInput) {
+      currentWalletInput.value = getCurrentWalletVp();
+      delete currentWalletInput.dataset.userEdited;
+    }
+    updateVpCalculator();
+  });
+
+  // Current Wallet VP Input Real-time debounce
+  const inputWallet = document.getElementById("inputCalcCurrentVp");
+  inputWallet?.addEventListener("input", () => {
+    if (inputWallet) inputWallet.dataset.userEdited = "true";
+    clearTimeout(inputCalcVpDebounceTimer);
+    inputCalcVpDebounceTimer = setTimeout(() => {
+      updateVpCalculator();
+    }, 150);
   });
 
   // Pull from Wishlist Button

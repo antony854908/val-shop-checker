@@ -831,6 +831,135 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* Interactive VP Credit & Deduction Box */
+.calc-wallet-credit-box {
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(0, 245, 212, 0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.calc-wallet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calc-wallet-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.btn-pull-wallet {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(0, 245, 212, 0.1);
+  border: 1px solid rgba(0, 245, 212, 0.35);
+  border-radius: 6px;
+  color: var(--val-cyan, #00f5d4);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-pull-wallet:hover {
+  background: rgba(0, 245, 212, 0.22);
+  border-color: var(--val-cyan, #00f5d4);
+  box-shadow: 0 0 10px rgba(0, 245, 212, 0.25);
+}
+
+.calc-wallet-input-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.calc-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 140px;
+}
+
+.input-wallet-credit {
+  width: 100%;
+  padding: 6px 34px 6px 12px;
+  background: rgba(15, 25, 35, 0.9);
+  border: 1.5px solid rgba(0, 245, 212, 0.4);
+  border-radius: 8px;
+  color: var(--val-cyan, #00f5d4);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: right;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input-wallet-credit:focus {
+  border-color: var(--val-cyan, #00f5d4);
+  box-shadow: 0 0 12px rgba(0, 245, 212, 0.35);
+}
+
+.calc-input-unit {
+  position: absolute;
+  right: 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.calc-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  cursor: pointer;
+  user-select: none;
+  flex: 1;
+  min-width: 200px;
+}
+
+/* VP Deduction on Quick Tags */
+.skin-thb-quick-tag.covered {
+  background: rgba(16, 185, 129, 0.14) !important;
+  border-color: rgba(16, 185, 129, 0.45) !important;
+}
+
+.skin-thb-quick-tag.covered .tag-price {
+  color: #34d399 !important;
+  font-weight: 700;
+}
+
+.tag-deduct-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(0, 245, 212, 0.16);
+  border: 1px solid rgba(0, 245, 212, 0.4);
+  color: var(--val-cyan, #00f5d4);
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
 /* Calculation Result Box */
 .calc-result-card {
   background: linear-gradient(135deg, rgba(245, 211, 108, 0.06) 0%, rgba(0, 0, 0, 0.4) 100%);
