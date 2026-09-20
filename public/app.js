@@ -860,7 +860,22 @@ function renderSavedAccounts() {
 
   const accounts = getSavedAccounts();
   if (accounts.length === 0) {
-    container.classList.add('hidden');
+    container.classList.remove('hidden');
+    if (countEl) countEl.textContent = '0 บัญชี';
+    listEl.innerHTML = `
+      <div class="empty-saved-accounts-box">
+        <div class="empty-saved-accounts-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+        </div>
+        <div class="empty-saved-accounts-content">
+          <div class="empty-saved-title">ยังไม่มีบัญชีที่บันทึกในเครื่องนี้</div>
+          <div class="empty-saved-desc">แตะปุ่มเข้าสู่ระบบด้วย Google หรือ Riot ด้านล่าง ระบบจะบันทึกบัญชีลงในเครื่องนี้ให้อัตโนมัติ เพื่อให้ครั้งต่อไปสามารถแตะเลือกล็อกอินได้ทันทีใน 1 วินาที</div>
+        </div>
+      </div>
+    `;
     return;
   }
 
@@ -1163,6 +1178,28 @@ btnTutorialOpenRiot?.addEventListener('click', () => {
   closeGoogleTutorialModal();
   activateGoogleWaitingState();
 });
+
+const btnPasteFromClipboard = document.getElementById('btnPasteFromClipboard');
+
+async function handleDirectClipboardPaste() {
+  try {
+    if (navigator.clipboard && navigator.clipboard.readText) {
+      const clipText = await navigator.clipboard.readText();
+      if (clipText && (clipText.includes('access_token=') || clipText.startsWith('eyJ') || clipText.includes('playvalorant.com'))) {
+        if (quickPasteInput) quickPasteInput.value = clipText.trim();
+        showAlert(googleAlert, 'พบลิงก์จากคลิปบอร์ด กำลังเข้าสู่ระบบและบันทึกบัญชีลงในเครื่อง...', 'info');
+        await processTokenString(clipText.trim(), googleAlert);
+        if (googleWaitingBanner) googleWaitingBanner.classList.add('hidden');
+        return;
+      }
+    }
+  } catch (e) {
+    console.warn('Clipboard read error:', e);
+  }
+  showAlert(googleAlert, 'ไม่พบลิงก์ Token ในคลิปบอร์ด กรุณากดคัดลอกลิงก์จากหน้า Google / playvalorant ก่อนแตะปุ่มนี้', 'warning');
+}
+
+btnPasteFromClipboard?.addEventListener('click', handleDirectClipboardPaste);
 
 btnDismissWaiting?.addEventListener('click', () => {
   if (googleWaitingBanner) googleWaitingBanner.classList.add('hidden');

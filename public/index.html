@@ -184,21 +184,60 @@
           <!-- Alert / Status Banner -->
           <div id="googleAlert" class="alert-box hidden"></div>
 
-          <!-- Saved Accounts Chooser (Shown when saved accounts exist) -->
-          <div id="savedAccountsSection" class="saved-accounts-container hidden">
+          <!-- Saved Accounts Chooser (Always visible for device multi-account selection) -->
+          <div id="savedAccountsSection" class="saved-accounts-container">
             <div class="saved-accounts-header">
               <div class="saved-accounts-header-left">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
-                <span class="saved-accounts-title">เลือกบัญชีเพื่อเข้าสู่ระบบ</span>
+                <span class="saved-accounts-title">เลือกล็อกอินจากบัญชีในเครื่องนี้</span>
               </div>
               <span id="savedAccountsCount" class="saved-accounts-count-badge">0 บัญชี</span>
             </div>
             <div id="savedAccountsList" class="saved-accounts-list"></div>
             <div class="saved-accounts-divider">
               <span>หรือเลือกเข้าสู่ระบบใหม่ด้านล่าง</span>
+            </div>
+          </div>
+
+          <!-- Interactive Google Waiting Helper Banner -->
+          <div id="googleWaitingBanner" class="google-waiting-banner hidden">
+            <div class="google-waiting-inner">
+              <div class="google-waiting-head">
+                <div class="google-waiting-badge">
+                  <div class="google-spinner"></div>
+                  <span>ขั้นตอนการเลือกล็อกอิน Google ในเครื่อง</span>
+                </div>
+                <button type="button" id="btnDismissWaiting" class="btn-dismiss-waiting" aria-label="ปิด">&times;</button>
+              </div>
+              <p class="google-waiting-instruction">
+                เมื่อเลือกบัญชี Google ในเครื่องแล้ว ให้คัดลอกลิงก์ที่ได้รับ หรือกดปุ่มด้านล่างเพื่อวางและล็อกอินอัตโนมัติ
+              </p>
+              <div class="google-waiting-steps">
+                <div class="g-step">
+                  <span class="g-step-idx">1</span>
+                  <span>เลือกบัญชี Google</span>
+                </div>
+                <div class="g-step-arrow">&rarr;</div>
+                <div class="g-step">
+                  <span class="g-step-idx">2</span>
+                  <span>คัดลอกลิงก์</span>
+                </div>
+                <div class="g-step-arrow">&rarr;</div>
+                <div class="g-step">
+                  <span class="g-step-idx">3</span>
+                  <span>แตะปุ่มวางทันที</span>
+                </div>
+              </div>
+              <button type="button" id="btnPasteFromClipboard" class="btn-paste-clipboard-action">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                </svg>
+                <span>แตะเพื่อวางลิงก์จากคลิปบอร์ด &amp; เข้าสู่ระบบ</span>
+              </button>
             </div>
           </div>
 
