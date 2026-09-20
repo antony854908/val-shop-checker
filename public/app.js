@@ -5298,47 +5298,40 @@ document.addEventListener('mouseover', (e) => {
 // ==========================================================
 // DYNAMIC SCROLL AUDIO & SCROLL REVEAL OBSERVER (60 FPS)
 // ==========================================================
-let lastScrollAudioTime = 0;
-let lastScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+// HIGH-PERFORMANCE 120FPS HARDWARE-ACCELERATED SCROLL SYSTEM
+// ==========================================================
 
-window.addEventListener('scroll', () => {
-  const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
-  const scrollDiff = Math.abs(currentScrollTop - lastScrollTop);
-  
-  if (scrollDiff > 40) {
-    const now = Date.now();
-    if (now - lastScrollAudioTime > 90) {
-      lastScrollAudioTime = now;
-      lastScrollTop = currentScrollTop;
-      playTacticalAudio('scroll_tick');
-    }
-  }
-}, { passive: true });
-
-// Universal IntersectionObserver for Staggered Scroll Animations
-const scrollRevealObserver = new IntersectionObserver((entries) => {
+// Universal IntersectionObserver for Staggered Scroll Animations (Optimized for 120 FPS)
+const scrollRevealObserver = new IntersectionObserver((entries, observer) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       entry.target.classList.add('in-view');
+      // Unobserve once revealed to free CPU & GPU resources immediately
+      observer.unobserve(entry.target);
     }
   });
 }, {
   threshold: 0.05,
-  rootMargin: '0px 0px -30px 0px'
+  rootMargin: '50px 0px 50px 0px'
 });
 
 function observeScrollElements() {
-  document.querySelectorAll('.skin-card, .bundle-hero, .section-header, .career-summary-card, .agent-catalog-card, .tactical-login-card, .all-agents-catalog-grid, .night-market-card, .bundle-item-card').forEach(el => {
-    if (!el.classList.contains('scroll-observed')) {
-      el.classList.add('scroll-observed', 'scroll-reveal');
-      scrollRevealObserver.observe(el);
-    }
-  });
+  const elements = document.querySelectorAll('.skin-card:not(.scroll-observed), .bundle-hero:not(.scroll-observed), .section-header:not(.scroll-observed), .career-summary-card:not(.scroll-observed), .agent-catalog-card:not(.scroll-observed), .tactical-login-card:not(.scroll-observed), .night-market-card:not(.scroll-observed), .bundle-item-card:not(.scroll-observed)');
+  for (let i = 0; i < elements.length; i++) {
+    elements[i].classList.add('scroll-observed', 'scroll-reveal');
+    scrollRevealObserver.observe(elements[i]);
+  }
 }
 
-// Observe on initial load and periodically when new cards render
+// Observe efficiently with debounced MutationObserver (ZERO continuous polling overhead)
+let domObserveDebounceTimer = null;
+const scrollDomObserver = new MutationObserver(() => {
+  if (domObserveDebounceTimer) clearTimeout(domObserveDebounceTimer);
+  domObserveDebounceTimer = setTimeout(observeScrollElements, 100);
+});
+scrollDomObserver.observe(document.body, { childList: true, subtree: true });
+
 observeScrollElements();
-setInterval(observeScrollElements, 800);
 
 // ==========================================================
 // 1. PLAYER INVENTORY & ACCOUNT VALUATION MODULE
