@@ -745,21 +745,405 @@ const quickPasteInput = document.getElementById('quickPasteInput');
 const btnAutoPaste = document.getElementById('btnAutoPaste');
 const googleAlert = document.getElementById('googleAlert');
 const btnOpenRiotGoogle = document.getElementById('btnOpenRiotGoogle');
+const btnOpenGoogleAuth = document.getElementById('btnOpenGoogleAuth');
+const btnSocialGoogle = document.getElementById('btnSocialGoogle');
+const btnSwitchAccount = document.getElementById('btnSwitchAccount');
+const btnMobSheetSwitchAccount = document.getElementById('btnMobSheetSwitchAccount');
+const btnCloseAccountSwitcher = document.getElementById('btnCloseAccountSwitcher');
+const btnModalGoToLogin = document.getElementById('btnModalGoToLogin');
 const googleWaitingBanner = document.getElementById('googleWaitingBanner');
 const btnDismissWaiting = document.getElementById('btnDismissWaiting');
 
 let isWaitingForGoogleLink = false;
+let lastLoginProvider = 'google';
+
+// --- Multi-Account Management (Saved Accounts & Switcher) ---
+const SAVED_ACCOUNTS_KEY = 'val_saved_accounts';
+
+function getSavedAccounts() {
+  try {
+    const raw = localStorage.getItem(SAVED_ACCOUNTS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveAccountToStorage(user, auth, authPack, type = 'google') {
+  if (!user && !auth) return;
+  try {
+    const accounts = getSavedAccounts();
+    const gameName = (user && user.gameName) || (auth && auth.gameName) || 'Valorant Agent';
+    const tagLine = (user && user.tagLine) || (auth && auth.tagLine) || '';
+    const puuid = (auth && auth.puuid) || (user && user.puuid) || `${gameName}#${tagLine}`;
+    const region = (user && user.region) || (auth && auth.region) || 'ap';
+    const level = (user && user.level) || 0;
+    const wallet = (user && user.wallet) || null;
+
+    const existingIdx = accounts.findIndex(a => a.puuid === puuid || (a.gameName === gameName && a.tagLine === tagLine));
+    const entry = {
+      puuid,
+      gameName,
+      tagLine,
+      region,
+      level,
+      wallet,
+      authPack: authPack || (auth ? btoa(unescape(encodeURIComponent(JSON.stringify(auth)))) : null),
+      auth: auth ? {
+        puuid: auth.puuid,
+        gameName: auth.gameName,
+        tagLine: auth.tagLine,
+        region: auth.region,
+        accessToken: auth.accessToken,
+        idToken: auth.idToken,
+        entitlementsToken: auth.entitlementsToken
+      } : null,
+      type: type || 'google',
+      lastActive: Date.now()
+    };
+
+    if (existingIdx >= 0) {
+      if (!entry.authPack && accounts[existingIdx].authPack) {
+        entry.authPack = accounts[existingIdx].authPack;
+      }
+      if (!entry.auth && accounts[existingIdx].auth) {
+        entry.auth = accounts[existingIdx].auth;
+      }
+      accounts[existingIdx] = { ...accounts[existingIdx], ...entry };
+    } else {
+      accounts.unshift(entry);
+    }
+
+    if (accounts.length > 8) accounts.length = 8;
+    localStorage.setItem(SAVED_ACCOUNTS_KEY, JSON.stringify(accounts));
+    renderSavedAccounts();
+  } catch (e) {
+    console.warn('Failed to save account:', e);
+  }
+}
+
+function updateSavedAccountUser(user) {
+  if (!user) return;
+  try {
+    const accounts = getSavedAccounts();
+    const gameName = user.gameName;
+    const tagLine = user.tagLine;
+    const puuid = user.puuid || `${gameName}#${tagLine}`;
+    const idx = accounts.findIndex(a => a.puuid === puuid || (a.gameName === gameName && a.tagLine === tagLine));
+    if (idx >= 0) {
+      accounts[idx].level = user.level || accounts[idx].level;
+      accounts[idx].region = user.region || accounts[idx].region;
+      accounts[idx].wallet = user.wallet || accounts[idx].wallet;
+      accounts[idx].lastActive = Date.now();
+      localStorage.setItem(SAVED_ACCOUNTS_KEY, JSON.stringify(accounts));
+    }
+  } catch (e) {}
+}
+
+function removeSavedAccount(puuid) {
+  try {
+    let accounts = getSavedAccounts();
+    accounts = accounts.filter(a => a.puuid !== puuid && `${a.gameName}#${a.tagLine}` !== puuid);
+    localStorage.setItem(SAVED_ACCOUNTS_KEY, JSON.stringify(accounts));
+    renderSavedAccounts();
+    renderModalSavedAccounts();
+  } catch (e) {
+    console.warn('Failed to remove account:', e);
+  }
+}
+
+function renderSavedAccounts() {
+  const container = document.getElementById('savedAccountsSection');
+  const listEl = document.getElementById('savedAccountsList');
+  const countEl = document.getElementById('savedAccountsCount');
+  if (!container || !listEl) return;
+
+  const accounts = getSavedAccounts();
+  if (accounts.length === 0) {
+    container.classList.add('hidden');
+    return;
+  }
+
+  container.classList.remove('hidden');
+  if (countEl) countEl.textContent = `${accounts.length} บัญชี`;
+
+  const currentPuuid = currentUser ? (currentUser.puuid || `${currentUser.gameName}#${currentUser.tagLine}`) : null;
+
+  listEl.innerHTML = accounts.map(acc => {
+    const isActive = currentPuuid && (currentPuuid === acc.puuid || currentPuuid === `${acc.gameName}#${acc.tagLine}`);
+    const isGoogle = acc.type === 'google';
+    return `
+      <div class="saved-account-card ${isActive ? 'is-active-session' : ''}" data-puuid="${escapeHtml(acc.puuid)}">
+        <div class="account-card-left" data-action="switch" data-puuid="${escapeHtml(acc.puuid)}">
+          <div class="account-avatar-badge ${isGoogle ? 'google-type' : 'riot-type'}">
+            ${isGoogle ? `
+              <svg class="google-icon-svg" viewBox="0 0 24 24" width="16" height="16">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+            ` : `
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+              </svg>
+            `}
+          </div>
+          <div class="account-info">
+            <div class="account-name-row">
+              <span class="account-player-name">${escapeHtml(acc.gameName)}</span>
+              <span class="account-player-tag">#${escapeHtml(acc.tagLine)}</span>
+              ${isActive ? '<span class="account-active-badge">กำลังใช้งาน</span>' : ''}
+            </div>
+            <div class="account-meta-row">
+              <span class="account-badge-region">${escapeHtml((acc.region || 'AP').toUpperCase())}</span>
+              ${acc.level ? `<span class="account-badge-lvl">LVL ${acc.level}</span>` : ''}
+              <span class="account-badge-provider">${isGoogle ? 'Google Sign-in' : 'Riot ID'}</span>
+            </div>
+          </div>
+        </div>
+        <div class="account-card-right">
+          <button type="button" class="btn-account-switch" data-action="switch" data-puuid="${escapeHtml(acc.puuid)}" title="เข้าสู่ระบบด้วยบัญชีนี้">
+            <span>เข้าสู่ระบบ</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <button type="button" class="btn-account-remove" data-action="remove" data-puuid="${escapeHtml(acc.puuid)}" title="ลบบัญชีนี้ออกจากเครื่อง">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  listEl.querySelectorAll('[data-action="switch"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const puuid = btn.getAttribute('data-puuid');
+      if (puuid) switchAccount(puuid);
+    });
+  });
+
+  listEl.querySelectorAll('[data-action="remove"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const puuid = btn.getAttribute('data-puuid');
+      if (puuid && confirm('ต้องการลบบัญชีนี้ออกจากเครื่องหรือไม่?')) {
+        removeSavedAccount(puuid);
+      }
+    });
+  });
+}
+
+function renderModalSavedAccounts() {
+  const modalList = document.getElementById('modalSavedAccountsList');
+  if (!modalList) return;
+
+  const accounts = getSavedAccounts();
+  if (accounts.length === 0) {
+    modalList.innerHTML = `
+      <div class="empty-accounts-hint" style="text-align:center; padding:24px; color:var(--val-subtext);">
+        <p>ยังไม่มีบัญชีที่บันทึกไว้ในเครื่องนี้</p>
+        <p style="font-size:12px; margin-top:6px;">เข้าสู่ระบบด้วยบัญชี Google หรือ Riot เพื่อบันทึกบัญชีสำหรับสลับใช้งาน</p>
+      </div>
+    `;
+    return;
+  }
+
+  const currentPuuid = currentUser ? (currentUser.puuid || `${currentUser.gameName}#${currentUser.tagLine}`) : null;
+
+  modalList.innerHTML = accounts.map(acc => {
+    const isActive = currentPuuid && (currentPuuid === acc.puuid || currentPuuid === `${acc.gameName}#${acc.tagLine}`);
+    const isGoogle = acc.type === 'google';
+    return `
+      <div class="saved-account-card ${isActive ? 'is-active-session' : ''}">
+        <div class="account-card-left" data-modal-action="switch" data-puuid="${escapeHtml(acc.puuid)}">
+          <div class="account-avatar-badge ${isGoogle ? 'google-type' : 'riot-type'}">
+            ${isGoogle ? `
+              <svg class="google-icon-svg" viewBox="0 0 24 24" width="16" height="16">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+            ` : `
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+              </svg>
+            `}
+          </div>
+          <div class="account-info">
+            <div class="account-name-row">
+              <span class="account-player-name">${escapeHtml(acc.gameName)}</span>
+              <span class="account-player-tag">#${escapeHtml(acc.tagLine)}</span>
+              ${isActive ? '<span class="account-active-badge">กำลังใช้งาน</span>' : ''}
+            </div>
+            <div class="account-meta-row">
+              <span class="account-badge-region">${escapeHtml((acc.region || 'AP').toUpperCase())}</span>
+              ${acc.level ? `<span class="account-badge-lvl">LVL ${acc.level}</span>` : ''}
+              <span class="account-badge-provider">${isGoogle ? 'Google' : 'Riot'}</span>
+            </div>
+          </div>
+        </div>
+        <div class="account-card-right">
+          ${isActive ? `
+            <span class="btn-account-current">ใช้งานอยู่</span>
+          ` : `
+            <button type="button" class="btn-account-switch" data-modal-action="switch" data-puuid="${escapeHtml(acc.puuid)}">
+              <span>สลับบัญชี</span>
+            </button>
+          `}
+          <button type="button" class="btn-account-remove" data-modal-action="remove" data-puuid="${escapeHtml(acc.puuid)}" title="ลบบัญชีนี้ออกจากเครื่อง">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  modalList.querySelectorAll('[data-modal-action="switch"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const puuid = btn.getAttribute('data-puuid');
+      if (puuid) {
+        closeAccountSwitcherModal();
+        switchAccount(puuid);
+      }
+    });
+  });
+
+  modalList.querySelectorAll('[data-modal-action="remove"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const puuid = btn.getAttribute('data-puuid');
+      if (puuid && confirm('ต้องการลบบัญชีนี้ออกจากเครื่องหรือไม่?')) {
+        removeSavedAccount(puuid);
+      }
+    });
+  });
+}
+
+async function switchAccount(puuid) {
+  const accounts = getSavedAccounts();
+  const acc = accounts.find(a => a.puuid === puuid || `${a.gameName}#${a.tagLine}` === puuid);
+  if (!acc) return;
+
+  showAlert(googleAlert, `กำลังเชื่อมต่อบัญชี <strong>${escapeHtml(acc.gameName)}#${escapeHtml(acc.tagLine)}</strong>...`, 'info');
+
+  let loginPayload = null;
+  if (acc.authPack) {
+    loginPayload = { authPack: acc.authPack, region: acc.region || 'auto' };
+  } else if (acc.auth && acc.auth.accessToken) {
+    loginPayload = { accessToken: acc.auth.accessToken, idToken: acc.auth.idToken, region: acc.region || 'auto' };
+  }
+
+  if (loginPayload) {
+    try {
+      const res = await apiFetch('/api/auth/token-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(loginPayload)
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setStoredSid(data.sessionId);
+        if (data.authPack) setStoredAuthPack(data.authPack);
+        else if (data.auth) setStoredAuthPack(data.auth);
+
+        saveAccountToStorage(data.user || data.auth, data.auth, data.authPack, acc.type || 'google');
+
+        currentUser = data.user || data.auth;
+        renderUserHeader(currentUser);
+        switchAppMode('store');
+        playTacticalAudio?.('login');
+
+        if (data.store) {
+          currentStore = data.store;
+          dailyRemaining = data.store.dailyRemainingSeconds || getSecondsUntilShopReset();
+          renderDailyShop(data.store.dailyOffers || []);
+          renderBundles(data.store.featuredBundles || []);
+          renderNightMarket(data.store.nightMarket);
+          startTimers();
+        } else {
+          loadStore();
+        }
+
+        if (data.inventory) {
+          playerInventoryData = data.inventory;
+          populateInventoryWeaponFilter(playerInventoryData);
+          renderInventoryView(playerInventoryData);
+        } else {
+          loadPlayerInventory(true).catch(() => {});
+        }
+        return;
+      }
+    } catch (e) {
+      console.warn('Saved account login failed:', e);
+    }
+  }
+
+  showLoginView();
+  showAlert(googleAlert, `เซสชันของบัญชี <strong>${escapeHtml(acc.gameName)}#${escapeHtml(acc.tagLine)}</strong> หมดอายุแล้ว กรุณากดปุ่ม <strong>เข้าสู่ระบบด้วย Google (เลือกบัญชี)</strong> ด้านล่างเพื่ออัปเดต`, 'warning');
+  const googleBtn = document.getElementById('btnOpenGoogleAuth');
+  if (googleBtn) {
+    googleBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    googleBtn.classList.add('pulse-highlight');
+    setTimeout(() => googleBtn.classList.remove('pulse-highlight'), 3000);
+  }
+}
+
+function openAccountSwitcherModal() {
+  const modal = document.getElementById('accountSwitcherModal');
+  if (!modal) return;
+  renderModalSavedAccounts();
+  modal.classList.remove('hidden');
+  modal.setAttribute('aria-hidden', 'false');
+  playTacticalAudio?.('click');
+}
+
+function closeAccountSwitcherModal() {
+  const modal = document.getElementById('accountSwitcherModal');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+btnSwitchAccount?.addEventListener('click', openAccountSwitcherModal);
+btnMobSheetSwitchAccount?.addEventListener('click', () => {
+  document.getElementById('mobMoreMenuModal')?.classList.add('hidden');
+  openAccountSwitcherModal();
+});
+btnCloseAccountSwitcher?.addEventListener('click', closeAccountSwitcherModal);
+btnModalGoToLogin?.addEventListener('click', () => {
+  closeAccountSwitcherModal();
+  showLoginView();
+});
 
 function activateGoogleWaitingState() {
   isWaitingForGoogleLink = true;
   if (googleWaitingBanner) googleWaitingBanner.classList.remove('hidden');
+  showAlert(
+    googleAlert,
+    'เปิดหน้าระบบเลือกบัญชีแล้ว! ให้เลือกบัญชี Google และเข้าสู่ระบบ จากนั้นคัดลอกลิงก์หรือ Token มาวางด้านล่าง',
+    'info'
+  );
   if (quickPasteInput) {
     quickPasteInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
     quickPasteInput.focus();
   }
 }
 
+btnOpenGoogleAuth?.addEventListener('click', () => {
+  lastLoginProvider = 'google';
+  activateGoogleWaitingState();
+});
+
+btnSocialGoogle?.addEventListener('click', () => {
+  lastLoginProvider = 'google';
+  activateGoogleWaitingState();
+});
+
 btnOpenRiotGoogle?.addEventListener('click', () => {
+  lastLoginProvider = 'riot';
   activateGoogleWaitingState();
 });
 
@@ -873,6 +1257,8 @@ async function processTokenString(rawText, alertEl) {
     } else if (data.auth) {
       setStoredAuthPack(data.auth);
     }
+
+    saveAccountToStorage(data.user || data.auth, data.auth, data.authPack, lastLoginProvider || 'google');
 
     // Immediately activate logged in state and switch to store!
     currentUser = data.user || data.auth;
@@ -1118,6 +1504,16 @@ async function checkAuth() {
 // Update User Header
 function renderUserHeader(user) {
   currentUserData = user;
+  if (!user) return;
+  updateSavedAccountUser(user);
+
+  const hLevel = document.getElementById('headerUserLevel');
+  const hName = document.getElementById('headerUserName');
+  const hRegion = document.getElementById('headerUserRegion');
+  if (hLevel) hLevel.textContent = 'LVL ' + (user.level || 1);
+  if (hName) hName.textContent = (user.gameName || 'Agent') + (user.tagLine ? '#' + user.tagLine : '');
+  if (hRegion) hRegion.textContent = (user.region || 'AP').toUpperCase();
+
   const nameEl = document.getElementById('userName');
   const tagEl = document.getElementById('userTag');
   const regionEl = document.getElementById('userRegion');
@@ -1199,6 +1595,7 @@ function showLoginView() {
   }
   mfaBox?.classList.add('hidden');
   riotLoginForm?.classList.remove('hidden');
+  renderSavedAccounts();
 }
 
 // Form 1: Riot Login

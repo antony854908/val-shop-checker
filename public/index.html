@@ -149,6 +149,12 @@
               <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
             </svg>
           </button>
+          <button id="btnSwitchAccount" class="btn btn-outline-secondary btn-sm" title="สลับหรือเลือกบัญชีอื่น">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M9 21H4v-5M15 15l6 6M4 4l5 5"/>
+            </svg>
+            <span>สลับบัญชี</span>
+          </button>
           <button id="btnLogout" class="btn btn-outline-danger btn-sm">
             ออกจากระบบ
           </button>
@@ -178,15 +184,56 @@
           <!-- Alert / Status Banner -->
           <div id="googleAlert" class="alert-box hidden"></div>
 
+          <!-- Saved Accounts Chooser (Shown when saved accounts exist) -->
+          <div id="savedAccountsSection" class="saved-accounts-container hidden">
+            <div class="saved-accounts-header">
+              <div class="saved-accounts-header-left">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span class="saved-accounts-title">เลือกบัญชีเพื่อเข้าสู่ระบบ</span>
+              </div>
+              <span id="savedAccountsCount" class="saved-accounts-count-badge">0 บัญชี</span>
+            </div>
+            <div id="savedAccountsList" class="saved-accounts-list"></div>
+            <div class="saved-accounts-divider">
+              <span>หรือเลือกเข้าสู่ระบบใหม่ด้านล่าง</span>
+            </div>
+          </div>
+
           <!-- Primary Riot Sign In Action (1-Click) -->
           <div class="riot-action-group">
-            <a id="btnOpenRiotGoogle" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1" target="_blank" rel="noopener noreferrer" class="btn-riot-main-signin">
+            <!-- Google Sign-in with Account Chooser -->
+            <a id="btnOpenGoogleAuth" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1&method=google&prompt=select_account" target="_blank" rel="noopener noreferrer" class="btn-google-signin">
+              <div class="btn-google-brand-badge">
+                <svg class="google-icon-svg" viewBox="0 0 24 24" width="20" height="20">
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
+                  <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                </svg>
+              </div>
+              <div class="btn-signin-labels">
+                <span class="btn-signin-title">เข้าสู่ระบบด้วย Google (เลือกบัญชี)</span>
+                <span class="btn-signin-desc">เลือกบัญชี Google ที่ผูกกับ Valorant</span>
+              </div>
+              <svg class="riot-arrow-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+
+            <!-- Riot ID Sign-in -->
+            <a id="btnOpenRiotGoogle" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1&prompt=login" target="_blank" rel="noopener noreferrer" class="btn-riot-main-signin">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
                 <polyline points="10 17 15 12 10 7"/>
                 <line x1="15" y1="12" x2="3" y2="12"/>
               </svg>
-              <span>เข้าสู่ระบบด้วยบัญชี Riot / Google</span>
+              <span>เข้าสู่ระบบด้วย Riot ID / อื่นๆ</span>
+              <svg class="riot-arrow-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </a>
 
             <!-- Single Line Terminal Input (Riot Style with -> Submit Button) -->
@@ -205,7 +252,7 @@
 
           <!-- Social Buttons Row (Iconic Riot Client Style) -->
           <div class="riot-social-row">
-            <a href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1" target="_blank" rel="noopener noreferrer" class="social-icon-btn google" title="เข้าสู่ระบบด้วย Google">
+            <a id="btnSocialGoogle" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1&method=google&prompt=select_account" target="_blank" rel="noopener noreferrer" class="social-icon-btn google" title="เข้าสู่ระบบด้วย Google (เลือกบัญชี)">
               <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
             </a>
             <a href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1" target="_blank" rel="noopener noreferrer" class="social-icon-btn facebook" title="เข้าสู่ระบบด้วย Facebook">
@@ -267,6 +314,10 @@
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               <span>วิธีเข้าสู่ระบบ (คำแนะนำ)</span>
             </button>
+            <span class="riot-footer-divider">•</span>
+            <a href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1&method=google&prompt=select_account" target="_blank" rel="noopener noreferrer" class="riot-link-btn">
+              <span>เลือกบัญชี Google อื่น</span>
+            </a>
             <span class="riot-footer-divider">•</span>
             <a href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1&prompt=login" target="_blank" rel="noopener noreferrer" class="riot-link-btn">
               <span>เปลี่ยนไอดี Riot</span>
@@ -1623,10 +1674,52 @@
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           <span>สลับเป็นโหมดคอม (PC UI)</span>
         </button>
+        <button type="button" class="mob-menu-btn" id="btnMobSheetSwitchAccount">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#00f5d4" stroke-width="2"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M9 21H4v-5M15 15l6 6M4 4l5 5"/></svg>
+          <span style="color: #00f5d4;">สลับบัญชี (Switch)</span>
+        </button>
         <button type="button" class="mob-menu-btn mob-menu-logout" id="btnMobSheetLogout">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ff4655" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           <span style="color: #ff4655;">ออกจากระบบ</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Switcher Modal -->
+  <div id="accountSwitcherModal" class="modal-backdrop-layer hidden" aria-hidden="true">
+    <div class="modal-box modal-switcher-dialog" role="dialog" aria-modal="true" aria-labelledby="switcherModalTitle">
+      <div class="modal-header">
+        <div class="modal-header-titles">
+          <div class="modal-badge-tag" style="color:var(--val-cyan); border-color:var(--val-cyan);">MULTI-ACCOUNT</div>
+          <h3 id="switcherModalTitle" class="modal-title" style="display:flex; align-items:center; gap:8px;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M9 21H4v-5M15 15l6 6M4 4l5 5"/>
+            </svg>
+            <span>สลับหรือเลือกบัญชี Valorant</span>
+          </h3>
+          <p class="modal-subtitle">เลือกบัญชี Google หรือ Riot ที่คุณบันทึกไว้เพื่อสลับใช้งานได้ทันที</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="btnCloseAccountSwitcher" aria-label="ปิด">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <div id="modalSavedAccountsList" class="modal-accounts-grid"></div>
+        <div class="modal-accounts-actions" style="margin-top: 16px; display: flex; flex-direction: column; gap: 10px;">
+          <a href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1&method=google&prompt=select_account" target="_blank" rel="noopener noreferrer" class="btn-google-signin" style="justify-content:center;">
+            <div class="btn-google-brand-badge">
+              <svg class="google-icon-svg" viewBox="0 0 24 24" width="18" height="18">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+            </div>
+            <span style="font-weight:700;">+ เพิ่มบัญชี Google ใหม่ (เลือกบัญชี)</span>
+          </a>
+          <button type="button" id="btnModalGoToLogin" class="btn btn-outline-secondary btn-sm" style="width: 100%; padding: 10px;">
+            ไปยังหน้าลงชื่อเข้าใช้ด้วยวิธีอื่น
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1680,7 +1773,7 @@
             <span class="tip-badge">ทางลัดเสริม</span>
             <strong>บุ๊กมาร์ก 1-คลิก (Bookmarklet):</strong>
           </div>
-          <p>ลากลิงก์นี้ไปวางที่แถบบุ๊กมาร์ก (Bookmarks Bar) ของเบราว์เซอร์: <a href="javascript:(function(){const h=window.location.hash;if(h&amp;&amp;h.includes('access_token=')){window.location.href='https://val-shop-checker.vercel.app/'+h;}else{alert('กรุณากดปุ่มนี้ขณะอยู่ที่หน้า playvalorant.com/opt_in');}})()" class="btn-bookmarklet" onclick="event.preventDefault(); alert('ลากปุ่มนี้ไปวางที่แถบ Bookmarks ของเบราว์เซอร์ เพื่อใช้เป็นปุ่มกดส่งโทเคนกลับมาที่เว็บอัตโนมัติใน 1 วินาที');">🔖 ส่ง Token กลับ ValShop</a></p>
+          <p>ลากลิงก์นี้ไปวางที่แถบบุ๊กมาร์ก (Bookmarks Bar) ของเบราว์เซอร์: <a href="javascript:(function(){const h=window.location.hash;if(h&amp;&amp;h.includes('access_token=')){window.location.href='https://val-shop-checker.vercel.app/'+h;}else{alert('กรุณากดปุ่มนี้ขณะอยู่ที่หน้า playvalorant.com/opt_in');}})()" class="btn-bookmarklet" onclick="event.preventDefault(); alert('ลากปุ่มนี้ไปวางที่แถบ Bookmarks ของเบราว์เซอร์ เพื่อใช้เป็นปุ่มกดส่งโทเคนกลับมาที่เว็บอัตโนมัติใน 1 วินาที');">ส่ง Token กลับ ValShop</a></p>
           <p class="tip-subtext">เมื่อหน้า Riot เด้งมาที่หน้า 404 (playvalorant.com/opt_in) แค่กดปุ่มบุ๊กมาร์กนี้ มันจะพาคุณกลับมาที่เว็บพร้อมต่ออายุให้เสร็จสรรพ!</p>
         </div>
       </div>
