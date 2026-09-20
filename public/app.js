@@ -763,6 +763,18 @@ btnOpenRiotGoogle?.addEventListener('click', () => {
   activateGoogleWaitingState();
 });
 
+// Toggle Local Password Drawer
+document.getElementById('btnTogglePasswordDrawer')?.addEventListener('click', () => {
+  playTacticalAudio?.('click');
+  const drawer = document.getElementById('riotPasswordDrawer');
+  if (drawer) {
+    drawer.classList.toggle('hidden');
+    if (!drawer.classList.contains('hidden')) {
+      document.getElementById('loginUsername')?.focus();
+    }
+  }
+});
+
 btnTutorialOpenRiot?.addEventListener('click', () => {
   closeGoogleTutorialModal();
   activateGoogleWaitingState();
