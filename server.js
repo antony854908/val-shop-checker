@@ -329,6 +329,7 @@ app.post('/api/auth/token-login', authRateLimitMiddleware, async (req, res) => {
         tagLine: authData.tagLine,
         region: authData.region,
         level: 1,
+        expiresAt: authData.expiresAt,
         wallet: { vp: wallet.vp || 0, rp: wallet.rp || 0, kc: wallet.kc || 0 }
       },
       store: storefront,
@@ -369,6 +370,17 @@ async function completeUserSession(sessionId, tokens, userRegion) {
     }
   }
 
+  let expiresAt = Date.now() + 3600 * 1000;
+  try {
+    const parts = (tokens.accessToken || '').split('.');
+    if (parts.length >= 2) {
+      const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+      if (payload.exp) {
+        expiresAt = payload.exp * 1000;
+      }
+    }
+  } catch (e) {}
+
   const authData = {
     accessToken: tokens.accessToken,
     entitlementsToken,
@@ -376,7 +388,8 @@ async function completeUserSession(sessionId, tokens, userRegion) {
     region: finalRegion,
     country: userInfo.country || 'tha',
     gameName: nameData.gameName || 'Agent',
-    tagLine: nameData.tagLine || 'VAL'
+    tagLine: nameData.tagLine || 'VAL',
+    expiresAt
   };
 
   sessionStore.updateSession(sessionId, {
@@ -408,6 +421,7 @@ app.get('/api/auth/me', async (req, res) => {
         tagLine: auth.tagLine,
         region: auth.region,
         level: levelProgress.level,
+        expiresAt: auth.expiresAt || (Date.now() + 3600 * 1000),
         wallet: {
           vp: wallet.vp,
           rp: wallet.rp,

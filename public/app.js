@@ -115,6 +115,15 @@ async function apiFetch(url, options = {}) {
     setStoredAuthPack(returnedAuthPack);
   }
 
+  // 401 Interception for Token Expiration (Method 1: Quick 1-Click Re-Auth)
+  if (res.status === 401 && !url.includes('/api/auth/token-login') && !url.includes('/api/auth/login')) {
+    res.clone().json().then(data => {
+      if (data?.error && (data.error.includes('หมดอายุ') || data.error.includes('expired') || data.error.includes('Token') || data.error.includes('401'))) {
+        window.openQuickReauthModal?.(data.error);
+      }
+    }).catch(() => {});
+  }
+
   return res;
 }
 
@@ -1114,6 +1123,7 @@ function renderUserHeader(user) {
   if (kcEl) kcEl.textContent = (user.wallet?.kc || 0).toLocaleString();
 
   userHeader?.classList.remove('hidden');
+  startTokenCountdownTimer(user.expiresAt);
   loginSection?.classList.add('hidden');
   if (currentAppMode === 'store') {
     storeSection?.classList.remove('hidden');
@@ -1166,6 +1176,8 @@ function renderUserHeader(user) {
 
 function showLoginView() {
   currentUser = null;
+  if (tokenTimerInterval) clearInterval(tokenTimerInterval);
+  document.getElementById('btnTokenTimerBadge')?.classList.add('hidden');
   userHeader?.classList.add('hidden');
   storeSection?.classList.add('hidden');
   inventorySection?.classList.add('hidden');
@@ -5041,10 +5053,212 @@ function initVpCompareModule() {
   });
 }
 
+// ==========================================================
+// QUICK 1-CLICK RE-AUTH SYSTEM (METHOD 1)
+// ==========================================================
+let tokenTimerInterval = null;
+let quickReauthFocusHandlerAttached = false;
+
+window.openQuickReauthModal = function(customReason = '') {
+  playTacticalAudio?.('open');
+  const modal = document.getElementById('quickReauthModal');
+  if (!modal) return;
+
+  const alertEl = document.getElementById('quickReauthStatusAlert');
+  if (alertEl) {
+    if (customReason) {
+      alertEl.textContent = customReason;
+      alertEl.className = 'reauth-status-alert error';
+      alertEl.classList.remove('hidden');
+    } else {
+      alertEl.classList.add('hidden');
+    }
+  }
+
+  const inputUrl = document.getElementById('inputQuickReauthUrl');
+  if (inputUrl) inputUrl.value = '';
+
+  modal.classList.remove('hidden');
+};
+
+window.closeQuickReauthModal = function() {
+  playTacticalAudio?.('close');
+  const modal = document.getElementById('quickReauthModal');
+  if (modal) modal.classList.add('hidden');
+};
+
+function startTokenCountdownTimer(expiresAt) {
+  if (tokenTimerInterval) clearInterval(tokenTimerInterval);
+
+  const badgeEl = document.getElementById('btnTokenTimerBadge');
+  const textEl = document.getElementById('tokenTimerText');
+  if (!badgeEl || !textEl) return;
+
+  const targetExp = expiresAt || (Date.now() + 3600 * 1000);
+  badgeEl.classList.remove('hidden');
+
+  function update() {
+    const now = Date.now();
+    const remainingMs = targetExp - now;
+
+    if (remainingMs <= 0) {
+      textEl.textContent = 'หมดอายุ';
+      badgeEl.classList.add('expired');
+      badgeEl.classList.remove('warning');
+      return;
+    }
+
+    const totalSecs = Math.floor(remainingMs / 1000);
+    const mins = Math.floor(totalSecs / 60);
+    const secs = totalSecs % 60;
+    textEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+    if (totalSecs <= 600) { // under 10 mins
+      badgeEl.classList.add('warning');
+      badgeEl.classList.remove('expired');
+    } else {
+      badgeEl.classList.remove('warning', 'expired');
+    }
+  }
+
+  update();
+  tokenTimerInterval = setInterval(update, 1000);
+}
+
+async function handleQuickReauth(val) {
+  const alertEl = document.getElementById('quickReauthStatusAlert');
+  const submitBtn = document.getElementById('btnQuickReauthSubmit');
+  if (!val) return;
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'กำลังต่ออายุ...';
+  }
+
+  try {
+    let accessToken = '';
+    let idToken = '';
+
+    if (val.includes('access_token=')) {
+      const match = val.match(/access_token=([^&]+)/);
+      if (match) accessToken = match[1];
+      const idMatch = val.match(/id_token=([^&]+)/);
+      if (idMatch) idToken = idMatch[1];
+    } else if (val.startsWith('ey')) {
+      accessToken = val;
+    }
+
+    if (!accessToken) {
+      throw new Error('ไม่พบ Access Token ในลิงก์ กรุณากดปุ่มเปิดรับ Token ใหม่อีกครั้ง');
+    }
+
+    const res = await apiFetch('/api/auth/token-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accessToken, idToken, region: 'auto' })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || 'ต่ออายุไม่สำเร็จ');
+    }
+
+    if (data.authPack) {
+      setStoredAuthPack(data.authPack);
+    }
+
+    currentUser = data.user || data.auth;
+    renderUserHeader(currentUser);
+    playTacticalAudio?.('login');
+
+    if (alertEl) {
+      alertEl.textContent = 'ต่ออายุเซสชันสำเร็จแล้ว! (ใช้งานต่อได้อีก 1 ชม.)';
+      alertEl.className = 'reauth-status-alert';
+      alertEl.classList.remove('hidden');
+    }
+
+    setTimeout(() => {
+      window.closeQuickReauthModal();
+      if (currentAppMode === 'store') loadStore();
+      else if (currentAppMode === 'inventory') loadPlayerInventory(true);
+    }, 800);
+
+  } catch (err) {
+    if (alertEl) {
+      alertEl.textContent = err.message || 'ต่ออายุไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+      alertEl.className = 'reauth-status-alert error';
+      alertEl.classList.remove('hidden');
+    }
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> <span>ต่ออายุทันที</span>`;
+    }
+  }
+}
+
+function initQuickReauth() {
+  const modal = document.getElementById('quickReauthModal');
+  const btnClose = document.getElementById('btnCloseQuickReauthModal');
+  const btnTimer = document.getElementById('btnTokenTimerBadge');
+  const btnSubmit = document.getElementById('btnQuickReauthSubmit');
+  const inputUrl = document.getElementById('inputQuickReauthUrl');
+
+  btnTimer?.addEventListener('click', () => {
+    window.openQuickReauthModal();
+  });
+
+  btnClose?.addEventListener('click', () => {
+    window.closeQuickReauthModal();
+  });
+
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) window.closeQuickReauthModal();
+  });
+
+  btnSubmit?.addEventListener('click', () => {
+    const val = inputUrl?.value?.trim();
+    if (val) handleQuickReauth(val);
+  });
+
+  inputUrl?.addEventListener('paste', () => {
+    setTimeout(() => {
+      const val = inputUrl.value.trim();
+      if (val && (val.includes('access_token=') || val.startsWith('ey'))) {
+        handleQuickReauth(val);
+      }
+    }, 60);
+  });
+
+  if (!quickReauthFocusHandlerAttached) {
+    quickReauthFocusHandlerAttached = true;
+    window.addEventListener('focus', async () => {
+      if (modal && !modal.classList.contains('hidden')) {
+        try {
+          if (navigator.clipboard && navigator.clipboard.readText) {
+            const clipText = await navigator.clipboard.readText();
+            if (clipText && clipText.includes('access_token=')) {
+              if (inputUrl) inputUrl.value = clipText;
+              const alertEl = document.getElementById('quickReauthStatusAlert');
+              if (alertEl) {
+                alertEl.textContent = 'ตรวจพบคลิปบอร์ด Token ใหม่แล้ว! กำลังต่ออายุอัตโนมัติ...';
+                alertEl.className = 'reauth-status-alert';
+                alertEl.classList.remove('hidden');
+              }
+              handleQuickReauth(clipText);
+            }
+          }
+        } catch (e) {}
+      }
+    });
+  }
+}
+
 // App Bootstrap
 updateSoundToggleUi();
 initInspectStageControls();
 initVpCompareModule();
+initQuickReauth();
 loadWeaponsList();
 loadAllAgents();
 checkAuth();

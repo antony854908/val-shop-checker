@@ -130,6 +130,12 @@
         </div>
 
         <div class="header-action-btns">
+          <!-- Token Expiry Countdown Pill & 1-Click Re-auth Button -->
+          <button id="btnTokenTimerBadge" class="token-timer-badge hidden" type="button" title="สถานะเซสชัน Riot Games (Token 1 ชม.) คลิกเพื่อต่ออายุแบบ 1-คลิกทันที">
+            <span class="token-timer-dot"></span>
+            <span id="tokenTimerText">59:45</span>
+            <span class="token-timer-action">ต่ออายุ</span>
+          </button>
           <button id="btnRefreshShop" class="btn btn-circle" title="รีเฟรชร้านค้า">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
@@ -1730,6 +1736,62 @@
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ff4655" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           <span style="color: #ff4655;">ออกจากระบบ</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick 1-Click Re-Auth Modal (Method 1) -->
+  <div id="quickReauthModal" class="modal-backdrop-layer hidden" aria-hidden="true">
+    <div class="modal-box modal-reauth-box" role="dialog" aria-modal="true" aria-labelledby="reauthModalTitle">
+      <div class="modal-header">
+        <div class="modal-header-titles">
+          <div class="modal-badge-tag" style="color:var(--val-cyan); border-color:var(--val-cyan);">RSO SESSION REFRESH</div>
+          <h3 id="reauthModalTitle" class="modal-title">ต่ออายุเซสชัน Riot (1-คลิก ไม่ต้องพิมพ์รหัส)</h3>
+          <p class="modal-subtitle">เนื่องจากระบบความปลอดภัยของ Riot Games โทเคนมีอายุ 1 ชม. แต่เบราว์เซอร์ของคุณจำการล็อกอินไว้แล้ว</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="btnCloseQuickReauthModal" aria-label="ปิด">&times;</button>
+      </div>
+
+      <div class="modal-body reauth-modal-body">
+        <!-- Step 1 Button: Opens Riot in 1 second without asking for password -->
+        <div class="reauth-card-step">
+          <div class="reauth-step-num">1</div>
+          <div class="reauth-step-content">
+            <h4>เปิดรับ Token ใหม่ (เบราว์เซอร์จำการล็อกอินไว้แล้ว)</h4>
+            <p>คลิกปุ่มด้านล่างเพื่อเปิดหน้า Riot เบราว์เซอร์จะดึง Token ใหม่ให้ใน 1 วินาทีโดย<strong>ไม่ต้องกรอกรหัสผ่านหรือ 2FA ใหม่</strong></p>
+            <a id="btnQuickReauthOpenRiot" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-reauth-action">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              <span>เปิดรับ Token ใหม่ (1 คลิก)</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Step 2: Auto-detect on Focus & Clipboard Paste -->
+        <div class="reauth-card-step">
+          <div class="reauth-step-num">2</div>
+          <div class="reauth-step-content">
+            <h4>วางลิงก์ หรือสลับกลับมาหน้านี้ (ตรวจจับอัตโนมัติ)</h4>
+            <p>คัดลอก URL จากแถบ Address bar ของหน้า Riot แล้วกดปุ่มวาง หรือเพียงแค่สลับกลับมาหน้านี้ระบบจะตรวจจับให้ทันที</p>
+            <div class="input-paste-action-box">
+              <input type="text" id="inputQuickReauthUrl" placeholder="วาง https://playvalorant.com/opt_in#access_token=... หรือโทเคน" class="input-dark">
+              <button type="button" id="btnQuickReauthSubmit" class="btn btn-primary btn-sm">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                <span>ต่ออายุทันที</span>
+              </button>
+            </div>
+            <div id="quickReauthStatusAlert" class="reauth-status-alert hidden"></div>
+          </div>
+        </div>
+
+        <!-- Bookmarklet Shortcut Tip -->
+        <div class="reauth-tip-card">
+          <div class="tip-header">
+            <span class="tip-badge">ทางลัดเสริม</span>
+            <strong>บุ๊กมาร์ก 1-คลิก (Bookmarklet):</strong>
+          </div>
+          <p>ลากลิงก์นี้ไปวางที่แถบบุ๊กมาร์ก (Bookmarks Bar) ของเบราว์เซอร์: <a href="javascript:(function(){const h=window.location.hash;if(h&amp;&amp;h.includes('access_token=')){window.location.href='https://val-shop-checker.vercel.app/'+h;}else{alert('กรุณากดปุ่มนี้ขณะอยู่ที่หน้า playvalorant.com/opt_in');}})()" class="btn-bookmarklet" onclick="event.preventDefault(); alert('ลากปุ่มนี้ไปวางที่แถบ Bookmarks ของเบราว์เซอร์ เพื่อใช้เป็นปุ่มกดส่งโทเคนกลับมาที่เว็บอัตโนมัติใน 1 วินาที');">🔖 ส่ง Token กลับ ValShop</a></p>
+          <p class="tip-subtext">เมื่อหน้า Riot เด้งมาที่หน้า 404 (playvalorant.com/opt_in) แค่กดปุ่มบุ๊กมาร์กนี้ มันจะพาคุณกลับมาที่เว็บพร้อมต่ออายุให้เสร็จสรรพ!</p>
+        </div>
       </div>
     </div>
   </div>
