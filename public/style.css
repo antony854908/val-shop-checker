@@ -5621,41 +5621,150 @@ body {
   color: #fff;
 }
 
-.chromas-flex-grid, .levels-flex-grid {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 4px;
-  scrollbar-width: none;
+/* Swatch Images inside Chroma Pills */
+.chroma-swatch-img {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: block;
 }
 
-.chroma-pill, .level-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--val-border);
-  border-radius: 5px;
-  padding: 6px 9px;
+.chroma-swatch-fallback {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  border-radius: 4px;
+  background: var(--val-red, #ff4655);
+  display: inline-block;
+}
+
+.chromas-flex-grid, .levels-flex-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding-bottom: 4px;
+}
+
+.chroma-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  padding: 6px 13px;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  font-size: 11px;
+  font-family: 'Kanit', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #e2e8f0;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
 }
 
-.chroma-pill:hover, .level-card:hover {
-  background: rgba(255, 255, 255, 0.08);
+.chroma-pill:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-1px);
 }
 
-.chroma-pill:active, .level-card:active {
+.chroma-pill:active {
   transform: scale(0.96);
 }
 
-.chroma-pill.active, .level-card.active {
-  border-color: var(--val-cyan);
-  background: rgba(0, 245, 212, 0.12);
-  box-shadow: 0 0 10px var(--val-cyan-glow);
-  transform: scale(1.02);
+.chroma-pill.active {
+  border-color: var(--val-cyan, #00f5d4);
+  background: rgba(0, 245, 212, 0.16);
+  color: var(--val-cyan, #00f5d4);
+  box-shadow: 0 0 12px rgba(0, 245, 212, 0.3);
+}
+
+.level-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  transition: all 0.2s ease;
+}
+
+.level-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.level-card:active {
+  transform: scale(0.96);
+}
+
+.level-card.active {
+  border-color: var(--val-red, #ff4655);
+  background: rgba(255, 70, 85, 0.16);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(255, 70, 85, 0.25);
+}
+
+.lvl-num {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--val-gold, #f59e0b);
+}
+
+.lvl-item {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+/* Modal Stage and Weapon Display (Desktop Base) */
+.skin-display-stage {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  max-height: 260px;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 0%, rgba(0, 0, 0, 0.35) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage-preview-box {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.inspect-weapon-img {
+  max-width: 90%;
+  max-height: 190px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.75));
+  transition: opacity 0.2s ease, transform 0.25s ease;
+}
+
+#modalSkinVideo {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
 }
 
 @keyframes cardTacticalEnter {
@@ -6565,6 +6674,224 @@ body.ui-mode-mobile .modal-agent-dialog {
   to {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+/* ==========================================================
+   PLATFORM-TAILORED UI EXPERIENCES (MOBILE VS PC ADAPTATIONS)
+   ========================================================== */
+
+/* --- MOBILE PLATFORM SPECIFIC ADAPTATIONS --- */
+body.ui-mode-mobile .modal-tactical-dialog,
+@media (max-width: 900px) {
+  body:not(.ui-mode-pc) .modal-tactical-dialog {
+    width: 100% !important;
+    max-height: 88vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    border-bottom: none !important;
+  }
+
+  body:not(.ui-mode-pc) .modal-tactical-dialog .modal-header {
+    padding: 10px 14px 8px !important;
+  }
+
+  body:not(.ui-mode-pc) .modal-skin-title {
+    font-size: 1.05rem !important;
+  }
+
+  body:not(.ui-mode-pc) .modal-tactical-dialog .modal-body {
+    padding: 8px 12px calc(24px + env(safe-area-inset-bottom, 12px)) !important;
+    gap: 10px !important;
+    overflow-y: auto !important;
+  }
+
+  /* Compact Display Stage on Mobile - Prevents Giant Screen Bloat */
+  body:not(.ui-mode-pc) .skin-display-stage {
+    height: 155px !important;
+    max-height: 165px !important;
+    border-radius: 10px !important;
+  }
+
+  body:not(.ui-mode-pc) .stage-preview-box {
+    padding: 6px !important;
+  }
+
+  body:not(.ui-mode-pc) .inspect-weapon-img {
+    max-width: 94% !important;
+    max-height: 120px !important;
+  }
+
+  /* Compact Chroma & Level Selectors on Mobile */
+  body:not(.ui-mode-pc) .inspector-section-header h4 {
+    font-size: 0.78rem !important;
+  }
+
+  body:not(.ui-mode-pc) .active-variant-label {
+    font-size: 0.74rem !important;
+  }
+
+  body:not(.ui-mode-pc) .chromas-flex-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 5px !important;
+  }
+
+  body:not(.ui-mode-pc) .chroma-pill {
+    padding: 3px 9px !important;
+    font-size: 0.75rem !important;
+    gap: 5px !important;
+    border-radius: 14px !important;
+  }
+
+  body:not(.ui-mode-pc) .chroma-swatch-img {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
+    border-radius: 3px !important;
+  }
+
+  body:not(.ui-mode-pc) .levels-flex-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 5px !important;
+  }
+
+  body:not(.ui-mode-pc) .level-card {
+    padding: 4px 8px !important;
+    font-size: 0.73rem !important;
+    gap: 5px !important;
+    border-radius: 6px !important;
+  }
+
+  body:not(.ui-mode-pc) .lvl-num {
+    font-size: 0.74rem !important;
+  }
+
+  body:not(.ui-mode-pc) .lvl-item {
+    font-size: 0.7rem !important;
+  }
+
+  /* Compact Price Compare Bar in Modal on Mobile */
+  body:not(.ui-mode-pc) .modal-price-compare-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 8px 10px !important;
+    gap: 6px !important;
+  }
+
+  body:not(.ui-mode-pc) .compare-tag-over {
+    font-size: 0.85rem !important;
+  }
+
+  body:not(.ui-mode-pc) .compare-combo-desc {
+    font-size: 0.72rem !important;
+  }
+
+  body:not(.ui-mode-pc) .btn-inspect-compare {
+    width: 100% !important;
+    justify-content: center !important;
+    min-height: 38px !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+body.ui-mode-mobile .modal-tactical-dialog .modal-header {
+  padding: 10px 14px 8px !important;
+}
+body.ui-mode-mobile .modal-skin-title {
+  font-size: 1.05rem !important;
+}
+body.ui-mode-mobile .modal-tactical-dialog .modal-body {
+  padding: 8px 12px calc(24px + env(safe-area-inset-bottom, 12px)) !important;
+  gap: 10px !important;
+  overflow-y: auto !important;
+}
+body.ui-mode-mobile .skin-display-stage {
+  height: 155px !important;
+  max-height: 165px !important;
+  border-radius: 10px !important;
+}
+body.ui-mode-mobile .stage-preview-box {
+  padding: 6px !important;
+}
+body.ui-mode-mobile .inspect-weapon-img {
+  max-width: 94% !important;
+  max-height: 120px !important;
+}
+body.ui-mode-mobile .chromas-flex-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 5px !important;
+}
+body.ui-mode-mobile .chroma-pill {
+  padding: 3px 9px !important;
+  font-size: 0.75rem !important;
+  gap: 5px !important;
+  border-radius: 14px !important;
+}
+body.ui-mode-mobile .chroma-swatch-img {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  border-radius: 3px !important;
+}
+body.ui-mode-mobile .levels-flex-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 5px !important;
+}
+body.ui-mode-mobile .level-card {
+  padding: 4px 8px !important;
+  font-size: 0.73rem !important;
+  gap: 5px !important;
+  border-radius: 6px !important;
+}
+body.ui-mode-mobile .modal-price-compare-bar {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  padding: 8px 10px !important;
+  gap: 6px !important;
+}
+body.ui-mode-mobile .btn-inspect-compare {
+  width: 100% !important;
+  justify-content: center !important;
+  min-height: 38px !important;
+}
+
+/* --- PC PLATFORM SPECIFIC ADAPTATIONS --- */
+body.ui-mode-pc .modal-tactical-dialog,
+@media (min-width: 901px) {
+  body:not(.ui-mode-mobile) .modal-tactical-dialog {
+    max-width: 880px !important;
+    border-radius: 16px !important;
+  }
+  body:not(.ui-mode-mobile) .skin-display-stage {
+    height: 260px !important;
+    max-height: 280px !important;
+  }
+  body:not(.ui-mode-mobile) .inspect-weapon-img {
+    max-width: 90% !important;
+    max-height: 200px !important;
+  }
+  body:not(.ui-mode-mobile) .chroma-pill {
+    padding: 6px 14px !important;
+    font-size: 0.82rem !important;
+    gap: 7px !important;
+  }
+  body:not(.ui-mode-mobile) .chroma-swatch-img {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  body:not(.ui-mode-mobile) .level-card {
+    padding: 6px 14px !important;
+    font-size: 0.82rem !important;
+  }
+  body:not(.ui-mode-mobile) .modal-price-compare-bar {
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 12px 16px !important;
   }
 }
 

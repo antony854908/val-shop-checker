@@ -2201,6 +2201,20 @@ function openSkinModal(skinOrUuid) {
   resetInspectTransform();
 }
 
+function formatChromaCleanName(fullName, fallback = 'Variant') {
+  if (!fullName) return fallback;
+  const match = fullName.match(/\(([^)]+)\)/);
+  if (match) {
+    let clean = match[1].trim();
+    clean = clean.replace(/^Variant\s*\d*\s*:?\s*/i, '').trim();
+    if (clean) return clean;
+    return match[1].trim();
+  }
+  if (fullName.includes(' - ')) return fullName.split(' - ').pop().trim();
+  if (fullName.includes(' / ')) return fullName.split(' / ').pop().trim();
+  return fullName;
+}
+
 // Render Chromas in Modal
 function renderModalChromas(chromas) {
   const container = document.getElementById('chromasContainer');
@@ -2214,14 +2228,15 @@ function renderModalChromas(chromas) {
       selectorSection.style.display = (chromas && chromas.length === 1) ? 'block' : 'none';
     }
     if (chromas && chromas.length === 1) {
-      label.textContent = chromas[0].name || chromas[0].colorName || 'Base';
+      label.textContent = chromas[0].name || chromas[0].colorName || 'ดั้งเดิม (Base)';
       container.innerHTML = '<p style="font-size:12px; color:var(--val-gray); padding: 4px 0;">สีดั้งเดิม (Base / Original)</p>';
     }
     return;
   }
 
   if (selectorSection) selectorSection.style.display = 'block';
-  label.textContent = chromas[0].name || chromas[0].colorName || 'Base';
+  const firstRaw = chromas[0].name || chromas[0].colorName || '';
+  label.textContent = firstRaw || 'ดั้งเดิม (Base)';
 
   chromas.forEach((chroma, idx) => {
     const pill = document.createElement('div');
@@ -2229,17 +2244,20 @@ function renderModalChromas(chromas) {
     
     let swatchHtml = '';
     if (chroma.swatch) {
-      swatchHtml = '<img src="' + chroma.swatch + '" alt="" class="chroma-swatch-img" onerror="this.style.display=\'none\'">';
+      swatchHtml = `<img src="${chroma.swatch}" alt="" class="chroma-swatch-img" onerror="this.style.display='none'">`;
     } else {
-      swatchHtml = '<span style="width:18px;height:18px;border-radius:50%;background:#ff4655;display:inline-block;"></span>';
+      swatchHtml = '<span class="chroma-swatch-fallback"></span>';
     }
 
-    pill.innerHTML = swatchHtml + '<span>' + (chroma.colorName || chroma.name) + '</span>';
+    const rawName = chroma.colorName || chroma.name || '';
+    const cleanLabel = formatChromaCleanName(rawName, idx === 0 ? 'ดั้งเดิม' : ('สี ' + (idx + 1)));
+
+    pill.innerHTML = `${swatchHtml}<span>${cleanLabel}</span>`;
 
     pill.addEventListener('click', () => {
       document.querySelectorAll('.chroma-pill').forEach(p => p.classList.remove('active'));
       pill.classList.add('active');
-      label.textContent = chroma.name || chroma.colorName;
+      label.textContent = chroma.name || chroma.colorName || cleanLabel;
       playTacticalAudio('chroma');
 
       const newImg = chroma.fullRender || chroma.displayIcon || currentInspectedSkin?.displayIcon;
