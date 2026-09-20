@@ -529,12 +529,58 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 // ==========================================================
-// 100% AUTOMATIC DEVICE DETECTION (PC VS MOBILE - ZERO MANUAL BUTTONS)
+// SEPARATE MOBILE & PC UI ENGINE WITH INSTANT TOGGLE + AUTO-DETECTION
 // ==========================================================
-function autoDetectDeviceMode() {
-  const isMobile = window.innerWidth <= 900 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent || '');
+function getDeviceModePreference() {
+  return localStorage.getItem('val_ui_mode_pref') || 'auto'; // 'auto' | 'mobile' | 'pc'
+}
+
+function setDeviceModePreference(mode) {
+  if (mode === 'auto') {
+    localStorage.removeItem('val_ui_mode_pref');
+  } else {
+    localStorage.setItem('val_ui_mode_pref', mode);
+  }
+  applyDeviceMode();
+}
+
+function applyDeviceMode() {
+  const pref = getDeviceModePreference();
+  let isMobile = false;
+  if (pref === 'mobile') {
+    isMobile = true;
+  } else if (pref === 'pc') {
+    isMobile = false;
+  } else {
+    isMobile = window.innerWidth <= 900 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent || '');
+  }
+
   document.body.classList.toggle('ui-mode-mobile', isMobile);
   document.body.classList.toggle('ui-mode-pc', !isMobile);
+
+  const toggleBtn = document.getElementById('btnToggleDeviceMode');
+  const iconPc = toggleBtn?.querySelector('.icon-device-pc');
+  const iconMob = toggleBtn?.querySelector('.icon-device-mob');
+  if (isMobile) {
+    iconPc?.classList.add('hidden');
+    iconMob?.classList.remove('hidden');
+  } else {
+    iconPc?.classList.remove('hidden');
+    iconMob?.classList.add('hidden');
+  }
+
+  const labelEl = document.getElementById('deviceModeLabel');
+  if (labelEl) {
+    if (pref === 'mobile') labelEl.textContent = 'โหมด: มือถือ';
+    else if (pref === 'pc') labelEl.textContent = 'โหมด: คอม';
+    else labelEl.textContent = isMobile ? 'โหมด: มือถือ (ออโต้)' : 'โหมด: คอม (ออโต้)';
+  }
+
+  const sheetBtnPc = document.getElementById('btnMobSheetTogglePc');
+  if (sheetBtnPc) {
+    const span = sheetBtnPc.querySelector('span');
+    if (span) span.textContent = isMobile ? 'สลับเป็นโหมดคอม (PC UI)' : 'สลับเป็นโหมดมือถือ (Mobile UI)';
+  }
 
   const mobPanel = document.getElementById('deviceGuideMobile');
   const pcPanel = document.getElementById('deviceGuidePc');
@@ -560,8 +606,15 @@ function autoDetectDeviceMode() {
   }
 }
 
-autoDetectDeviceMode();
-window.addEventListener('resize', autoDetectDeviceMode, { passive: true });
+function toggleDeviceMode() {
+  playTacticalAudio?.('click');
+  const isCurMobile = document.body.classList.contains('ui-mode-mobile');
+  setDeviceModePreference(isCurMobile ? 'pc' : 'mobile');
+}
+
+window.toggleDeviceMode = toggleDeviceMode;
+applyDeviceMode();
+window.addEventListener('resize', applyDeviceMode, { passive: true });
 
 // Google & Device Tutorial Navigation
 document.querySelectorAll('.btn-device-tab').forEach(btn => {
@@ -2408,9 +2461,79 @@ document.querySelectorAll('.mobile-nav-item[data-tab]').forEach(item => {
   });
 });
 
-btnMobOpenVp?.addEventListener('click', () => {
-  playTacticalAudio('click');
+// Mobile More Menu Bottom Sheet Handlers
+const mobMoreMenuModal = document.getElementById('mobMoreMenuModal');
+const btnMobOpenMoreMenu = document.getElementById('btnMobOpenMoreMenu');
+const btnCloseMobMoreMenu = document.getElementById('btnCloseMobMoreMenu');
+
+function openMobMoreMenu() {
+  playTacticalAudio?.('click');
+  mobMoreMenuModal?.classList.remove('hidden');
+  mobMoreMenuModal?.setAttribute('aria-hidden', 'false');
+  requestAnimationFrame(() => mobMoreMenuModal?.classList.add('sheet-open'));
+}
+
+function closeMobMoreMenu() {
+  mobMoreMenuModal?.classList.remove('sheet-open');
+  setTimeout(() => {
+    mobMoreMenuModal?.classList.add('hidden');
+    mobMoreMenuModal?.setAttribute('aria-hidden', 'true');
+  }, 250);
+}
+
+btnMobOpenMoreMenu?.addEventListener('click', openMobMoreMenu);
+btnCloseMobMoreMenu?.addEventListener('click', closeMobMoreMenu);
+mobMoreMenuModal?.addEventListener('click', (e) => {
+  if (e.target === mobMoreMenuModal) closeMobMoreMenu();
+});
+
+// Bottom sheet sub-tab buttons
+document.querySelectorAll('.mob-menu-btn[data-mob-tab]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.mobTab;
+    if (tab) {
+      closeMobMoreMenu();
+      if (tab === 'bundles') {
+        switchAppMode('store');
+        setTimeout(() => {
+          document.getElementById('bundleContainer')?.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      } else if (tab === 'nightmarket') {
+        switchAppMode('store');
+        setTimeout(() => {
+          const nm = document.getElementById('nightMarketContainer');
+          if (nm) {
+            nm.classList.remove('hidden');
+            nm.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 150);
+      } else {
+        switchAppMode(tab);
+      }
+    }
+  });
+});
+
+document.getElementById('btnMobSheetVp')?.addEventListener('click', () => {
+  closeMobMoreMenu();
+  playTacticalAudio?.('click');
   window.openVpCompareModal?.();
+});
+
+document.getElementById('btnMobSheetTogglePc')?.addEventListener('click', () => {
+  closeMobMoreMenu();
+  toggleDeviceMode();
+});
+
+document.getElementById('btnMobSheetLogout')?.addEventListener('click', () => {
+  closeMobMoreMenu();
+  playTacticalAudio?.('click');
+  document.getElementById('btnLogout')?.click();
+});
+
+// Header Device Toggle Button
+document.getElementById('btnToggleDeviceMode')?.addEventListener('click', () => {
+  toggleDeviceMode();
 });
 
 // Load weapons list for dropdown
