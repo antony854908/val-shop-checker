@@ -1,4 +1,4 @@
-const CACHE_NAME = 'valstore-v7.1';
+const CACHE_NAME = 'valstore-v7.2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -7,7 +7,8 @@ const STATIC_ASSETS = [
   '/manifest.json',
   '/favicon.ico',
   '/assets/icon-192.png',
-  '/assets/icon-512.png'
+  '/assets/icon-512.png',
+  '/assets/placeholder-skin.svg'
 ];
 
 self.addEventListener('install', (e) => {

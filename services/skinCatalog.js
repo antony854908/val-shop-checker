@@ -385,7 +385,7 @@ class SkinCatalog {
             }
           }
           if (!bestIcon) {
-            bestIcon = weaponInfo.displayIcon || 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
+            bestIcon = weaponInfo.displayIcon || '/assets/placeholder-skin.svg';
           }
 
           const chromas = (skin.chromas || []).map((c, idx) => {

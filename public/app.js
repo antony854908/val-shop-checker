@@ -173,7 +173,7 @@ document.addEventListener('error', (e) => {
     } else if (img.classList.contains('main-preview-render') || img.closest('.skin-image-box') || img.classList.contains('bundle-mini-img-wrap')) {
       if (!img.dataset.hasFallback) {
         img.dataset.hasFallback = '1';
-        img.src = 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
+        img.src = '/assets/placeholder-skin.svg';
       }
     }
   }
@@ -1982,7 +1982,7 @@ function renderDailyShop(skins) {
 
     const chromasCount = skin.chromas ? skin.chromas.length : 1;
     const hasVideo = skin.hasVideo || (skin.levels && skin.levels.some(l => l.streamedVideo));
-    const safeIcon = skin.displayIcon || 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
+    const safeIcon = skin.displayIcon || '/assets/placeholder-skin.svg';
     const starred = isWishlisted(skin.uuid);
 
     card.innerHTML = `
@@ -2185,7 +2185,7 @@ function renderBundles(bundles) {
   const officialEst = Math.round(bundlePrice * 0.292);
   const savings = Math.max(0, officialEst - overEst);
 
-  const heroImage = b.displayIcon || b.verticalPromoImage || (b.items && b.items.find(i => i.displayIcon)?.displayIcon) || 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
+  const heroImage = b.displayIcon || b.verticalPromoImage || (b.items && b.items.find(i => i.displayIcon)?.displayIcon) || '/assets/placeholder-skin.svg';
 
   const heroDiv = document.createElement('div');
   heroDiv.className = 'bundle-hero';
@@ -2311,7 +2311,7 @@ window.openBundleModal = function(b) {
 
   const bundleName = b.name || "Featured Collection";
   const bundlePrice = b.totalDiscountedCost || b.totalBaseCost || b.price || 0;
-  const heroImage = b.displayIcon || b.verticalPromoImage || (b.items && b.items.find(i => i.displayIcon)?.displayIcon) || "https://media.valorant-api.com/weapons/skins/default/displayicon.png";
+  const heroImage = b.displayIcon || b.verticalPromoImage || (b.items && b.items.find(i => i.displayIcon)?.displayIcon) || "/assets/placeholder-skin.svg";
 
   const nameEl = document.getElementById("modalBundleName");
   if (nameEl) nameEl.textContent = bundleName;
@@ -2474,7 +2474,7 @@ function renderNightMarket(nm) {
     card.className = 'skin-card nm-card';
     card.style.setProperty('--card-tier-color', offer.tier?.highlightColor || '#EBC971');
     card.style.animationDelay = (idx * 0.08) + 's';
-    const safeIcon = offer.displayIcon || 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
+    const safeIcon = offer.displayIcon || '/assets/placeholder-skin.svg';
     const starred = isWishlisted(offer.uuid);
     const skinPrice = offer.discountedPrice || 0;
     const walletVp = getCurrentWalletVp();
@@ -3312,7 +3312,7 @@ function renderCatalogItems(skins) {
 
     const chromasCount = skin.chromas ? skin.chromas.length : 1;
     const hasVideo = skin.hasVideo || (skin.levels && skin.levels.some(l => l.streamedVideo));
-    const safeIcon = skin.displayIcon || 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
+    const safeIcon = skin.displayIcon || '/assets/placeholder-skin.svg';
     const starred = isWishlisted(skin.uuid);
 
     card.innerHTML = `
@@ -5997,7 +5997,7 @@ function filterAndRenderInventoryGrid() {
     const tierName = skin.contentTier?.name || skin.tier?.name || 'Standard Edition';
     const tierColor = skin.contentTier?.color || skin.tier?.highlightColor || '#ff4655';
     const tierIcon = skin.contentTier?.displayIcon || skin.tier?.displayIcon || '';
-    const imgUrl = skin.displayIcon || (skin.chromas && skin.chromas[0]?.displayIcon) || (skin.levels && skin.levels[0]?.displayIcon) || skin.weaponIcon || 'https://media.valorant-api.com/weapons/skins/default/displayicon.png';
+    const imgUrl = skin.displayIcon || (skin.chromas && skin.chromas[0]?.displayIcon) || (skin.levels && skin.levels[0]?.displayIcon) || skin.weaponIcon || '/assets/placeholder-skin.svg';
     const isStandard = skin.isStandardDefault || (skin.name || '').toLowerCase().startsWith('standard ');
     const priceFormatted = (skin.estimatedVpPrice || 0) > 0 
       ? (skin.estimatedVpPrice.toLocaleString() + ' VP') 
@@ -6025,7 +6025,7 @@ function filterAndRenderInventoryGrid() {
       </div>
 
       <div class="skin-image-box">
-        <img src="${imgUrl}" alt="${escapeHtml(skin.name)}" class="skin-render-img" loading="lazy" onerror="this.onerror=null; this.src='https://media.valorant-api.com/weapons/skins/default/displayicon.png';">
+        <img src="${imgUrl}" alt="${escapeHtml(skin.name)}" class="skin-render-img" loading="lazy" onerror="this.onerror=null; this.src='/assets/placeholder-skin.svg';">
       </div>
 
       <div class="skin-card-footer">

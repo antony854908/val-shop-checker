@@ -585,8 +585,10 @@ app.get('/api/matches', async (req, res) => {
   }
 
   try {
-    const limit = parseInt(req.query.limit, 10) || 10;
-    const queue = req.query.queue || '';
+    const parsedLimit = parseInt(req.query.limit, 10);
+    // Clamp to a safe range: each match entry triggers a separate Riot API call.
+    const limit = Number.isFinite(parsedLimit) ? Math.min(Math.max(parsedLimit, 1), 20) : 10;
+    const queue = typeof req.query.queue === 'string' ? req.query.queue.slice(0, 32) : '';
 
     const history = await valorantApi.getMatchHistory(
       auth.puuid,
@@ -619,15 +621,36 @@ app.get('/api/match/:matchId', async (req, res) => {
     return res.status(401).json({ ok: false, error: 'กรุณาเข้าสู่ระบบก่อนดูรายละเอียดการแข่งขัน' });
   }
 
+  const matchId = String(req.params.matchId || '');
+  if (!/^[0-9a-fA-F-]{8,64}$/.test(matchId)) {
+    return res.status(400).json({ ok: false, error: 'รหัสแมตช์ไม่ถูกต้อง' });
+  }
+
   try {
     const rawMatch = await valorantApi.getMatchDetails(
-      req.params.matchId,
+      matchId,
       auth.region,
       auth.accessToken,
       auth.entitlementsToken
     );
 
-    const formatted = valorantApi.formatMatchData(auth.puuid, rawMatch);
+    // Resolve real Riot IDs, otherwise every row on the scoreboard renders as "Agent".
+    let namesMap = new Map();
+    try {
+      const puuids = (rawMatch?.players || []).map(p => p.subject || p.puuid).filter(Boolean);
+      if (puuids.length) {
+        namesMap = await valorantApi.resolvePlayerNames(
+          puuids,
+          auth.region,
+          auth.accessToken,
+          auth.entitlementsToken
+        );
+      }
+    } catch (nameErr) {
+      console.error('[Match Names Error]:', nameErr.message);
+    }
+
+    const formatted = valorantApi.formatMatchData(auth.puuid, rawMatch, namesMap);
 
     res.json({
       ok: true,
@@ -718,6 +741,8 @@ app.post('/api/auth/logout', (req, res) => {
     sameSite: 'lax',
     path: '/'
   });
+  // Without this the next request re-hydrates auth from val_auth_pack and the user is silently logged back in.
+  res.clearCookie('val_auth_pack', { path: '/' });
   res.json({ ok: true, message: 'ออกจากระบบเรียบร้อย' });
 });
 
