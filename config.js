@@ -16,6 +16,13 @@ module.exports = {
     RP: 'e59aa87c-4cbf-517a-5983-6e81511be9b7', // Radianite Points
     KC: '85ca954a-41f2-ce94-9b45-8ca3dd39a00d'  // Kingdom Credits
   },
+  ITEM_TYPES: {
+    SKIN: 'e7c63390-eda7-46e0-bb7a-a6abdacd2433',
+    BUDDY: 'dd3bf334-87f3-40bd-b043-682a57a8dc3a',
+    CARD: '3f296c07-64c3-494c-923b-fe692a4fa1bd',
+    SPRAY: 'd5f120f8-ff8c-4aac-92ea-f2b5acbe9e47',
+    TITLE: 'de7caa6b-adf7-4588-bbd1-143831e786c6'
+  },
   DEFAULT_CLIENT_VERSION: 'release-13.04-shipping-18-5304478',
   DEFAULT_CLIENT_PLATFORM: 'ew0KCSJwbGF0Zm9ybVR5cGUiOiAiUEMiLA0KCSJwbGF0Zm9ybU9TIjogIldpbmRvd3MiLA0KCSJwbGF0Zm9ybU9TVmVyc2lvbiI6ICIxMC4wLjE5MDQyLjEuMjU2LjY0Yml0IiwNCgkicGxhdGZvcm1DaGlwc2V0IjogIlVua25vd24iDQp9'
 };

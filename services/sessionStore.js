@@ -8,16 +8,23 @@ const STORE_FILE = process.env.VERCEL
   ? path.join('/tmp', '.session-store.json')
   : path.join(__dirname, '..', '.session-store.json');
 
+const TMP_STORE_FILE = `${STORE_FILE}.tmp`;
+
+/**
+ * Checks whether a given JWT token has expired with a 30s buffer.
+ * @param {string} token - Raw JWT string
+ * @returns {boolean}
+ */
 function isJwtExpired(token) {
   try {
-    if (!token) return true;
+    if (!token || typeof token !== 'string') return true;
     const parts = token.split('.');
     if (parts.length < 2) return true;
     const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
-    if (payload.exp && Date.now() >= (payload.exp * 1000 - 30000)) { // 30s buffer
+    if (payload && payload.exp && Date.now() >= (payload.exp * 1000 - 30000)) {
       return true;
     }
-  } catch (e) {
+  } catch (err) {
     return true;
   }
   return false;
@@ -26,10 +33,20 @@ function isJwtExpired(token) {
 class SessionStore {
   constructor() {
     this.sessions = new Map();
+    this.metrics = {
+      saveCount: 0,
+      saveErrors: 0,
+      cleanupCount: 0,
+      lastSaveDurationMs: 0
+    };
+
     this.loadFromDisk();
 
-    // Auto cleanup expired sessions every 10 minutes
-    setInterval(() => this.cleanup(), 10 * 60 * 1000);
+    // Auto cleanup expired sessions every 10 minutes; unref timer so tests/cli exit cleanly
+    this.cleanupTimer = setInterval(() => this.cleanup(), 10 * 60 * 1000);
+    if (this.cleanupTimer.unref) {
+      this.cleanupTimer.unref();
+    }
   }
 
   loadFromDisk() {
@@ -55,12 +72,33 @@ class SessionStore {
     }
   }
 
+  /**
+   * Atomically save sessions to disk to prevent corrupted JSON writes during interruption.
+   */
   saveToDisk() {
+    const startTime = Date.now();
     try {
       const data = Array.from(this.sessions.values());
-      fs.writeFileSync(STORE_FILE, JSON.stringify(data, null, 2), { encoding: 'utf8', mode: 0o600 });
+      const serialized = JSON.stringify(data, null, 2);
+      const dir = path.dirname(STORE_FILE);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+
+      // Write atomically: write to temp file first, then atomic rename
+      fs.writeFileSync(TMP_STORE_FILE, serialized, { encoding: 'utf8', mode: 0o600 });
+      fs.renameSync(TMP_STORE_FILE, STORE_FILE);
+
+      this.metrics.saveCount++;
+      this.metrics.lastSaveDurationMs = Date.now() - startTime;
     } catch (e) {
+      this.metrics.saveErrors++;
       console.error('[SessionStore] Error saving sessions to disk:', e.message);
+      try {
+        if (fs.existsSync(TMP_STORE_FILE)) {
+          fs.unlinkSync(TMP_STORE_FILE);
+        }
+      } catch (_) {}
     }
   }
 
@@ -143,6 +181,18 @@ class SessionStore {
     if (changed) {
       this.saveToDisk();
     }
+    this.metrics.cleanupCount++;
+  }
+
+  getMetrics() {
+    return {
+      ...this.metrics,
+      activeSessions: this.sessions.size
+    };
+  }
+
+  isJwtExpired(token) {
+    return isJwtExpired(token);
   }
 }
 

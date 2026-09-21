@@ -117,6 +117,10 @@ async function apiFetch(url, options = {}) {
 
   // 401 Interception for Token Expiration (Method 1: Quick 1-Click Re-Auth)
   if (res.status === 401 && !url.includes('/api/auth/token-login') && !url.includes('/api/auth/login')) {
+    try {
+      localStorage.removeItem('val_auth_pack');
+      document.cookie = 'val_auth_pack=; Max-Age=0; path=/;';
+    } catch (_) {}
     res.clone().json().then(data => {
       if (data?.error && (data.error.includes('หมดอายุ') || data.error.includes('expired') || data.error.includes('Token') || data.error.includes('401'))) {
         window.openQuickReauthModal?.(data.error);
@@ -1440,6 +1444,7 @@ function formatTime(seconds) {
 
 // Start Countdown Timers
 function startTimers() {
+  window.__dailyTimerManaged = true;
   if (timerInterval) clearInterval(timerInterval);
 
   const updateTimerDisplays = () => {
@@ -1529,9 +1534,19 @@ async function checkAuth() {
             await loadStore();
             return true;
           }
+        } else {
+          try {
+            localStorage.removeItem('val_auth_pack');
+            document.cookie = 'val_auth_pack=; Max-Age=0; path=/;';
+          } catch (_) {}
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      try {
+        localStorage.removeItem('val_auth_pack');
+        document.cookie = 'val_auth_pack=; Max-Age=0; path=/;';
+      } catch (_) {}
+    }
   }
 
   showLoginView();
@@ -5522,11 +5537,16 @@ function initVpCompareModule() {
 // ==========================================================
 let tokenTimerInterval = null;
 let quickReauthFocusHandlerAttached = false;
+// Loop prevention: remember the last auto-submitted clipboard token + a failure cooldown
+let lastAutoToken = null;
+let lastAutoSubmitFailAt = 0;
+const AUTO_SUBMIT_COOLDOWN_MS = 5000;
 
 window.openQuickReauthModal = function(customReason = '') {
-  playTacticalAudio?.('open');
   const modal = document.getElementById('quickReauthModal');
   if (!modal) return;
+  if (!modal.classList.contains('hidden')) return; // Already visible, prevent loop!
+  playTacticalAudio?.('open');
 
   const alertEl = document.getElementById('quickReauthStatusAlert');
   if (alertEl) {
@@ -5648,6 +5668,7 @@ async function handleQuickReauth(val) {
     }, 800);
 
   } catch (err) {
+    lastAutoSubmitFailAt = Date.now();
     if (alertEl) {
       alertEl.textContent = err.message || 'ต่ออายุไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
       alertEl.className = 'reauth-status-alert error';
@@ -5702,6 +5723,11 @@ function initQuickReauth() {
           if (navigator.clipboard && navigator.clipboard.readText) {
             const clipText = await navigator.clipboard.readText();
             if (clipText && clipText.includes('access_token=')) {
+              const now = Date.now();
+              // Break the infinite loop: never auto-resubmit the SAME token while it
+              // is already failing (expired/invalid) within the cooldown window.
+              const alreadyFailed = (clipText === lastAutoToken) && (now - lastAutoSubmitFailAt < AUTO_SUBMIT_COOLDOWN_MS);
+              if (alreadyFailed) return;
               if (inputUrl) inputUrl.value = clipText;
               const alertEl = document.getElementById('quickReauthStatusAlert');
               if (alertEl) {
@@ -5709,6 +5735,7 @@ function initQuickReauth() {
                 alertEl.className = 'reauth-status-alert';
                 alertEl.classList.remove('hidden');
               }
+              lastAutoToken = clipText;
               handleQuickReauth(clipText);
             }
           }
@@ -6397,6 +6424,7 @@ async function loadGuestStorePreview() {
     const data = await res.json();
     if (data.ok && data.featuredBundles && data.featuredBundles.length > 0) {
       renderBundles(data.featuredBundles);
+      startTimers();
     }
   } catch (e) {}
 }

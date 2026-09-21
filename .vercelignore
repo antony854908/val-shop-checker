@@ -1,5 +1,13 @@
 node_modules
-.session-store.json
+.session-store.json*
 server.log
 test-security.js
 .git
+*.7z
+tmp-*
+*.log
+backup-*
+setup-gdrive-termux.sh
+launch-app.sh
+start.bat
+start.sh

@@ -6,3 +6,4 @@ server.log
 .vercel
 *.log
 .env*
+.yorn

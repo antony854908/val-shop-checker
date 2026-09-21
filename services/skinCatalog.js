@@ -23,6 +23,10 @@ class SkinCatalog {
     this.lastFetch = 0;
   }
 
+  get catalogItems() {
+    return this.uniqueSkinsList || [];
+  }
+
   formatLevelItemName(rawItem, levelNum) {
     if (!rawItem) return `Level ${levelNum}`;
     const clean = rawItem.replace('EEquippableSkinLevelItem::', '');

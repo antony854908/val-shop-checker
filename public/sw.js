@@ -1,4 +1,4 @@
-const CACHE_NAME = 'valstore-v6.4';
+const CACHE_NAME = 'valstore-v7.1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -58,7 +58,7 @@ self.addEventListener('fetch', (e) => {
         return networkResponse;
       })
       .catch(async () => {
-        const cached = await caches.match(e.request);
+        const cached = await caches.match(e.request, { ignoreSearch: true });
         if (cached) {
           return cached;
         }

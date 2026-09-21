@@ -397,6 +397,7 @@
         <script>
           (function() {
             function updateShopResetTimer() {
+              if (window.__dailyTimerManaged) return;
               var now = new Date();
               var nextReset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + (now.getUTCHours() >= 0 ? 1 : 0), 0, 0, 0));
               var diff = Math.max(0, Math.floor((nextReset.getTime() - now.getTime()) / 1000));
@@ -1824,6 +1825,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=6.5"></script>
+     <script src="app.js?v=7.1"></script>
 </body>
 </html>

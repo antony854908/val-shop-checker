@@ -149,10 +149,16 @@ function getSessionMiddleware(req, res, next) {
       const decodedStr = Buffer.from(authPackRaw, 'base64').toString('utf8');
       const authObj = JSON.parse(decodedStr);
       if (authObj && authObj.accessToken && authObj.puuid) {
-        session.auth = authObj;
-        sessionStore.updateSession(session.id, { auth: authObj });
+        if (!sessionStore.isJwtExpired(authObj.accessToken)) {
+          session.auth = authObj;
+          sessionStore.updateSession(session.id, { auth: authObj });
+        } else {
+          res.clearCookie('val_auth_pack', { path: '/' });
+        }
       }
-    } catch (e) {}
+    } catch (e) {
+      res.clearCookie('val_auth_pack', { path: '/' });
+    }
   }
 
   req.valSession = session;
@@ -432,6 +438,7 @@ app.get('/api/auth/me', async (req, res) => {
   } catch (err) {
     if (err.code === 'TOKEN_EXPIRED') {
       sessionStore.updateSession(req.valSession.id, { auth: null });
+      res.clearCookie('val_auth_pack', { path: '/' });
       return res.status(401).json({ ok: false, loggedIn: false, error: 'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่' });
     }
     res.json({
@@ -476,9 +483,26 @@ app.get('/api/shop', async (req, res) => {
     console.error('[Storefront Error]:', err.message);
     if (err.code === 'TOKEN_EXPIRED') {
       sessionStore.updateSession(req.valSession.id, { auth: null });
+      res.clearCookie('val_auth_pack', { path: '/' });
       return res.status(401).json({ ok: false, error: 'Access Token หมดอายุ กรุณาเข้าสู่ระบบใหม่' });
     }
     res.status(500).json({ ok: false, error: err.message || 'ไม่สามารถโหลดร้านค้าได้' });
+  }
+});
+
+// Endpoint: Get Featured Bundles (Guest & Public Store Preview)
+app.get('/api/featured', (req, res) => {
+  try {
+    const featuredBundles = valorantApi.storefrontService.getCachedFeaturedBundles();
+    res.json({
+      ok: true,
+      featuredBundles
+    });
+  } catch (err) {
+    res.json({
+      ok: true,
+      featuredBundles: []
+    });
   }
 });
 
@@ -505,6 +529,7 @@ app.get('/api/inventory', async (req, res) => {
     console.error('[Inventory Error]:', err.message);
     if (err.code === 'TOKEN_EXPIRED') {
       sessionStore.updateSession(req.valSession.id, { auth: null });
+      res.clearCookie('val_auth_pack', { path: '/' });
       return res.status(401).json({ ok: false, error: 'Access Token หมดอายุ กรุณาเข้าสู่ระบบใหม่' });
     }
     res.status(500).json({ ok: false, error: err.message || 'ไม่สามารถโหลดคลังสกินได้' });
@@ -545,6 +570,7 @@ app.get('/api/career/mmr', async (req, res) => {
     console.error('[MMR Error]:', err.message);
     if (err.code === 'TOKEN_EXPIRED') {
       sessionStore.updateSession(req.valSession.id, { auth: null });
+      res.clearCookie('val_auth_pack', { path: '/' });
       return res.status(401).json({ ok: false, error: 'Access Token หมดอายุ กรุณาเข้าสู่ระบบใหม่' });
     }
     res.status(500).json({ ok: false, error: err.message || 'ไม่สามารถโหลดข้อมูลแรงก์ได้' });
@@ -579,6 +605,7 @@ app.get('/api/matches', async (req, res) => {
     console.error('[Match History Error]:', err.message);
     if (err.code === 'TOKEN_EXPIRED') {
       sessionStore.updateSession(req.valSession.id, { auth: null });
+      res.clearCookie('val_auth_pack', { path: '/' });
       return res.status(401).json({ ok: false, error: 'Access Token หมดอายุ กรุณาเข้าสู่ระบบใหม่' });
     }
     res.status(500).json({ ok: false, error: err.message || 'ไม่สามารถโหลดประวัติการเล่นได้' });

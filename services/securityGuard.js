@@ -4,15 +4,19 @@
  * Anti-Brute-Force, Parameter Pollution Defenses, and Safe Logging.
  */
 
-// In-Memory Sliding Window Rate Limiter
+// In-Memory Sliding Window Rate Limiter with Capacity Bounds & Memory Protection
 class RateLimiter {
-  constructor(windowMs = 60000, maxRequests = 10) {
+  constructor(windowMs = 60000, maxRequests = 10, maxEntries = 10000) {
     this.windowMs = windowMs;
     this.maxRequests = maxRequests;
+    this.maxEntries = maxEntries;
     this.hits = new Map();
 
-    // Auto cleanup old hits every 5 minutes
-    setInterval(() => this.cleanup(), 5 * 60 * 1000);
+    // Auto cleanup old hits every 5 minutes (unref timer for clean test/process teardown)
+    this.cleanupTimer = setInterval(() => this.cleanup(), 5 * 60 * 1000);
+    if (this.cleanupTimer.unref) {
+      this.cleanupTimer.unref();
+    }
   }
 
   cleanup() {
@@ -29,6 +33,13 @@ class RateLimiter {
 
   check(key) {
     const now = Date.now();
+    
+    // Evict oldest entry if Map exceeds maxEntries capacity (DoS / Memory Bloat defense)
+    if (this.hits.size >= this.maxEntries && !this.hits.has(key)) {
+      const oldestKey = this.hits.keys().next().value;
+      if (oldestKey) this.hits.delete(oldestKey);
+    }
+
     const timestamps = this.hits.get(key) || [];
     const valid = timestamps.filter(t => now - t < this.windowMs);
 
@@ -41,15 +52,23 @@ class RateLimiter {
     this.hits.set(key, valid);
     return true; // OK
   }
+
+  reset(key) {
+    if (key) {
+      this.hits.delete(key);
+    } else {
+      this.hits.clear();
+    }
+  }
 }
 
 // Dedicated Rate Limiters
-const authLimiter = new RateLimiter(60 * 1000, 10); // 10 auth attempts per minute per IP
-const apiLimiter = new RateLimiter(60 * 1000, 180);  // 180 API calls per minute per IP
+const authLimiter = new RateLimiter(60 * 1000, 10, 5000); // 10 auth attempts per minute per IP
+const apiLimiter = new RateLimiter(60 * 1000, 180, 10000);  // 180 API calls per minute per IP
 
 // Rate Limit Middleware Helpers
 function authRateLimitMiddleware(req, res, next) {
-  const clientIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
+  const clientIp = req.ip || req.connection?.remoteAddress || '127.0.0.1';
   if (!authLimiter.check(clientIp)) {
     return res.status(429).json({
       ok: false,
@@ -60,7 +79,7 @@ function authRateLimitMiddleware(req, res, next) {
 }
 
 function apiRateLimitMiddleware(req, res, next) {
-  const clientIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
+  const clientIp = req.ip || req.connection?.remoteAddress || '127.0.0.1';
   if (!apiLimiter.check(clientIp)) {
     return res.status(429).json({
       ok: false,
@@ -120,7 +139,32 @@ function validateTokenInput(body) {
     return { ok: false, error: 'ข้อมูลคำขอไม่ถูกต้อง' };
   }
 
-  let { accessToken, idToken, region } = body;
+  let { accessToken, idToken, region, authPack } = body;
+
+  // Unpack authPack if passed directly (from account switcher or stored session)
+  if ((!accessToken || typeof accessToken !== 'string') && authPack) {
+    try {
+      let rawPack = authPack;
+      if (typeof rawPack === 'string') {
+        try {
+          const decoded = Buffer.from(rawPack, 'base64').toString('utf8');
+          const parsed = JSON.parse(decoded);
+          accessToken = parsed.accessToken;
+          idToken = parsed.idToken || idToken;
+          if (parsed.region && (!region || region === 'auto')) region = parsed.region;
+        } catch (_) {
+          const parsed = JSON.parse(rawPack);
+          accessToken = parsed.accessToken;
+          idToken = parsed.idToken || idToken;
+          if (parsed.region && (!region || region === 'auto')) region = parsed.region;
+        }
+      } else if (typeof rawPack === 'object' && rawPack.accessToken) {
+        accessToken = rawPack.accessToken;
+        idToken = rawPack.idToken || idToken;
+        if (rawPack.region && (!region || region === 'auto')) region = rawPack.region;
+      }
+    } catch (_) {}
+  }
 
   if (!accessToken || typeof accessToken !== 'string') {
     return { ok: false, error: 'กรุณาระบุ Access Token หรือวาง URL' };
@@ -128,7 +172,11 @@ function validateTokenInput(body) {
 
   let raw = (accessToken || '').trim().replace(/^["'\s]+|["'\s]+$/g, '');
   if (raw.includes('%23') || raw.includes('%3D') || raw.includes('%26')) {
-    try { raw = decodeURIComponent(raw); } catch (e) {}
+    try {
+      raw = decodeURIComponent(raw);
+    } catch (decodeErr) {
+      // Keep raw fallback if URI decode throws on malformed percent sequences
+    }
   }
 
   const accessMatch = raw.match(/access_token=([a-zA-Z0-9_\-\.]+)/);
@@ -189,6 +237,7 @@ function validateMfaInput(body) {
 }
 
 module.exports = {
+  RateLimiter,
   authRateLimitMiddleware,
   apiRateLimitMiddleware,
   isValidSessionId,
