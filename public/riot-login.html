@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>กำลังเตรียมหน้าล็อกอิน Riot...</title>
+  <link rel="icon" href="favicon.ico">
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 0%, #1a2334 0%, #0b0f18 60%);
+      color: #f8fafc;
+      font-family: "Kanit", "Segoe UI", system-ui, sans-serif;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      padding: 32px 26px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      background: rgba(18, 24, 36, 0.88);
+      box-shadow: 0 20px 50px -18px rgba(0, 0, 0, 0.9);
+      text-align: center;
+    }
+    .spinner {
+      width: 42px;
+      height: 42px;
+      margin: 0 auto 18px;
+      border: 3px solid rgba(255, 70, 85, 0.2);
+      border-top-color: #ff4655;
+      border-radius: 50%;
+      animation: spin .85s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h1 { margin: 0 0 8px; font-size: 18px; font-weight: 700; letter-spacing: .2px; }
+    p { margin: 0; font-size: 13px; line-height: 1.6; color: #94a3b8; }
+    .step { margin-top: 14px; font-size: 12px; color: #64748b; }
+    .manual {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 70, 85, 0.5);
+      background: rgba(255, 70, 85, 0.12);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .manual:hover { background: rgba(255, 70, 85, 0.25); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="spinner"></div>
+    <h1>กำลังเตรียมหน้าล็อกอิน Riot</h1>
+    <p>ล้างเซสชันเก่าที่ค้างอยู่เพื่อไม่ให้หน้าล็อกอินวนโหลดไม่หยุด<br>ระบบจะพาไปหน้า Riot อย่างเป็นทางการใน 1-2 วินาที</p>
+    <p class="step" id="step">[1/2] กำลังล้างเซสชัน Riot เดิม...</p>
+    <a class="manual" id="manual" href="#" rel="noopener">ไปหน้าล็อกอิน Riot ทันที</a>
+  </div>
+
+  <script>
+    (function () {
+      var AUTHORIZE_PREFIX = 'https://auth.riotgames.com/authorize';
+      var LOGOUT_URL = 'https://auth.riotgames.com/logout';
+      var DEFAULT_TARGET = AUTHORIZE_PREFIX
+        + '?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in'
+        + '&client_id=play-valorant-web-prod'
+        + '&response_type=token%20id_token'
+        + '&scope=account%20openid'
+        + '&nonce=1&prompt=login';
+
+      var params = new URLSearchParams(location.search);
+      var requested = params.get('to') || '';
+
+      // Only ever forward to the official Riot authorize endpoint (no open redirect).
+      var target = requested.indexOf(AUTHORIZE_PREFIX) === 0 ? requested : DEFAULT_TARGET;
+
+      var manual = document.getElementById('manual');
+      var step = document.getElementById('step');
+      manual.href = target;
+
+      var navigated = false;
+      function go() {
+        if (navigated) return;
+        navigated = true;
+        step.textContent = '[2/2] กำลังเปิดหน้าล็อกอิน Riot...';
+        location.replace(target);
+      }
+
+      // Front-channel logout: the GET response expires csid/ssid/clid (SameSite=None),
+      // which is what stops authenticate.riotgames.com from entering the
+      // "method=login_state" resume screen that hangs forever.
+      try {
+        fetch(LOGOUT_URL, { mode: 'no-cors', credentials: 'include', cache: 'no-store' })
+          .then(function () { setTimeout(go, 200); })
+          .catch(function () {});
+      } catch (e) {}
+
+      var pixel = new Image();
+      pixel.onload = pixel.onerror = function () { setTimeout(go, 200); };
+      pixel.src = LOGOUT_URL + '?_=' + Date.now();
+
+      // Hard timeout so a blocked request can never strand the user here.
+      setTimeout(go, 2500);
+    })();
+  </script>
+</body>
+</html>

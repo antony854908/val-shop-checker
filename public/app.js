@@ -181,37 +181,48 @@ document.addEventListener('error', (e) => {
 
 /* ------------------------------------------------------------------
  * Riot Auth Loop Guard
- * auth.riotgames.com/authorize reuses any stale RSO session cookie and
- * bounces the browser to authenticate.riotgames.com/?method=login_state
- * which spins forever (the "login page never finishes loading" bug).
- * Fix: open auth.riotgames.com/logout first to drop the stale session,
- * then navigate that same tab to the real authorize URL.
+ * auth.riotgames.com/authorize resumes any stale RSO session and bounces
+ * the browser to authenticate.riotgames.com/?method=login_state, a page
+ * that spins forever (the "login never loads" bug).
+ * The Riot logout page sends Cross-Origin-Opener-Policy, so a popup we
+ * open there cannot be redirected by us afterwards (that left users
+ * stranded on the logout screen). Instead we open our OWN same-origin
+ * relay page, which clears the Riot session and then navigates itself.
  * ------------------------------------------------------------------ */
 const RIOT_AUTHORIZE_PREFIX = 'https://auth.riotgames.com/authorize';
-const RIOT_LOGOUT_URL = 'https://auth.riotgames.com/logout';
-// auth.riotgames.com/logout expires csid/ssid/clid; give slow mobile links time to land.
-const RIOT_LOGOUT_SETTLE_MS = 2200;
+const RIOT_RELAY_PAGE = 'riot-login.html';
+const RIOT_DEFAULT_AUTH_URL = RIOT_AUTHORIZE_PREFIX
+  + '?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in'
+  + '&client_id=play-valorant-web-prod'
+  + '&response_type=token%20id_token'
+  + '&scope=account%20openid'
+  + '&nonce=1&prompt=login';
+
+function buildRiotRelayUrl(authUrl) {
+  let target = (authUrl && authUrl.indexOf(RIOT_AUTHORIZE_PREFIX) === 0) ? authUrl : RIOT_DEFAULT_AUTH_URL;
+  // No prompt = Riot may silently resume an old session (the looping screen).
+  if (!/[?&]prompt=/.test(target)) {
+    target += '&prompt=login';
+  }
+  return `${RIOT_RELAY_PAGE}?to=${encodeURIComponent(target)}`;
+}
 
 function openRiotAuthWindow(authUrl) {
-  if (!authUrl || authUrl.indexOf(RIOT_AUTHORIZE_PREFIX) !== 0) return false;
-
+  const relayUrl = buildRiotRelayUrl(authUrl);
   let win = null;
   try {
-    win = window.open(RIOT_LOGOUT_URL, '_blank');
+    win = window.open(relayUrl, '_blank');
   } catch (_) {
     win = null;
   }
 
   if (!win) {
-    // Popup blocked: keep the original behaviour so login is still possible.
-    try { window.open(authUrl, '_blank', 'noopener'); } catch (_) {}
+    // Popup blocked: run the same flow in the current tab instead of dead-ending.
+    window.location.href = relayUrl;
     return false;
   }
 
-  setTimeout(() => {
-    try { win.location.href = authUrl; } catch (_) {}
-    try { win.focus(); } catch (_) {}
-  }, RIOT_LOGOUT_SETTLE_MS);
+  try { win.focus(); } catch (_) {}
   return true;
 }
 
@@ -225,7 +236,7 @@ document.addEventListener('click', (e) => {
 
 // Manual escape hatch for users already stuck on the looping Riot page.
 window.resetRiotAuthSession = function() {
-  try { window.open(RIOT_LOGOUT_URL, '_blank', 'noopener'); } catch (_) {}
+  openRiotAuthWindow(RIOT_DEFAULT_AUTH_URL);
 };
 
 // Global Delegated Click for Compare Tags
