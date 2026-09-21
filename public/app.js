@@ -179,6 +179,55 @@ document.addEventListener('error', (e) => {
   }
 }, true);
 
+/* ------------------------------------------------------------------
+ * Riot Auth Loop Guard
+ * auth.riotgames.com/authorize reuses any stale RSO session cookie and
+ * bounces the browser to authenticate.riotgames.com/?method=login_state
+ * which spins forever (the "login page never finishes loading" bug).
+ * Fix: open auth.riotgames.com/logout first to drop the stale session,
+ * then navigate that same tab to the real authorize URL.
+ * ------------------------------------------------------------------ */
+const RIOT_AUTHORIZE_PREFIX = 'https://auth.riotgames.com/authorize';
+const RIOT_LOGOUT_URL = 'https://auth.riotgames.com/logout';
+// auth.riotgames.com/logout expires csid/ssid/clid; give slow mobile links time to land.
+const RIOT_LOGOUT_SETTLE_MS = 2200;
+
+function openRiotAuthWindow(authUrl) {
+  if (!authUrl || authUrl.indexOf(RIOT_AUTHORIZE_PREFIX) !== 0) return false;
+
+  let win = null;
+  try {
+    win = window.open(RIOT_LOGOUT_URL, '_blank');
+  } catch (_) {
+    win = null;
+  }
+
+  if (!win) {
+    // Popup blocked: keep the original behaviour so login is still possible.
+    try { window.open(authUrl, '_blank', 'noopener'); } catch (_) {}
+    return false;
+  }
+
+  setTimeout(() => {
+    try { win.location.href = authUrl; } catch (_) {}
+    try { win.focus(); } catch (_) {}
+  }, RIOT_LOGOUT_SETTLE_MS);
+  return true;
+}
+
+// Intercept every Riot authorize link in the page (login card, modals, tutorial).
+document.addEventListener('click', (e) => {
+  const link = e.target.closest && e.target.closest(`a[href^="${RIOT_AUTHORIZE_PREFIX}"]`);
+  if (!link) return;
+  e.preventDefault();
+  openRiotAuthWindow(link.href);
+}, true);
+
+// Manual escape hatch for users already stuck on the looping Riot page.
+window.resetRiotAuthSession = function() {
+  try { window.open(RIOT_LOGOUT_URL, '_blank', 'noopener'); } catch (_) {}
+};
+
 // Global Delegated Click for Compare Tags
 document.addEventListener('click', (e) => {
   const quickTag = e.target.closest('.skin-thb-quick-tag');

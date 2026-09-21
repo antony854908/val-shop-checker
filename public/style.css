@@ -9063,3 +9063,36 @@ html {
 
 
 
+
+/* Riot login loop rescue button (clears stale RSO session) */
+.btn-riot-loop-fix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--val-gray, #94A3B8);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .18s ease, color .18s ease, background .18s ease;
+}
+
+.btn-riot-loop-fix:hover {
+  border-color: rgba(255, 70, 85, 0.55);
+  background: rgba(255, 70, 85, 0.08);
+  color: #fff;
+}
+
+.btn-riot-loop-fix svg {
+  flex: 0 0 auto;
+  color: var(--val-red, #ff4655);
+}

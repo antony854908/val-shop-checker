@@ -1,4 +1,4 @@
-const CACHE_NAME = 'valstore-v7.2';
+const CACHE_NAME = 'valstore-v7.3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
