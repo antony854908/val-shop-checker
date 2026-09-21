@@ -924,22 +924,9 @@ function renderSavedAccounts() {
 
   const accounts = getSavedAccounts();
   if (accounts.length === 0) {
-    container.classList.remove('hidden');
+    container.classList.add('hidden');
     if (countEl) countEl.textContent = '0 บัญชี';
-    listEl.innerHTML = `
-      <div class="empty-saved-accounts-box">
-        <div class="empty-saved-accounts-icon">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-            <line x1="12" y1="18" x2="12.01" y2="18"/>
-          </svg>
-        </div>
-        <div class="empty-saved-accounts-content">
-          <div class="empty-saved-title">ยังไม่มีบัญชีที่บันทึกในเครื่องนี้</div>
-          <div class="empty-saved-desc">แตะปุ่มเข้าสู่ระบบด้วย Google หรือ Riot ด้านล่าง ระบบจะบันทึกบัญชีลงในเครื่องนี้ให้อัตโนมัติ เพื่อให้ครั้งต่อไปสามารถแตะเลือกล็อกอินได้ทันทีใน 1 วินาที</div>
-        </div>
-      </div>
-    `;
+    listEl.innerHTML = '';
     return;
   }
 

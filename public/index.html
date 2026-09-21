@@ -40,35 +40,40 @@
     
     <!-- Header Navigation -->
     <header class="app-header">
-      <div class="brand-area">
-        <div class="brand-logo">
-          <svg viewBox="0 0 100 100" class="val-logo-svg">
-            <polygon points="10,12 50,88 40,88 0,12" fill="#FF4655" />
-            <polygon points="60,12 100,12 100,88 90,88 90,32 60,88 50,88" fill="#ECE8E1" />
-          </svg>
+      <div class="header-main-row">
+        <div class="brand-area">
+          <div class="brand-logo">
+            <svg viewBox="0 0 100 100" class="val-logo-svg">
+              <polygon points="10,12 50,88 40,88 0,12" fill="#FF4655" />
+              <polygon points="60,12 100,12 100,88 90,88 90,32 60,88 50,88" fill="#ECE8E1" />
+            </svg>
+          </div>
+          <div class="brand-titles">
+            <h1>VALORANT <span class="accent-text">STORE</span></h1>
+            <p class="brand-tagline">ร้านค้ารายวัน &amp; คลังสกินปืนพร้อมดูวิดีโอ Finisher HD</p>
+          </div>
         </div>
-        <div class="brand-titles">
-          <h1>VALORANT <span class="accent-text">STORE</span></h1>
-          <p class="brand-tagline">ร้านค้ารายวัน & คลังสกินปืนพร้อมดูวิดีโอ Finisher HD</p>
+
+        <div class="header-actions">
+          <button id="btnOpenVpCalc" class="btn btn-pill btn-calc" title="ระบบเปรียบเทียบราคาเงินจริงกับ VP ร้านไหนเติมถูกสุด">
+            <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" width="15" height="15">
+            <span class="btn-calc-text">เทียบราคาเติม VP</span>
+          </button>
+          <button id="btnToggleSoundEffects" class="btn btn-pill btn-sound-toggle" title="เปิด/ปิดเสียงเอฟเฟกต์ (SFX)">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" class="icon-sound-on"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" class="icon-sound-off hidden"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+            <span class="sound-toggle-label">เสียง SFX</span>
+          </button>
+          <button id="btnToggleDeviceMode" class="btn btn-pill btn-device-toggle" title="สลับโหมด มือถือ / คอมพิวเตอร์">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" class="icon-device-pc hidden"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" class="icon-device-mob"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            <span id="deviceModeLabel" class="device-toggle-label">โหมด: ออโต้</span>
+          </button>
+          <button id="btnInstallPwa" class="btn btn-pill btn-pwa hidden" title="ติดตั้งลงเครื่อง">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>ติดตั้งแอป</span>
+          </button>
         </div>
-        <button id="btnOpenVpCalc" class="btn btn-pill btn-calc" title="ระบบเปรียบเทียบราคาเงินจริงกับ VP ร้านไหนเติมถูกสุด">
-          <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" width="14" height="14">
-          <span>เทียบราคาเติม VP (OverTopup)</span>
-        </button>
-        <button id="btnToggleSoundEffects" class="btn btn-pill btn-sound-toggle" title="เปิด/ปิดเสียงเอฟเฟกต์ (SFX)">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" class="icon-sound-on"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" class="icon-sound-off hidden"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-          <span class="sound-toggle-label">เสียง SFX</span>
-        </button>
-        <button id="btnToggleDeviceMode" class="btn btn-pill btn-device-toggle" title="สลับโหมด มือถือ / คอมพิวเตอร์">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" class="icon-device-pc hidden"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" class="icon-device-mob"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-          <span id="deviceModeLabel" class="device-toggle-label">โหมด: ออโต้</span>
-        </button>
-        <button id="btnInstallPwa" class="btn btn-pill btn-pwa hidden">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>ติดตั้งแอป</span>
-        </button>
       </div>
 
       <!-- Mode Switcher Tabs -->
@@ -77,15 +82,15 @@
           <span class="tab-icon">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
           </span>
-          <span class="tab-label">ร้านค้าไอดี (Store)</span>
+          <span class="tab-label">ร้านค้า (Store)</span>
         </button>
-        <button id="btnTabInventory" class="mode-tab-btn tab-highlight-gold">
+        <button id="btnTabInventory" class="mode-tab-btn">
           <span class="tab-icon">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
           </span>
-          <span class="tab-label">สกินที่เรามี &amp; มูลค่าไอดี (Inventory)</span>
+          <span class="tab-label">คลังสกิน &amp; มูลค่าไอดี (Inventory)</span>
         </button>
-        <button id="btnTabCrosshairs" class="mode-tab-btn tab-highlight-cyan">
+        <button id="btnTabCrosshairs" class="mode-tab-btn">
           <span class="tab-icon">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="2"/></svg>
           </span>
@@ -184,8 +189,8 @@
           <!-- Alert / Status Banner -->
           <div id="googleAlert" class="alert-box hidden"></div>
 
-          <!-- Saved Accounts Chooser (Always visible for device multi-account selection) -->
-          <div id="savedAccountsSection" class="saved-accounts-container">
+          <!-- Saved Accounts Chooser (Visible when accounts exist in device) -->
+          <div id="savedAccountsSection" class="saved-accounts-container hidden">
             <div class="saved-accounts-header">
               <div class="saved-accounts-header-left">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
@@ -1841,6 +1846,6 @@
     </div>
   </div>
 
-     <script src="app.js?v=7.4"></script>
+           <script src="app.js?v=7.5"></script>
 </body>
 </html>
