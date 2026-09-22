@@ -1,0 +1,1120 @@
+/* ============================================================================
+   VALORANT TACTICAL DESIGN SYSTEM — v1.9.0
+   Layer สุดท้าย: โหลดหลัง style.css เพื่อคุมภาษาการออกแบบทั้งเว็บให้เป็นแนวเกม VALORANT
+   - Typography: Anton (Tungsten-like display) / Kanit (DIN-like + Thai) / Chakra Petch (tactical data)
+   - Palette: Rift Navy #0F1923 · Valorant Red #FF4655 · Off-White #ECE8E1 · Mint #0DE0C0
+   - Shape language: มุมตัดเฉียง (notch), เส้นคม, ไม่มีมุมโค้งมน, HUD-style accents
+   ========================================================================== */
+
+/* ==========================================================================
+   1. TOKENS & SHAPE LANGUAGE
+   ========================================================================== */
+:root {
+  --notch-sm: 8px;
+  --notch-md: 12px;
+
+  /* มุมตัดแบบ VALORANT */
+  --clip-card: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+  --clip-panel: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  --clip-btn: polygon(0 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%);
+  --clip-btn-sm: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
+  --clip-tag: polygon(0 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
+  --clip-chip: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+
+  --ease-tactical: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ==========================================================================
+   2. GLOBAL TYPOGRAPHY — ระบบตัวอักษรใหม่ทั้งเว็บ
+   ========================================================================== */
+body {
+  font-family: var(--font-body);
+  font-weight: 300;
+  letter-spacing: 0.1px;
+  line-height: 1.55;
+  font-size: 14.5px;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  line-height: 1.22;
+}
+
+/* หัวเรื่องหลักแบบ VALORANT: Anton + uppercase + tracking กว้าง (ไทย fallback Kanit อัตโนมัติ) */
+.brand-titles h1,
+.dash-title h2,
+.modal-title,
+.riot-signin-title,
+.agent-card-name,
+.hero-title {
+  font-family: var(--font-display) !important;
+  font-weight: 400 !important;
+  text-transform: uppercase;
+  letter-spacing: 1.5px !important;
+  line-height: 1.12 !important;
+}
+
+/* ตัวเลข / ข้อมูลยุทธวิธี → Chakra Petch tabular */
+.stat-val, .stat-value, .val-price, .price-digits, .timer-digits,
+.hero-price-digits, .match-score-digits, .counter-badge, .catalog-badge-counter,
+.calc-val-vp, .cur-val, .mini-stat-val, .lvl-num, .outcome-score,
+.vp-amount, .inv-tier-chip, .stat-number, .skin-price-val {
+  font-family: var(--font-tactical) !important;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.4px;
+}
+
+/* ป้ายกำกับเล็ก ๆ ทั้งหมด → uppercase tracking แบบ HUD */
+.stat-label, .tab-label, .badge-tag, .feat-tag, .timer-tag, .tier-pill,
+.modal-badge-tag, .match-mode-badge, .match-queue-tag, .ch-style-tag,
+.playstyle-tag, .ability-slot-tag, .modal-tier-tag, .pay-tag, .skin-tier-name,
+.agent-role-pill, .agent-match-badge {
+  font-family: var(--font-tactical) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  font-weight: 600;
+}
+
+a { text-decoration: none; }
+::selection { background: var(--val-red); color: #fff; }
+
+/* ==========================================================================
+   3. BACKDROP — tactical grid บาง ๆ + เส้นคาดหัวจอ
+   ========================================================================== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(236, 232, 225, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(236, 232, 225, 0.022) 1px, transparent 1px);
+  background-size: 76px 76px;
+  mask-image: radial-gradient(ellipse 120% 60% at 50% 0%, #000 0%, transparent 72%);
+  -webkit-mask-image: radial-gradient(ellipse 120% 60% at 50% 0%, #000 0%, transparent 72%);
+}
+
+/* เส้นคาดหัวจอแบบแถบสถานะในเกม */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  z-index: 40;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    var(--val-red) 0%, var(--val-red) 18%,
+    rgba(255, 70, 85, 0.25) 18%, rgba(255, 70, 85, 0.25) 46%,
+    rgba(13, 224, 192, 0.35) 46%, rgba(13, 224, 192, 0.35) 52%,
+    rgba(236, 232, 225, 0.12) 52%, rgba(236, 232, 225, 0.12) 100%);
+  opacity: 0.9;
+}
+
+/* ลายตารางเดิมเป็นจุดถี่จนดูเลอะ → ทำให้เป็นตารางยุทธวิธีที่ห่างและเนียนขึ้น */
+.val-bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(236, 232, 225, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(236, 232, 225, 0.02) 1px, transparent 1px);
+  background-size: 88px 88px;
+  mask-image: radial-gradient(ellipse 95% 80% at 50% 30%, #000 25%, transparent 92%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 80% at 50% 30%, #000 25%, transparent 92%);
+}
+/* จุดเล็ก ๆ กระจายเต็มจอทำให้ดูรก → ปิด แล้วใช้เส้นสแกนแนวนอนจาง ๆ แทน */
+.val-bg-crosshairs {
+  background-image: repeating-linear-gradient(0deg, rgba(236, 232, 225, 0.016) 0px, rgba(236, 232, 225, 0.016) 1px, transparent 1px, transparent 4px);
+  background-size: auto;
+  opacity: 0.55;
+}
+
+/* ลายน้ำแนวตั้งข้างจอ (ของเดิมจางจนดูเหมือนบั๊ก) */
+.val-bg-watermark .watermark-label {
+  font-family: var(--font-tactical);
+  font-size: 10px;
+  letter-spacing: 6px;
+  color: rgba(236, 232, 225, 0.05);
+  font-weight: 600;
+}
+.val-bg-watermark .top-left {
+  top: 46%;
+  left: 6px;
+  transform: rotate(-90deg);
+  transform-origin: left center;
+}
+.val-bg-watermark .bottom-right {
+  bottom: 46%;
+  right: 6px;
+  transform: rotate(90deg);
+  transform-origin: right center;
+}
+@media (max-width: 1500px) { .val-bg-watermark { display: none; } }
+
+/* ==========================================================================
+   4. APP SHELL — container / header / แถบแท็บ
+   ========================================================================== */
+.app-container {
+  max-width: 1340px;
+  padding: var(--sp-4) var(--sp-6) var(--sp-8);
+}
+
+.app-header {
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: linear-gradient(180deg, rgba(16, 27, 38, 0.96) 0%, rgba(12, 21, 30, 0.93) 100%);
+  border: 1px solid rgba(236, 232, 225, 0.09);
+  border-left: 3px solid var(--val-red);
+  border-radius: 0;
+  box-shadow: 0 18px 38px -18px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(236, 232, 225, 0.05);
+  margin-bottom: var(--sp-6);
+  position: relative;
+  overflow: hidden;
+}
+.app-header::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 260px; height: 100%;
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 70, 85, 0.05) 55%, rgba(255, 70, 85, 0.11) 100%);
+  pointer-events: none;
+}
+
+.header-main-row { gap: var(--sp-3); align-items: center; }
+.brand-area { min-width: 0; }
+.brand-titles { min-width: 0; }
+.brand-titles h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.brand-logo {
+  width: 40px; height: 40px;
+  background: linear-gradient(140deg, var(--val-red) 0%, var(--val-red-deep) 100%);
+  clip-path: var(--clip-chip);
+  box-shadow: 0 0 22px -4px rgba(255, 70, 85, 0.6);
+}
+.brand-logo svg { width: 22px; height: 22px; }
+
+.brand-titles h1 {
+  font-size: 26px;
+  color: var(--val-white);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.7);
+}
+.brand-tagline {
+  font-family: var(--font-tactical);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--val-gray);
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+/* ปุ่มมุมขวาบน — กันล้นจอ */
+.header-actions {
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 100%;
+  min-width: 0;
+}
+.header-actions .btn-pill {
+  border-radius: 0 !important;
+  clip-path: var(--clip-btn-sm);
+  font-family: var(--font-tactical);
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(236, 232, 225, 0.12);
+  background: rgba(236, 232, 225, 0.05);
+  color: var(--val-gray-2);
+}
+.header-actions .btn-pill:hover {
+  background: rgba(255, 70, 85, 0.16);
+  border-color: rgba(255, 70, 85, 0.5);
+  color: #fff;
+}
+
+/* --- แถบสลับโหมด (Tab bar) แบบ HUD --- */
+.mode-switcher-bar {
+  gap: 0;
+  background: linear-gradient(180deg, rgba(10, 19, 28, 0.85) 0%, rgba(13, 23, 33, 0.6) 100%);
+  padding: 0;
+  border-radius: 0;
+  border: 1px solid rgba(236, 232, 225, 0.08);
+  box-shadow: none;
+}
+.mode-tab-btn {
+  font-family: var(--font-tactical);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--val-gray);
+  padding: 12px 17px 10px;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  transition: color .18s var(--ease-tactical), background .18s var(--ease-tactical), border-color .18s var(--ease-tactical);
+}
+.mode-tab-btn:hover {
+  color: var(--val-white);
+  background: rgba(236, 232, 225, 0.05);
+  transform: none;
+  border-bottom-color: rgba(255, 70, 85, 0.4);
+}
+.mode-tab-btn.active {
+  color: #fff;
+  background: linear-gradient(180deg, rgba(255, 70, 85, 0.18) 0%, rgba(255, 70, 85, 0.03) 100%);
+  border-bottom-color: var(--val-red);
+}
+.mode-tab-btn.active .tab-icon { color: var(--val-red); }
+.mode-tab-btn:active { transform: none; }
+
+.btn-circle {
+  border-radius: 0;
+  clip-path: var(--clip-chip);
+  background: rgba(236, 232, 225, 0.07);
+  border: none;
+  width: 34px; height: 34px;
+  padding: 0 !important;   /* แก้ปุ่มรีเฟรชหัวมุมขวาเบี้ยวเพราะ padding ของ .btn */
+  flex-shrink: 0;
+}
+.btn-circle:hover { background: var(--val-red); }
+
+/* ---- ปุ่มที่ไม่เคยมีสไตล์ (เป็นกล่องขาว default ของเบราว์เซอร์) ---- */
+.btn-outline-secondary {
+  background: rgba(236, 232, 225, 0.05);
+  border: 1px solid rgba(236, 232, 225, 0.22);
+  color: var(--val-white);
+}
+.btn-outline-secondary:hover:not(:disabled) {
+  background: rgba(236, 232, 225, 0.14);
+  border-color: rgba(236, 232, 225, 0.42);
+  color: #fff;
+}
+.btn-outline-primary {
+  background: rgba(255, 70, 85, 0.1);
+  border: 1px solid rgba(255, 70, 85, 0.45);
+  color: var(--val-red);
+}
+.btn-outline-primary:hover:not(:disabled) { background: var(--val-red); color: #fff; }
+
+/* ปุ่มกรองโหมดใน AI Coach (เดิมไม่มี CSS เลย เลยโผล่เป็นปุ่มขาวของระบบ) */
+.ai-pill {
+  font-family: var(--font-tactical);
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 6px 12px;
+  background: rgba(236, 232, 225, 0.05);
+  border: 1px solid rgba(236, 232, 225, 0.12);
+  color: var(--val-gray-2);
+  border-radius: 0;
+  clip-path: var(--clip-btn-sm);
+  cursor: pointer;
+  transition: background .16s var(--ease-tactical), color .16s var(--ease-tactical), border-color .16s var(--ease-tactical);
+  white-space: nowrap;
+}
+.ai-pill:hover { background: rgba(236, 232, 225, 0.11); color: #fff; border-color: rgba(236, 232, 225, 0.25); }
+.ai-pill.active {
+  background: var(--val-red);
+  border-color: var(--val-red);
+  color: #fff;
+}
+
+/* ปุ่มปิดหน้าต่าง (บางตัวไม่มี CSS เลย เลยเป็นปุ่มขาว) */
+.modal-close-btn, .btn-close-modal {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(236, 232, 225, 0.07);
+  border: 1px solid rgba(236, 232, 225, 0.14);
+  color: var(--val-white);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 0;
+  clip-path: var(--clip-chip);
+  padding: 0;
+  transition: background .16s var(--ease-tactical), color .16s var(--ease-tactical);
+}
+.modal-close-btn:hover, .btn-close-modal:hover { background: var(--val-red); color: #fff; }
+
+/* ==========================================================================
+   5. BUTTONS
+   ========================================================================== */
+.btn {
+  font-family: var(--font-tactical);
+  font-weight: 600;
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 11px 19px;
+  border-radius: 0;
+  clip-path: var(--clip-btn);
+  transition: background .18s var(--ease-tactical), color .18s var(--ease-tactical),
+              box-shadow .22s var(--ease-tactical), transform .16s var(--ease-tactical);
+}
+.btn-sm {
+  padding: 7px 13px;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  clip-path: var(--clip-btn-sm);
+}
+.btn-primary {
+  background: var(--val-red);
+  border: 1px solid var(--val-red);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--val-red-hover);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  transform: translateY(-1px);
+}
+.btn-secondary {
+  background: rgba(236, 232, 225, 0.07);
+  border: 1px solid rgba(236, 232, 225, 0.16);
+  color: var(--val-white);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(236, 232, 225, 0.14);
+  border-color: rgba(236, 232, 225, 0.35);
+  transform: translateY(-1px);
+}
+.btn-outline-danger { border: 1px solid var(--val-red); color: var(--val-red); }
+.btn-outline-danger:hover:not(:disabled) { background: var(--val-red); color: #fff; }
+.btn-pill { border-radius: 0; clip-path: var(--clip-btn-sm); padding: 7px 14px; }
+
+.btn:focus-visible, .mode-tab-btn:focus-visible, .cat-pill:focus-visible, .mobile-nav-item:focus-visible {
+  outline: 2px solid var(--val-red);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   6. PILLS / CHIPS / FILTER BARS
+   ========================================================================== */
+.cat-pill, .ch-cat-pill, .inv-tier-chip, .provider-chip, .calc-preset-btn, .playstyle-pill {
+  border-radius: 0 !important;
+  clip-path: var(--clip-btn-sm);
+  font-family: var(--font-tactical);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.85px;
+  padding: 7px 13px;
+  background: rgba(236, 232, 225, 0.05);
+  border: 1px solid rgba(236, 232, 225, 0.1);
+  color: var(--val-gray-2);
+  transition: background .16s var(--ease-tactical), color .16s var(--ease-tactical), border-color .16s var(--ease-tactical);
+}
+.cat-pill:hover, .ch-cat-pill:hover, .calc-preset-btn:hover {
+  transform: none;
+  background: rgba(236, 232, 225, 0.1);
+  border-color: rgba(236, 232, 225, 0.22);
+  color: #fff;
+}
+.cat-pill.active, .ch-cat-pill.active, .calc-preset-btn.active, .inv-tier-chip.active {
+  background: var(--val-red) !important;
+  border-color: var(--val-red) !important;
+  color: #fff !important;
+}
+
+/* แถบเลื่อนแนวนอน: เพิ่มเงาจางที่ขอบเพื่อบอกว่ายังเลื่อนได้ (แก้อาการคำโดนตัดกลางคัน) */
+.category-pills-scroller, .crosshair-category-pills {
+  gap: var(--sp-2);
+  padding: 2px 2px 4px;
+  mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 26px), transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 26px), transparent 100%);
+}
+
+.catalog-filter-bar, .inv-filter-bar, .career-filter-bar {
+  gap: var(--sp-2);
+  margin: var(--sp-4) 0;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+.catalog-filter-bar .search-input-wrapper { flex: 1 1 260px; min-width: 200px; }
+.dropdown-filter-group { gap: var(--sp-2); flex-wrap: nowrap; flex-shrink: 0; }
+.dropdown-filter-group select { min-width: 148px; height: 42px; }
+@media (max-width: 760px) {
+  .catalog-filter-bar, .inv-filter-bar, .career-filter-bar { flex-wrap: wrap; }
+  .dropdown-filter-group { width: 100%; }
+}
+
+/* ==========================================================================
+   7. SECTION HEADERS
+   ========================================================================== */
+.dashboard-header-bar {
+  gap: var(--sp-4);
+  padding-bottom: var(--sp-4);
+  margin-bottom: var(--sp-5);
+  border-bottom: 1px solid rgba(236, 232, 225, 0.1);
+  position: relative;
+}
+.dashboard-header-bar::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -1px;
+  width: 74px; height: 2px;
+  background: var(--val-red);
+  box-shadow: 0 0 14px rgba(255, 70, 85, 0.7);
+}
+.dash-title h2 {
+  font-size: clamp(19px, 2.3vw, 27px);
+  color: var(--val-white);
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  word-break: keep-all;        /* กันหัวข้อถูกตัดกลางคำบนมือถือ */
+  overflow-wrap: normal;
+}
+.dash-title h2 svg, .section-title-svg { color: var(--val-red); flex-shrink: 0; }
+.dash-title p {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 300;
+  color: var(--val-gray);
+  margin-top: 5px;
+}
+
+/* ==========================================================================
+   8. CARDS — สกิน / เอเจนต์ / เป้าเล็ง / สถิติ
+   ========================================================================== */
+.skin-card, .inv-skin-card, .nm-card, .crosshair-card, .agent-catalog-card, .match-card {
+  border-radius: 0 !important;
+  clip-path: var(--clip-card);
+  border: 1px solid rgba(236, 232, 225, 0.09);
+  transition: transform .26s var(--ease-tactical), border-color .26s var(--ease-tactical), filter .26s var(--ease-tactical);
+}
+.skin-card, .inv-skin-card, .nm-card {
+  background: linear-gradient(178deg, rgba(23, 37, 50, 0.9) 0%, rgba(13, 22, 32, 0.96) 100%);
+}
+.crosshair-card, .agent-catalog-card {
+  background: linear-gradient(170deg, rgba(23, 37, 50, 0.92) 0%, rgba(13, 22, 32, 0.97) 100%);
+}
+/* เงาเรืองแสงต้องใช้ filter เพราะ box-shadow จะถูก clip-path ตัดทิ้ง */
+.skin-card:hover, .inv-skin-card:hover, .nm-card:hover, .crosshair-card:hover, .agent-catalog-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 70, 85, 0.5);
+  box-shadow: none;
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 14px rgba(255, 70, 85, 0.28));
+}
+.agent-catalog-card:hover { border-color: rgba(240, 199, 94, 0.5); filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 14px rgba(240, 199, 94, 0.25)); }
+.crosshair-card:hover { border-color: rgba(13, 224, 192, 0.5); filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 14px rgba(13, 224, 192, 0.22)); }
+
+/* แถบสี tier ด้านบนการ์ด (คงของเดิมไว้ แค่ทำให้คมขึ้น) */
+.skin-card::before { border-radius: 0 !important; height: 3px; opacity: 0.95; }
+.skin-card:hover::before { height: 3px; }
+
+.skins-card-grid, .crosshairs-card-grid, .all-agents-catalog-grid { gap: var(--sp-4); }
+
+/* หัวการ์ด: คุมความสูงให้เท่ากันทุกใบ (แก้บั๊กป้าย EDITION ตัดสองบรรทัดทำให้การ์ดเบี้ยว) */
+.skin-card-header {
+  min-height: 24px;
+  align-items: center;
+  gap: 6px;
+  padding-right: 34px;
+  flex-wrap: nowrap;
+}
+.skin-tier-info {
+  border-radius: 0 !important;
+  clip-path: var(--clip-tag);
+  padding: 3px 11px 3px 7px;
+  min-width: 62px;   /* กันกล่องยุบจนกลายเป็นป้ายเปล่า */
+  flex: 0 1 auto;
+  overflow: hidden;
+}
+.skin-tier-name {
+  font-size: 9px;
+  letter-spacing: 0.7px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.skin-features-badge { flex: 0 1 auto; gap: 4px; overflow: hidden; justify-content: flex-end; }
+.badge-feat {
+  border-radius: 0 !important;
+  clip-path: var(--clip-tag);
+  font-family: var(--font-tactical);
+  font-size: 8.5px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 2px 8px 2px 5px;
+  white-space: nowrap;
+  color: var(--val-cyan);
+}
+.skin-image-box { border-radius: 0; }
+.skin-card-footer { gap: var(--sp-2); }
+/* แถวล่างการ์ด: ปุ่มเคยล้นขอบการ์ดบนจอแคบ */
+.skin-meta-row { flex-wrap: wrap; row-gap: 8px; min-width: 0; }
+.skin-meta-row > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.skin-meta-row .btn-inspect { flex-shrink: 0; max-width: 100%; }
+.skin-name {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+.btn-wishlist-star {
+  border-radius: 0 !important;
+  clip-path: var(--clip-chip);
+  border: 1px solid rgba(236, 232, 225, 0.14);
+}
+
+/* การ์ดเอเจนต์ */
+.agent-catalog-card-header { min-height: 24px; gap: 6px; }
+.agent-role-pill, .agent-match-badge {
+  border-radius: 0 !important;
+  clip-path: var(--clip-tag);
+  font-size: 9.5px;
+  letter-spacing: 0.8px;
+  padding: 3px 10px 3px 6px;
+  white-space: nowrap;
+}
+.agent-card-name { font-size: 21px; margin-bottom: 2px; }
+.agent-price-pill, .agent-card-diff {
+  border-radius: 0 !important;
+  clip-path: var(--clip-tag);
+  font-family: var(--font-tactical);
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  padding-right: 11px;
+}
+
+/* การ์ดเป้าเล็ง */
+.ch-card-header { min-height: 40px; gap: var(--sp-2); }
+.ch-canvas-stage {
+  border-radius: 0 !important;
+  background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(13, 224, 192, 0.07) 0%, #0b141d 72%);
+  border: 1px solid rgba(236, 232, 225, 0.07);
+}
+/* ปุ่มคัดลอกโค้ด: เดิมเป็น cyan ล้วน ๆ → ปรับเข้าโทน VALORANT */
+.ch-copy-btn {
+  background: rgba(255, 70, 85, 0.12);
+  border: 1px solid rgba(255, 70, 85, 0.45);
+  color: var(--val-red);
+  font-family: var(--font-tactical);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 11px;
+  padding: 11px 9px;
+}
+.ch-copy-btn:hover { background: var(--val-red) !important; color: #fff !important; border-color: var(--val-red) !important; }
+.ch-desc-text { font-size: 12px; line-height: 1.5; color: var(--val-gray-2); }
+.ch-player-name { font-family: var(--font-heading); font-weight: 600; letter-spacing: 0.3px; }
+.ch-team-badge, .ch-style-tag {
+  border-radius: 0 !important;
+  clip-path: var(--clip-tag);
+  padding-right: 11px;
+  white-space: nowrap;
+}
+.ch-copy-btn { border-radius: 0 !important; clip-path: var(--clip-btn-sm); }
+.crosshairs-hero-banner, .cheapest-store-hero-banner, .inventory-valuation-banner {
+  border-radius: 0 !important;
+  clip-path: var(--clip-panel);
+  padding: var(--sp-5) var(--sp-6);
+  margin-bottom: var(--sp-5);
+}
+.crosshairs-hero-banner {
+  border: 1px solid rgba(236, 232, 225, 0.1);
+  border-left: 3px solid var(--val-red);
+  background: linear-gradient(115deg, #16242f 0%, #0d161f 62%, #111d27 100%);
+  align-items: center;      /* แก้ช่องว่างใหญ่ใต้ข้อความฝั่งซ้าย */
+  gap: var(--sp-5);
+}
+.crosshairs-hero-banner > *:first-child {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sp-2);
+}
+.crosshair-quick-tester {
+  border-radius: 0 !important;
+  border: 1px solid rgba(236, 232, 225, 0.09);
+  background: rgba(8, 15, 22, 0.6);
+}
+.tester-title, .tester-hero-desc h4 {
+  font-family: var(--font-tactical);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+/* การ์ดสถิติ/แมตช์ */
+.val-stat-card, .career-stat-box, .career-summary-card, .level-card,
+.custom-shop-tester-card, .dash-timer-card, .ability-card-item, .stat-content {
+  border-radius: 0 !important;
+}
+.val-stat-card, .career-stat-box, .career-summary-card, .dash-timer-card {
+  border-left: 2px solid rgba(255, 70, 85, 0.55);
+}
+.career-ai-analysis-card, .ai-feature-card, .recommended-agent-hero-card, .playstyle-desc-box {
+  border-radius: 0 !important;
+}
+.career-ai-analysis-card {
+  border: 1px solid rgba(236, 232, 225, 0.1);
+  border-left: 3px solid var(--val-red);
+  background: linear-gradient(120deg, rgba(23, 37, 50, 0.92) 0%, rgba(13, 22, 32, 0.95) 70%);
+}
+.career-ai-analysis-card::before {
+  background: linear-gradient(90deg, var(--val-red) 0%, rgba(255, 70, 85, 0.35) 45%, rgba(13, 224, 192, 0.55) 100%) !important;
+}
+.ai-header-row { gap: var(--sp-3); flex-wrap: wrap; align-items: center; }
+.ai-badge-title { font-family: var(--font-tactical); text-transform: uppercase; letter-spacing: 1.2px; }
+.stat-icon-wrap { border-radius: 0 !important; clip-path: var(--clip-chip); }
+.stat-label { font-size: 10px; color: var(--val-gray); }
+.match-card { padding-left: calc(var(--sp-4) - 2px); }
+
+/* ==========================================================================
+   9. BADGES & TAGS
+   ========================================================================== */
+.badge-tag, .feat-tag, .tier-pill, .modal-badge-tag, .match-mode-badge,
+.timer-tag, .nm-discount-badge, .counter-badge, .catalog-badge-counter,
+.account-active-badge, .inv-equipped-badge, .overtopup-combo-badge,
+.pkg-badge-item, .headshot-badge, .chroma-pill, .match-queue-tag,
+.modal-tier-tag, .playstyle-tag, .ability-slot-tag {
+  border-radius: 0 !important;
+  clip-path: var(--clip-tag);
+  font-family: var(--font-tactical);
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding-right: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.wallet-chip {
+  border-radius: 0 !important;
+  clip-path: var(--clip-chip);
+  font-family: var(--font-tactical);
+  letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   10. FORMS
+   ========================================================================== */
+.modern-input, .modern-select, .search-input-field, .custom-ch-input,
+input[type="text"], input[type="password"], input[type="email"], input[type="number"], textarea, select {
+  border-radius: 0 !important;
+  font-family: var(--font-body);
+  font-weight: 400;
+  background: rgba(10, 19, 28, 0.92);
+  border: 1px solid rgba(236, 232, 225, 0.12);
+  border-left: 2px solid rgba(236, 232, 225, 0.2);
+  transition: border-color .18s var(--ease-tactical), box-shadow .18s var(--ease-tactical), background .18s var(--ease-tactical);
+}
+.modern-input:focus, .modern-select:focus, .search-input-field:focus, .custom-ch-input:focus,
+input:focus, textarea:focus, select:focus {
+  border-color: rgba(255, 70, 85, 0.55);
+  border-left-color: var(--val-red);
+  box-shadow: 0 0 0 1px rgba(255, 70, 85, 0.2);
+  background: rgba(14, 24, 34, 0.98);
+  outline: none;
+}
+::placeholder { color: rgba(139, 151, 143, 0.75); font-weight: 300; }
+.search-input-field { padding: 11px 38px; font-size: 13px; }
+.search-icon-svg { color: var(--val-gray); }
+.btn-search-clear { border-radius: 0 !important; clip-path: var(--clip-chip); }
+
+/* ==========================================================================
+   11. MODALS
+   ========================================================================== */
+.modal-tactical-dialog, .modal-box, .modal-agent-dialog, .modal-bundle-dialog,
+.modal-calc-dialog, .modal-scoreboard-dialog, .modal-switcher-dialog, .modal-tutorial-dialog {
+  border-radius: 0 !important;
+  border: 1px solid rgba(236, 232, 225, 0.13);
+  border-top: 3px solid var(--val-red);
+  background: linear-gradient(175deg, rgba(20, 32, 44, 0.985) 0%, rgba(12, 21, 30, 0.99) 100%);
+  box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.95);
+}
+.modal-dialog-header, .modal-header {
+  border-bottom: 1px solid rgba(236, 232, 225, 0.1);
+  padding: var(--sp-4) var(--sp-5);
+}
+.modal-dialog-body, .modal-body { padding: var(--sp-5); }
+.modal-title { font-size: clamp(18px, 2.2vw, 24px); color: var(--val-white); }
+.modal-subtitle, .modal-sub-heading {
+  font-family: var(--font-tactical);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+  color: var(--val-gray);
+}
+.btn-dialog-close {
+  border-radius: 0 !important;
+  clip-path: var(--clip-chip);
+  top: 16px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  font-size: 19px;
+  background: rgba(236, 232, 225, 0.08);
+  border: 1px solid rgba(236, 232, 225, 0.14);
+}
+.btn-dialog-close:hover { background: var(--val-red) !important; color: #fff !important; border-color: var(--val-red) !important; }
+.modal-skin-heading {
+  font-family: var(--font-display) !important;
+  font-weight: 400 !important;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-size: 23px;
+}
+/* ปุ่มดึงข้อมูลจากไอดี/กระเป๋าตังค์: ปรับจาก mint เป็นโทนธีม */
+.btn-pull-wallet, .btn-gold-subtle, .btn-bundle-calc {
+  border-radius: 0 !important;
+  clip-path: var(--clip-btn-sm);
+  font-family: var(--font-tactical);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: rgba(255, 70, 85, 0.1);
+  border: 1px solid rgba(255, 70, 85, 0.4);
+  color: var(--val-red);
+}
+.btn-pull-wallet:hover, .btn-gold-subtle:hover, .btn-bundle-calc:hover {
+  background: var(--val-red);
+  color: #fff;
+  border-color: var(--val-red);
+}
+.modal-backdrop, .modal-backdrop-layer {
+  background: rgba(6, 12, 18, 0.84);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+}
+.modal-subnav-bar { gap: 2px; border-radius: 0; }
+.subnav-tab-btn {
+  border-radius: 0 !important;
+  font-family: var(--font-tactical);
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  font-size: 11px;
+  border-bottom: 2px solid transparent;
+}
+.subnav-tab-btn.active { border-bottom-color: var(--val-red); }
+
+/* ==========================================================================
+   12. LOGIN PAGE
+   ========================================================================== */
+.riot-client-window {
+  border-radius: 0 !important;
+  clip-path: var(--clip-panel);
+  max-width: 460px;
+  padding: var(--sp-7) var(--sp-6) var(--sp-6);
+  gap: var(--sp-4);
+  border: 1px solid rgba(236, 232, 225, 0.1);
+  border-top: 3px solid var(--val-red);
+  background: linear-gradient(178deg, #16242f 0%, #0d161f 100%);
+  box-shadow: 0 34px 80px -34px rgba(0, 0, 0, 0.95);
+}
+.riot-v-logo { filter: drop-shadow(0 0 18px rgba(255, 70, 85, 0.35)); }
+.riot-signin-title { font-size: 2rem; letter-spacing: 2px !important; }
+.riot-signin-subtitle {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 0.82rem;
+  color: var(--val-gray);
+  max-width: 34ch;
+  margin: 0 auto;
+}
+.btn-google-signin, .btn-riot-main-signin, .btn-paste-clipboard-action, .btn-riot-loop-fix {
+  border-radius: 0 !important;
+  clip-path: var(--clip-btn);
+  min-height: 56px;
+  font-family: var(--font-body);
+}
+.btn-signin-title {
+  font-family: var(--font-tactical) !important;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 0.88rem !important;
+  line-height: 1.25;
+}
+.btn-signin-desc { font-size: 0.7rem !important; font-weight: 300; }
+.btn-google-brand-badge, .btn-riot-brand-badge {
+  border-radius: 0 !important;
+  clip-path: var(--clip-chip);
+  flex-shrink: 0;
+}
+
+/* ลิงก์ท้ายกล่อง: บีบให้อยู่แถวเดียว ไม่มีจุดคั่นค้างท้ายบรรทัด */
+.riot-client-footer {
+  gap: 0;
+  padding-top: var(--sp-2);
+  border-top: 1px solid rgba(236, 232, 225, 0.07);
+  margin-top: var(--sp-1);
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+.riot-link-btn {
+  font-family: var(--font-tactical);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--val-gray);
+  padding: 6px 8px;
+  white-space: nowrap;
+  min-width: 0;
+  transition: color .16s var(--ease-tactical), background .16s var(--ease-tactical);
+}
+.riot-link-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.riot-link-btn:hover { color: var(--val-red); background: rgba(255, 70, 85, 0.08); }
+.riot-footer-divider {
+  color: rgba(236, 232, 225, 0.16);
+  font-size: 9px;
+  align-self: center;
+}
+.riot-guest-link {
+  font-family: var(--font-tactical);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--val-gray);
+  margin-top: 0;
+  padding: 10px 0 2px;
+}
+.riot-guest-link:hover { color: var(--val-cyan); }
+.saved-accounts-container, .alert-box, .google-waiting-banner, .empty-saved-accounts-box {
+  border-radius: 0 !important;
+}
+.login-view-container { padding-top: var(--sp-2); padding-bottom: var(--sp-2); }
+
+/* ==========================================================================
+   13. HUD / TIMERS / WALLET
+   ========================================================================== */
+.dash-timer-card, .hud-team, .hud-timer, .vp-subpanel, .user-lvl-pill, .user-shard-badge, .token-timer-badge {
+  border-radius: 0 !important;
+}
+.user-lvl-pill, .user-shard-badge, .token-timer-badge {
+  clip-path: var(--clip-tag);
+  font-family: var(--font-tactical);
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  padding-right: 12px;
+}
+.user-gamename { font-family: var(--font-heading); font-weight: 600; letter-spacing: 0.4px; }
+.timer-digits { font-variant-numeric: tabular-nums; letter-spacing: 1.2px; }
+
+/* ==========================================================================
+   14. SCROLLBAR
+   ========================================================================== */
+* { scrollbar-width: thin; scrollbar-color: rgba(255, 70, 85, 0.5) transparent; }
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: rgba(10, 19, 28, 0.6); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--val-red) 0%, var(--val-red-deep) 100%);
+  border: 2px solid rgba(10, 19, 28, 0.9);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--val-red-hover); }
+
+/* ==========================================================================
+   15. FOOTER
+   ========================================================================== */
+.app-footer {
+  margin-top: var(--sp-8);
+  padding: var(--sp-5) var(--sp-4) var(--sp-3);
+  border-top: 1px solid rgba(236, 232, 225, 0.08);
+  font-family: var(--font-tactical);
+  font-size: 10px;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: rgba(139, 151, 143, 0.7);
+  line-height: 1.9;
+  position: relative;
+}
+.app-footer::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 50%;
+  transform: translateX(-50%);
+  width: 86px; height: 2px;
+  background: var(--val-red);
+}
+.social-icon-btn { border-radius: 0 !important; clip-path: var(--clip-chip); }
+
+/* ==========================================================================
+   16. MOBILE
+   ========================================================================== */
+.mobile-bottom-nav {
+  height: calc(62px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, rgba(14, 24, 34, 0.97) 0%, rgba(9, 17, 25, 0.99) 100%);
+  border-top: 1px solid rgba(255, 70, 85, 0.3);
+  box-shadow: 0 -14px 36px rgba(0, 0, 0, 0.85);
+}
+.mobile-nav-item { border-radius: 0; color: var(--val-gray); padding: 8px 2px 6px; gap: 4px; }
+.mobile-nav-item span {
+  font-family: var(--font-tactical);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.mobile-nav-item.active { color: var(--val-red); }
+.mobile-nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 26px; height: 2px;
+  background: var(--val-red);
+  box-shadow: 0 0 12px rgba(255, 70, 85, 0.9);
+}
+.mob-menu-btn, .mob-more-sheet, .mob-sheet-grid > * { border-radius: 0 !important; }
+
+@media (max-width: 900px) {
+  /* กันเนื้อหา/ฟุตเตอร์ถูกแถบเมนูล่างทับ */
+  .app-container { padding: var(--sp-3) var(--sp-3) calc(80px + env(safe-area-inset-bottom, 0px)); }
+  .app-footer { margin-top: var(--sp-6); padding-bottom: var(--sp-2); font-size: 9px; letter-spacing: 0.7px; line-height: 1.75; }
+
+  .app-header { padding: 10px var(--sp-3); margin-bottom: var(--sp-4); border-left-width: 2px; }
+  .header-main-row { gap: var(--sp-2); }
+  .brand-titles h1 { font-size: 18px; letter-spacing: 1px !important; }
+  .brand-tagline { font-size: 8px; letter-spacing: 1.2px; }
+  .brand-logo { width: 32px; height: 32px; }
+
+  /* แถวหัวเว็บเคยล้น/ทับกันบนมือถือ → บีบชื่อแบรนด์และตรึงกลุ่มปุ่มไว้ */
+  .brand-titles { flex: 1 1 auto; }
+  .header-actions { gap: 5px; flex-wrap: nowrap; flex-shrink: 0; }
+  .header-actions .btn-pill { height: 30px; padding: 0 9px; font-size: 9.5px; letter-spacing: 0.4px; }
+  .header-actions .btn-sound-toggle .sound-toggle-label,
+  .header-actions .btn-device-toggle .device-toggle-label { display: none !important; }
+  .header-actions .btn-sound-toggle, .header-actions .btn-device-toggle { min-width: 30px; justify-content: center; padding: 0 8px; }
+  .header-actions .btn-pwa span { display: none; }
+  #btnOpenVpCalc .btn-calc-text { font-size: 9.5px !important; letter-spacing: 0.3px; }
+
+  /* แถวปุ่มใต้โปรไฟล์ผู้ใช้ (รีเฟรช/สลับบัญชี/ออกจากระบบ) เคยล้นขอบจอ */
+  .user-header { gap: var(--sp-2); padding-top: var(--sp-2); }
+  .header-action-btns { flex-wrap: wrap; gap: 6px; width: 100%; }
+  .header-action-btns .btn { flex: 1 1 auto; min-width: 0; justify-content: center; }
+  .header-action-btns .btn-circle { flex: 0 0 34px; }
+  .wallet-display { width: 100%; gap: 6px; }
+  .wallet-display .wallet-chip { flex: 1 1 0; justify-content: center; min-width: 0; }
+
+  .mode-tab-btn { padding: 10px 13px 9px; font-size: 10.5px; letter-spacing: 0.7px; }
+
+  .dashboard-header-bar { padding-bottom: var(--sp-3); margin-bottom: var(--sp-4); gap: var(--sp-2); }
+  .dash-title h2 { font-size: 18px; letter-spacing: 0.7px !important; }
+  .dash-title p { font-size: 11px; }
+
+  .skins-card-grid, .crosshairs-card-grid, .all-agents-catalog-grid { gap: 10px; }
+  .btn { padding: 10px 15px; font-size: 11.5px; }
+  .btn-sm { padding: 7px 11px; font-size: 10.5px; }
+
+  .search-input-wrapper { min-width: 0; width: 100%; }
+  .catalog-filter-bar, .inv-filter-bar { margin: var(--sp-3) 0; }
+  .dropdown-filter-group { width: 100%; }
+  .dropdown-filter-group select { min-width: 0; flex: 1; }
+
+  .modal-dialog-body, .modal-body { padding: var(--sp-4); }
+  .riot-client-window { padding: var(--sp-5) var(--sp-4); }
+  .crosshairs-hero-banner, .cheapest-store-hero-banner, .inventory-valuation-banner { padding: var(--sp-4); }
+}
+
+@media (max-width: 420px) {
+  .app-container { padding-left: 10px; padding-right: 10px; }
+  .skins-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .skin-card { padding: 11px 12px; }
+  .skin-card-header { padding-right: 30px; }
+  /* จอแคบมาก: แสดงเฉพาะไอคอน tier กันตัวหนังสือโดนตัดเหลือเศษเสี้ยว */
+  .skin-tier-info { min-width: 0; padding: 3px 8px 3px 5px; }
+  .skin-tier-name { display: none; }
+  .skin-features-badge .badge-feat { font-size: 8px; padding: 2px 7px 2px 4px; }
+  .skin-meta-row .btn-inspect { width: 100%; justify-content: center; }
+  .skin-meta-row > span { width: 100%; }
+  .brand-titles h1 { font-size: 16.5px; }
+  .dash-title h2 { font-size: 16px; }
+  .btn { font-size: 11px; letter-spacing: 0.6px; padding: 10px 12px; }
+  .riot-signin-title { font-size: 1.6rem; }
+  .btn-signin-title { font-size: 0.8rem !important; }
+}
+
+/* ==========================================================================
+   17. OVERFLOW / SPACING FIXES (ทุกหน้า)
+   ========================================================================== */
+.main-content-flow, .store-dashboard-view, .career-dashboard-view, .agents-dashboard-view,
+.catalog-dashboard-view, .inventory-dashboard-view, .crosshairs-dashboard-view {
+  min-width: 0;
+  max-width: 100%;
+}
+.main-content-flow { gap: var(--sp-6); }
+img, video, canvas, svg { max-width: 100%; }
+.skin-name, .ch-player-name, .match-map-name, .agent-card-name, .modal-skin-heading { overflow-wrap: anywhere; }
+
+.category-pills-scroller, .crosshair-category-pills, .mode-switcher-bar,
+.inv-filter-bar, .modal-subnav-bar, .media-switcher-tabs, .header-actions {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.category-pills-scroller::-webkit-scrollbar,
+.crosshair-category-pills::-webkit-scrollbar,
+.mode-switcher-bar::-webkit-scrollbar,
+.inv-filter-bar::-webkit-scrollbar,
+.modal-subnav-bar::-webkit-scrollbar,
+.media-switcher-tabs::-webkit-scrollbar,
+.header-actions::-webkit-scrollbar { display: none; }
+
+/* ==========================================================================
+   17b. TACTICAL DETAIL — องค์ประกอบเล็ก ๆ ที่ทำให้หน้าตา “เป็น VALORANT”
+   ========================================================================== */
+/* มุมวงเล็บแบบ HUD บนแผงใหญ่ */
+.crosshairs-hero-banner, .cheapest-store-hero-banner, .inventory-valuation-banner,
+.career-ai-analysis-card, .custom-shop-tester-card {
+  position: relative;
+}
+.crosshairs-hero-banner::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  width: 26px;
+  height: 26px;
+  border-right: 2px solid rgba(255, 70, 85, 0.5);
+  border-bottom: 2px solid rgba(255, 70, 85, 0.5);
+  pointer-events: none;
+}
+
+/* แถบสถานะสีเขียวมิ้นที่เหลืออยู่ ให้คงไว้เฉพาะข้อมูลเชิงบวก (กำไร/ส่วนลด) */
+.badge-feat { color: var(--val-cyan); border-color: rgba(13, 224, 192, 0.3); }
+.tab-highlight-cyan, .accent-cyan, .text-cyan { color: var(--val-cyan) !important; }
+
+/* ตารางข้อมูล (scoreboard / ตารางราคา VP) */
+.scoreboard-table th, .vp-rates-table th {
+  font-family: var(--font-tactical);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 10.5px;
+  color: var(--val-gray);
+  border-bottom: 1px solid rgba(236, 232, 225, 0.12);
+}
+.scoreboard-table td, .vp-rates-table td { font-family: var(--font-body); }
+.scoreboard-table-wrap, .vp-rates-table-wrap, .agents-perf-table-wrap { border-radius: 0 !important; }
+
+/* สถานะว่าง/กำลังโหลด */
+.spinner, .google-spinner { border-top-color: var(--val-red) !important; }
+.loading-mini-txt, .empty-saved-title, .empty-saved-desc {
+  font-family: var(--font-tactical);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* กล่องแจ้งเตือน / alert */
+.alert-box, .highlight-notice, .reauth-status-alert, .matrix-info-note, .mini-guide-callout {
+  border-radius: 0 !important;
+  border-left: 3px solid var(--val-red);
+  font-family: var(--font-body);
+}
+
+/* ==========================================================================
+   18. MOTION
+   ========================================================================== */
+.page-view-enter { animation: valTacticalIn .4s var(--ease-tactical) both; }
+@keyframes valTacticalIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

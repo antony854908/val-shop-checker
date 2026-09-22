@@ -3,50 +3,67 @@
    ========================================================== */
 
 :root {
-  --bg-dark: #090d14;
-  --bg-primary: #090d14;
-  --bg-surface: #0f141f;
-  --bg-card: rgba(18, 24, 36, 0.78);
-  --bg-card-hover: rgba(26, 35, 52, 0.9);
-  --bg-panel: rgba(14, 19, 30, 0.85);
-  --bg-header: rgba(12, 16, 26, 0.86);
-  --bg-input: rgba(15, 20, 31, 0.88);
-  --bg-glass: rgba(18, 24, 36, 0.65);
+  /* ---- VALORANT CORE SURFACES (official-ish rift navy) ---- */
+  --bg-dark: #0B1620;
+  --bg-primary: #0F1923;
+  --bg-surface: #111E29;
+  --bg-card: rgba(20, 33, 45, 0.82);
+  --bg-card-hover: rgba(28, 44, 58, 0.92);
+  --bg-panel: rgba(16, 27, 38, 0.88);
+  --bg-header: rgba(13, 23, 33, 0.9);
+  --bg-input: rgba(10, 19, 28, 0.9);
+  --bg-glass: rgba(20, 33, 45, 0.7);
 
   /* Tactical Valorant Accents */
   --val-red: #FF4655;
   --val-red-hover: #FF5E6C;
+  --val-red-deep: #BD3944;
   --val-red-glow: rgba(255, 70, 85, 0.35);
-  --val-cyan: #00F5D4;
-  --val-cyan-glow: rgba(0, 245, 212, 0.3);
-  --val-gold: #F5D36C;
-  --val-gold-glow: rgba(245, 211, 108, 0.3);
+  --val-cyan: #0DE0C0;
+  --val-cyan-glow: rgba(13, 224, 192, 0.28);
+  --val-gold: #F0C75E;
+  --val-gold-glow: rgba(240, 199, 94, 0.28);
   --val-purple: #B784E8;
-  --val-blue: #3A86FF;
-  --val-green: #38EF7D;
-  --val-white: #F8FAFC;
-  --val-gray: #94A3B8;
-  --val-dark-gray: #334155;
+  --val-blue: #4DC8F0;
+  --val-green: #3AE08C;
+  --val-white: #ECE8E1;
+  --val-gray: #8B978F;
+  --val-gray-2: #A7B2AB;
+  --val-dark-gray: #2E3D48;
 
   /* Borders & Shadows */
-  --val-border: rgba(255, 255, 255, 0.08);
-  --val-border-hover: rgba(255, 255, 255, 0.2);
-  --border-card: rgba(255, 255, 255, 0.08);
-  --border-card-hover: rgba(255, 255, 255, 0.2);
-  --shadow-card: 0 10px 28px -6px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.06);
-  --shadow-card-hover: 0 20px 42px -10px rgba(0, 0, 0, 0.8), 0 0 24px rgba(255, 70, 85, 0.25);
+  --val-border: rgba(236, 232, 225, 0.1);
+  --val-border-hover: rgba(236, 232, 225, 0.26);
+  --border-card: rgba(236, 232, 225, 0.1);
+  --border-card-hover: rgba(255, 70, 85, 0.45);
+  --shadow-card: 0 12px 30px -10px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(236, 232, 225, 0.05);
+  --shadow-card-hover: 0 22px 46px -12px rgba(0, 0, 0, 0.85), 0 0 26px rgba(255, 70, 85, 0.22);
   --shadow-glow: 0 0 25px rgba(255, 70, 85, 0.3);
 
-  /* Typography */
-  --font-heading: 'Rajdhani', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: 'Inter', 'Kanit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* Typography - Valorant stack (Anton ~ Tungsten, Kanit ~ DIN + Thai, Chakra Petch ~ tactical data) */
+  --font-display: 'Anton', 'Kanit', 'Arial Narrow', sans-serif;
+  --font-heading: 'Kanit', 'Chakra Petch', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Kanit', 'Chakra Petch', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-tactical: 'Chakra Petch', 'Kanit', sans-serif;
+  --font-mono: 'Chakra Petch', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  /* Spacing & Radii */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-card: 14px;
+  /* Spacing scale (8pt tactical grid) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 32px;
+  --sp-8: 40px;
+  --sp-9: 56px;
+
+  /* Spacing & Radii - Valorant is hard-edged, near-zero radius */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-card: 3px;
+  --notch: 12px;
 }
 
 *, *::before, *::after {
@@ -62,7 +79,7 @@ html {
 }
 
 body {
-  background-color: #080b11;
+  background-color: #0B1620;
   color: var(--val-white);
   font-family: var(--font-body);
   min-height: 100vh;
@@ -84,7 +101,7 @@ body {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  background-color: #080b11;
+  background-color: #0B1620;
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
@@ -156,7 +173,7 @@ body {
 
 .val-bg-watermark .watermark-label {
   position: absolute;
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 3px;
@@ -982,7 +999,7 @@ body {
   border: 1.5px solid rgba(0, 245, 212, 0.4);
   border-radius: 8px;
   color: var(--val-cyan, #00f5d4);
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 1.1rem;
   font-weight: 700;
   text-align: right;
@@ -2233,7 +2250,7 @@ body {
 }
 
 .mockup-url-text {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: #a0c0e0;
   white-space: nowrap;
@@ -2481,7 +2498,7 @@ body {
 }
 
 .diagram-url-bar .url-text {
-  font-family: monospace;
+  font-family: var(--font-mono);
   color: #a0c0e0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2507,7 +2524,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: #ff5f56;
 }
@@ -2537,7 +2554,7 @@ body {
 }
 
 .diagram-pc-bar .url-text {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: #fff;
   background: rgba(66, 133, 244, 0.4);
@@ -3302,7 +3319,7 @@ body {
 }
 
 .bundle-modal-timer-pill .timer-digits {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-weight: 700;
   color: var(--val-cyan);
 }
@@ -3452,7 +3469,7 @@ body {
 }
 
 .career-rank-title {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 18px;
   font-weight: 800;
   color: #fff;
@@ -3486,7 +3503,7 @@ body {
 .rr-pts {
   font-weight: 700;
   color: var(--val-gold);
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 12px;
 }
 
@@ -3518,7 +3535,7 @@ body {
 }
 
 .career-stat-box .stat-val {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 16px;
   font-weight: 800;
   color: #fff;
@@ -4556,7 +4573,7 @@ body {
 }
 
 .match-map-title {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 15px;
   font-weight: 800;
   color: #fff;
@@ -4576,7 +4593,7 @@ body {
 }
 
 .match-outcome-badge {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 13.5px;
   font-weight: 800;
   letter-spacing: 0.8px;
@@ -4587,7 +4604,7 @@ body {
 .outcome-draw-text { color: #a0aec0; }
 
 .match-score-digits {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 17px;
   font-weight: 800;
   color: #fff;
@@ -4601,7 +4618,7 @@ body {
 }
 
 .match-kda-row {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 14px;
   font-weight: 700;
   color: #fff;
@@ -4660,7 +4677,7 @@ body {
 }
 
 .roster-vs {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 9px;
   font-weight: 800;
   color: var(--val-gray);
@@ -4773,7 +4790,7 @@ body {
 }
 
 .match-map-name {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 20px;
   font-weight: 800;
   color: #fff;
@@ -4789,7 +4806,7 @@ body {
 }
 
 .outcome-title {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 22px;
   font-weight: 800;
   letter-spacing: 1px;
@@ -4797,7 +4814,7 @@ body {
 }
 
 .outcome-score {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 18px;
   font-weight: 800;
   color: #fff;
@@ -4889,7 +4906,7 @@ body {
 
 .team-header-row td {
   padding: 10px 12px;
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 14px;
   letter-spacing: 1px;
 }
@@ -5029,7 +5046,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.04);
   color: #fff;
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
@@ -5210,7 +5227,7 @@ body {
 }
 
 .replay-time-txt {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 12px;
   font-weight: 700;
   color: var(--val-cyan);
@@ -5243,7 +5260,7 @@ body {
 }
 
 .round-result-badge {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 16px;
   font-weight: 800;
   letter-spacing: 1px;
@@ -5345,7 +5362,7 @@ body {
 }
 
 .stat-feature-card .card-big-val {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 22px;
   font-weight: 800;
   color: #fff;
@@ -5753,7 +5770,7 @@ body {
 }
 
 .lvl-num {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-weight: 700;
   font-size: 0.82rem;
   color: var(--val-gold, #f59e0b);
@@ -6617,7 +6634,7 @@ body.ui-mode-mobile #btnOpenVpCalc .btn-calc-text {
 }
 
 .mob-sheet-title {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: 1px;
@@ -7111,7 +7128,7 @@ body.ui-mode-pc .modal-tactical-dialog,
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: "Rajdhani", sans-serif;
+  font-family: var(--font-tactical);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 2px;
@@ -7124,7 +7141,7 @@ body.ui-mode-pc .modal-tactical-dialog,
 }
 
 .card-hero-header h2 {
-  font-family: "Rajdhani", "Kanit", sans-serif;
+  font-family: var(--font-tactical);
   font-size: 26px;
   font-weight: 800;
   color: #ffffff;
@@ -7157,7 +7174,7 @@ body.ui-mode-pc .modal-tactical-dialog,
   border: 1px solid transparent;
   color: rgba(255, 255, 255, 0.6);
   padding: 10px 12px;
-  font-family: "Kanit", "Rajdhani", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 600;
   border-radius: 8px;
@@ -7188,7 +7205,7 @@ body.ui-mode-pc .modal-tactical-dialog,
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-family: "Rajdhani", sans-serif;
+  font-family: var(--font-tactical);
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -7246,7 +7263,7 @@ body.ui-mode-pc .modal-tactical-dialog,
 }
 
 .action-step-pill {
-  font-family: "Rajdhani", sans-serif;
+  font-family: var(--font-tactical);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 1px;
@@ -7361,7 +7378,7 @@ body.ui-mode-pc .modal-tactical-dialog,
   border-radius: 8px;
   padding: 0 14px 0 38px;
   color: #ffffff;
-  font-family: "Rajdhani", "Kanit", monospace;
+  font-family: var(--font-mono);
   font-size: 13.5px;
   outline: none;
   transition: all 0.2s;
@@ -7389,7 +7406,7 @@ body.ui-mode-pc .modal-tactical-dialog,
   border: none;
   border-radius: 8px;
   color: #ffffff;
-  font-family: "Kanit", "Rajdhani", sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -7445,7 +7462,7 @@ body.ui-mode-pc .modal-tactical-dialog,
   gap: 5px;
   font-size: 11.5px;
   color: rgba(255, 255, 255, 0.5);
-  font-family: "Rajdhani", sans-serif;
+  font-family: var(--font-tactical);
   letter-spacing: 0.5px;
 }
 
@@ -8116,7 +8133,7 @@ html {
   border: 1px solid rgba(0, 245, 212, 0.28);
   border-radius: 9999px;
   padding: 4px 10px;
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 0.85rem;
   font-weight: 700;
   color: #e2e8f0;
@@ -8221,7 +8238,7 @@ html {
   background: rgba(0, 245, 212, 0.15);
   border: 1px solid var(--val-cyan, #00f5d4);
   color: var(--val-cyan, #00f5d4);
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 1.1rem;
   font-weight: 700;
   display: flex;
@@ -8438,7 +8455,7 @@ html {
 
 .riot-signin-title {
   margin: 0;
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-tactical);
   font-size: 1.85rem;
   font-weight: 700;
   color: #f8fafc;
