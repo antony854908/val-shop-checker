@@ -596,7 +596,9 @@ app.get('/api/matches', async (req, res) => {
       auth.accessToken,
       auth.entitlementsToken,
       limit,
-      queue
+      queue,
+      auth.gameName,
+      auth.tagLine
     );
 
     res.json({
@@ -650,7 +652,7 @@ app.get('/api/match/:matchId', async (req, res) => {
       console.error('[Match Names Error]:', nameErr.message);
     }
 
-    const formatted = valorantApi.formatMatchData(auth.puuid, rawMatch, namesMap);
+    const formatted = valorantApi.formatMatchData(auth.puuid, rawMatch, namesMap, auth.gameName, auth.tagLine);
 
     res.json({
       ok: true,

@@ -94,7 +94,7 @@ class MatchHistoryService {
   }
 
   // Fetch Match History List with Formatted Details
-  async getMatchHistory(puuid, region, accessToken, entitlementsToken, apiService, limit = 10, queue = '') {
+  async getMatchHistory(puuid, region, accessToken, entitlementsToken, apiService, limit = 10, queue = '', myGameName = '', myTagLine = '') {
     try {
       const queueParam = queue ? `&queue=${encodeURIComponent(queue)}` : '';
       const result = await apiService.fetchWithShardFallback(
@@ -149,7 +149,7 @@ class MatchHistoryService {
 
       // Format all matches with real player names
       const formattedMatches = rawMatches
-        .map(raw => this.formatMatchData(puuid, raw, namesMap))
+        .map(raw => this.formatMatchData(puuid, raw, namesMap, myGameName, myTagLine))
         .filter(Boolean);
 
       return {
@@ -164,11 +164,15 @@ class MatchHistoryService {
   }
 
   // Helper: Format raw match into rich presentation data
-  formatMatchData(puuid, raw, namesMap = new Map()) {
+  formatMatchData(puuid, raw, namesMap = new Map(), myGameName = '', myTagLine = '') {
     const matchInfo = raw.matchInfo || {};
     const players = raw.players || [];
     const teams = raw.teams || [];
     const roundResults = raw.roundResults || [];
+
+    if (puuid && myGameName) {
+      namesMap.set(puuid.toLowerCase(), { gameName: myGameName, tagLine: myTagLine || 'VAL' });
+    }
 
     const mapMeta = skinCatalog.getMap(matchInfo.mapId);
     const queueName = this.formatQueueName(matchInfo.queueId);

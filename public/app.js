@@ -3098,6 +3098,10 @@ function switchAppMode(mode) {
     replaySection?.classList.remove('hidden');
     triggerSectionAnimation(replaySection);
     if (window.ValReplayEngine) {
+      const current = window.ValReplayEngine.getState()?.currentMatch;
+      if ((!current || !current.isRealMatch) && Array.isArray(allCareerMatches) && allCareerMatches.length > 0) {
+        window.ValReplayEngine.loadFromUserCareerMatch(allCareerMatches[0]);
+      }
       window.ValReplayEngine.switchSubView('2d-map');
     }
   }
@@ -3700,15 +3704,21 @@ function renderMatchesList(matches) {
     const optGroup = document.createElement('optgroup');
     optGroup.dataset.career = 'true';
     optGroup.label = '── แมตช์จริงของคุณ (Your Matches) ──';
-    matches.slice(0, 8).forEach(cm => {
+    matches.slice(0, 10).forEach(cm => {
       const opt = document.createElement('option');
       opt.dataset.career = 'true';
       opt.value = `career_${cm.matchId}`;
       const outcome = cm.outcome === 'VICTORY' ? 'ชนะ' : (cm.outcome === 'DEFEAT' ? 'แพ้' : 'เสมอ');
-      opt.textContent = `[แมตช์จริง] ${cm.map?.displayName || 'Map'} (${cm.myTeamScore}-${cm.enemyTeamScore} · ${outcome})`;
+      const agentName = cm.myAgent?.displayName || cm.myAgent?.name || '';
+      opt.textContent = `[แมตช์จริง] ${cm.map?.displayName || 'Map'} (${cm.myTeamScore}-${cm.enemyTeamScore} · ${agentName} · ${outcome})`;
       optGroup.appendChild(opt);
     });
     replaySelect.insertBefore(optGroup, replaySelect.firstChild);
+
+    // Auto-load latest real match into 2D Replay so it displays real user match immediately
+    if (window.ValReplayEngine) {
+      window.ValReplayEngine.loadFromUserCareerMatch(matches[0]);
+    }
   }
 
   // Run AI Playstyle & Best Agent Analysis

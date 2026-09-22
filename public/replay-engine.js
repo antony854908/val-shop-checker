@@ -103,23 +103,44 @@
 
   // Agent icons fallback (Official Valorant API)
   const AGENT_ICONS = {
-    Jett: 'https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/displayicon.png',
-    Reyna: 'https://media.valorant-api.com/agents/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc/displayicon.png',
-    Sova: 'https://media.valorant-api.com/agents/320b2a48-4d9b-a075-30f1-1f93a9b638fa/displayicon.png',
-    Omen: 'https://media.valorant-api.com/agents/8e253930-4c05-31dd-1b6c-968525494517/displayicon.png',
-    Killjoy: 'https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/displayicon.png',
-    Viper: 'https://media.valorant-api.com/agents/707eab51-4836-f488-046a-cda6bf494859/displayicon.png',
-    Skye: 'https://media.valorant-api.com/agents/6f2a04ca-43e0-be17-7f36-b3908627744d/displayicon.png',
-    Cypher: 'https://media.valorant-api.com/agents/117ed9e3-49f3-6512-3ccf-0cada7e3823b/displayicon.png',
+    Astra: 'https://media.valorant-api.com/agents/41fb69c1-4139-7b72-4040-80880ba8c8cc/displayicon.png',
+    Breach: 'https://media.valorant-api.com/agents/5f8d3a7f-467b-97f3-062c-dd409096c59d/displayicon.png',
+    Brimstone: 'https://media.valorant-api.com/agents/9f0d8ba9-4140-b941-57d3-a7ad57c6b417/displayicon.png',
     Chamber: 'https://media.valorant-api.com/agents/22697a3d-45bf-8dd7-4fec-84a9e28c69d7/displayicon.png',
-    Fade: 'https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/displayicon.png',
     Clove: 'https://media.valorant-api.com/agents/1dbf2edd-4729-0984-3115-daa5eed44993/displayicon.png',
+    Cypher: 'https://media.valorant-api.com/agents/117ed9e3-49f3-6512-3ccf-0cada7e3823b/displayicon.png',
+    Deadlock: 'https://media.valorant-api.com/agents/cc8e01d3-47f9-7ea0-53fa-f99296316a04/displayicon.png',
+    Fade: 'https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/displayicon.png',
+    Gekko: 'https://media.valorant-api.com/agents/e370fa57-4757-3604-3648-499e1f642d3f/displayicon.png',
+    Harbor: 'https://media.valorant-api.com/agents/2fcddacf-447a-aa36-6ca2-b99d2c25902e/displayicon.png',
     Iso: 'https://media.valorant-api.com/agents/0e38b510-41a8-5780-5e8f-568b2a4f2d6c/displayicon.png',
+    Jett: 'https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/displayicon.png',
+    'KAY/O': 'https://media.valorant-api.com/agents/601dbbe7-43ce-be57-2a40-4abd24953621/displayicon.png',
+    KAYO: 'https://media.valorant-api.com/agents/601dbbe7-43ce-be57-2a40-4abd24953621/displayicon.png',
+    Kayo: 'https://media.valorant-api.com/agents/601dbbe7-43ce-be57-2a40-4abd24953621/displayicon.png',
+    Killjoy: 'https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/displayicon.png',
+    Neon: 'https://media.valorant-api.com/agents/bb2a4828-46eb-8cd1-e765-15848195d751/displayicon.png',
+    Omen: 'https://media.valorant-api.com/agents/8e253930-4c05-31dd-1b6c-968525494517/displayicon.png',
     Phoenix: 'https://media.valorant-api.com/agents/eb93336a-449b-9c1b-0a54-a891f7921d69/displayicon.png',
     Raze: 'https://media.valorant-api.com/agents/f94c3b30-42be-e959-889c-5aa313dba261/displayicon.png',
-    Brimstone: 'https://media.valorant-api.com/agents/9f0d8ba9-4140-b941-57d3-a7ad57c6b417/displayicon.png',
-    Sage: 'https://media.valorant-api.com/agents/569fdd95-4d10-43ab-ca70-79becc718b46/displayicon.png'
+    Reyna: 'https://media.valorant-api.com/agents/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc/displayicon.png',
+    Sage: 'https://media.valorant-api.com/agents/569fdd95-4d10-43ab-ca70-79becc718b46/displayicon.png',
+    Skye: 'https://media.valorant-api.com/agents/6f2a04ca-43e0-be17-7f36-b3908627744d/displayicon.png',
+    Sova: 'https://media.valorant-api.com/agents/320b2a48-4d9b-a075-30f1-1f93a9b638fa/displayicon.png',
+    Tejo: 'https://media.valorant-api.com/agents/b0042456-4b68-e67c-d610-8b9f1d87179e/displayicon.png',
+    Viper: 'https://media.valorant-api.com/agents/707eab51-4836-f488-046a-cda6bf494859/displayicon.png',
+    Vyse: 'https://media.valorant-api.com/agents/efba5359-4016-a1e5-7626-b1ae76895940/displayicon.png',
+    Yoru: 'https://media.valorant-api.com/agents/7f94d92c-4234-0b36-9646-3a87eb8b5c89/displayicon.png'
   };
+
+  function getAgentIconUrl(agentName) {
+    if (!agentName) return AGENT_ICONS.Jett;
+    const clean = String(agentName).trim();
+    if (AGENT_ICONS[clean]) return AGENT_ICONS[clean];
+    const lower = clean.toLowerCase();
+    const found = Object.keys(AGENT_ICONS).find(k => k.toLowerCase() === lower);
+    return found ? AGENT_ICONS[found] : AGENT_ICONS.Jett;
+  }
 
   // Preloaded Agent Images Cache for High-DPI Canvas Rendering
   const AGENT_IMG_CACHE = {};
@@ -130,6 +151,22 @@
       img.src = url;
       AGENT_IMG_CACHE[agent] = img;
     });
+  }
+
+  function getAgentCanvasImage(agentName, customUrl) {
+    const key = agentName || 'Jett';
+    if (AGENT_IMG_CACHE[key] && AGENT_IMG_CACHE[key].complete && AGENT_IMG_CACHE[key].naturalWidth > 0) {
+      return AGENT_IMG_CACHE[key];
+    }
+    const url = customUrl || getAgentIconUrl(key);
+    if (typeof Image !== 'undefined') {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = url;
+      AGENT_IMG_CACHE[key] = img;
+      return img;
+    }
+    return null;
   }
 
   // ==========================================
@@ -1076,7 +1113,12 @@
     }
     const match = DEMO_MATCHES[matchKey] || DEMO_MATCHES.demo_ascent;
     ReplayState.currentMatch = match;
-    ReplayState.currentRoundIndex = Math.max(0, match.rounds.length - 1);
+
+    // Focus on the User's player if present, otherwise first player
+    const userP = [...match.atkPlayers, ...match.defPlayers].find(p => p.isUser);
+    ReplayState.focusedPlayerId = userP ? userP.id : (match.atkPlayers[0]?.id || 'p1');
+
+    ReplayState.currentRoundIndex = 0;
     ReplayState.currentTime = 0;
     ReplayState.isPlaying = false;
     ReplayState.lastKillfeedRenderedCount = 0;
@@ -1184,7 +1226,8 @@
     const timerClock = document.getElementById('hudTimerClock');
     const ctrlCurrent = document.getElementById('ctrlTimeCurrent');
 
-    if (roundPill) roundPill.textContent = `รอบที่ ${round.roundNum}`;
+    const rNum = round.roundNum || round.roundNumber || (ReplayState.currentRoundIndex + 1);
+    if (roundPill) roundPill.textContent = `รอบที่ ${rNum}`;
     if (ctrlCurrent) ctrlCurrent.textContent = formatTime(ReplayState.currentTime);
 
     // Phase determination
@@ -1237,12 +1280,12 @@
       row.className = `roster-player-row ${p.id === ReplayState.focusedPlayerId ? 'active' : ''}`;
       row.dataset.playerId = p.id;
 
-      const icon = AGENT_ICONS[p.agent] || AGENT_ICONS.Jett;
+      const icon = p.agentIcon || getAgentIconUrl(p.agent);
       row.innerHTML = `
         <div class="roster-player-left">
           <img src="${icon}" alt="${p.agent}" class="roster-agent-thumb">
           <div>
-            <div class="roster-p-name">${p.name}</div>
+            <div class="roster-p-name">${p.name} ${p.isUser ? '<span class="you-pill">คุณ</span>' : ''}</div>
             <div class="roster-p-role">${p.agent} · ${p.role}</div>
           </div>
         </div>
@@ -1286,10 +1329,10 @@
     const hs = document.getElementById('dossierHs');
     const grade = document.getElementById('dossierGrade');
 
-    if (img) img.src = AGENT_ICONS[player.agent] || AGENT_ICONS.Jett;
+    if (img) img.src = player.agentIcon || getAgentIconUrl(player.agent);
     const isAtk = ReplayState.currentMatch.atkPlayers.some((p) => p.id === player.id);
     if (tag) {
-      tag.textContent = isAtk ? 'ATK' : 'DEF';
+      tag.textContent = isAtk ? 'ทีมคุณ (ATK)' : 'ทีมตรงข้าม (DEF)';
       tag.className = `dossier-team-badge ${isAtk ? 'team-atk' : 'team-def'}`;
     }
     if (name) name.textContent = player.name;
@@ -1609,7 +1652,7 @@
       ctx.arc(px, py, 13.5, 0, Math.PI * 2);
       ctx.clip();
 
-      const agentImg = AGENT_IMG_CACHE[p.agent];
+      const agentImg = AGENT_IMG_CACHE[p.agent] || getAgentCanvasImage(p.agent, p.agentIcon);
       if (agentImg && agentImg.complete && agentImg.naturalWidth > 0) {
         ctx.drawImage(agentImg, px - 13.5, py - 13.5, 27, 27);
       } else {
@@ -1754,16 +1797,16 @@
     ];
 
     const match = ReplayState.currentMatch;
-    const pData = match ? match.powerGraph : null;
+    const pData = (match && match.metrics && match.metrics.radar) ? match.metrics.radar : (match ? match.powerGraph : null);
 
     const myScores = pData ? [
-      pData.reflexes.score / 100,
-      pData.aim.score / 100,
-      pData.precision.score / 100,
-      pData.movement.score / 100,
-      pData.teamplay.score / 100,
-      pData.impact.score / 100
-    ] : [0.92, 0.96, 0.88, 0.78, 0.94, 0.97];
+      (typeof pData.reflexes === 'object' ? pData.reflexes.score : pData.reflexes) / 100,
+      (typeof pData.aim === 'object' ? pData.aim.score : pData.aim) / 100,
+      (typeof pData.precision === 'object' ? pData.precision.score : pData.precision) / 100,
+      (typeof pData.movement === 'object' ? pData.movement.score : pData.movement) / 100,
+      (typeof pData.teamplay === 'object' ? pData.teamplay.score : pData.teamplay) / 100,
+      (typeof pData.impact === 'object' ? pData.impact.score : pData.impact) / 100
+    ] : [0.75, 0.75, 0.75, 0.75, 0.75, 0.75];
 
     const radiantScores = [0.95, 0.95, 0.92, 0.90, 0.92, 0.93];
     const immortalScores = [0.82, 0.84, 0.79, 0.76, 0.80, 0.82];
@@ -1868,16 +1911,26 @@
     gridAtk.innerHTML = '';
     gridDef.innerHTML = '';
 
+    const titleAtk = document.querySelector('.roster-side-title.team-atk');
+    const titleDef = document.querySelector('.roster-side-title.team-def');
+    const h2hAtk = document.getElementById('h2hScoreAtk');
+    const h2hDef = document.getElementById('h2hScoreDef');
+
+    if (h2hAtk) h2hAtk.textContent = `${ReplayState.currentMatch.scoreAtk} WINS`;
+    if (h2hDef) h2hDef.textContent = `${ReplayState.currentMatch.scoreDef} WINS`;
+    if (titleAtk) titleAtk.textContent = `ผู้เล่นทีมของคุณ (${ReplayState.currentMatch.scoreAtk} WINS)`;
+    if (titleDef) titleDef.textContent = `ผู้เล่นทีมตรงข้าม (${ReplayState.currentMatch.scoreDef} WINS)`;
+
     const createPlayerRow = (p) => {
       const card = document.createElement('div');
       card.className = 'player-stat-card-row';
 
-      const icon = AGENT_ICONS[p.agent] || AGENT_ICONS.Jett;
+      const icon = p.agentIcon || getAgentIconUrl(p.agent);
       card.innerHTML = `
         <div class="pcard-left">
           <img src="${icon}" class="pcard-avatar" alt="${p.agent}">
           <div class="pcard-name-col">
-            <span class="pcard-name">${p.name}</span>
+            <span class="pcard-name">${p.name} ${p.isUser ? '<span class="you-pill">คุณ</span>' : ''}</span>
             <span class="pcard-meta">${p.agent} · ${p.rank}</span>
           </div>
         </div>
@@ -2318,38 +2371,45 @@
       return { x: parseFloat(px.toFixed(1)), y: parseFloat(py.toFixed(1)) };
     }
 
-    // 2. Format 10 Players (ATK / DEF)
-    let sourcePlayers = [];
-    if (Array.isArray(rawMatch.players) && rawMatch.players.length > 0) {
-      sourcePlayers = rawMatch.players;
-    } else {
-      sourcePlayers = [...(rawMatch.friendlyTeam || []), ...(rawMatch.enemyTeam || [])];
+    // 2. Separate into Friendly Team (ATK) and Enemy Team (DEF)
+    let friendlyList = Array.isArray(rawMatch.friendlyTeam) ? rawMatch.friendlyTeam : [];
+    let enemyList = Array.isArray(rawMatch.enemyTeam) ? rawMatch.enemyTeam : [];
+
+    if (friendlyList.length === 0 && Array.isArray(rawMatch.players)) {
+      const myTeam = rawMatch.myTeamId || 'Blue';
+      friendlyList = rawMatch.players.filter(p => p.teamId === myTeam);
+      enemyList = rawMatch.players.filter(p => p.teamId !== myTeam);
+      if (friendlyList.length === 0) {
+        friendlyList = rawMatch.players.slice(0, 5);
+        enemyList = rawMatch.players.slice(5);
+      }
     }
 
-    const atkPlayers = [];
-    const defPlayers = [];
-
-    const formatPlayer = (p, idx, isAtk) => {
-      const pid = p.puuid || p.subject || ('p' + (idx + 1));
-      const gName = p.gameName ? `${p.gameName}#${p.tagLine || ''}`.replace(/#$/, '') : (p.name || 'Agent');
-      const agName = p.agent?.displayName || p.agent?.name || p.agent || 'Jett';
-      const rName = p.rank?.tierName || p.rank?.name || p.rank || 'Platinum';
+    const formatPlayer = (p, idx, isFriendly) => {
+      const pid = String(p.puuid || p.subject || (isFriendly ? 'friendly_' + (idx + 1) : 'enemy_' + (idx + 1)));
+      const agName = p.agent?.displayName || p.agent?.name || (typeof p.agent === 'string' ? p.agent : 'Agent');
+      const agIcon = p.agent?.displayIcon || p.agentIcon || getAgentIconUrl(agName);
+      const isUser = !!(p.isMe || (rawMatch.userPuuid && pid.toLowerCase() === rawMatch.userPuuid.toLowerCase()));
+      const gName = (p.gameName && p.gameName !== 'Agent') ? `${p.gameName}#${p.tagLine || ''}`.replace(/#$/, '') : (isUser ? 'คุณ' : (p.name || agName));
+      const rName = p.rank?.tierName || p.rank?.name || p.rank || 'UNRANKED';
       const st = p.stats || p.myStats || {};
-      const acs = Math.round(st.acs || (210 + (Math.random() * 40 - 20)));
-      const adr = Math.round(st.adr || (135 + (Math.random() * 30 - 15)));
-      const hs = Math.round(st.hsPercent || 25);
+      const acs = Math.round(st.acs || 0);
+      const adr = Math.round(st.adr || 0);
+      const hs = Math.round(st.hsPercent || 0);
       const k = st.kills || 0;
       const d = st.deaths || 0;
       const a = st.assists || 0;
-      const grade = acs >= 280 ? 'S+' : acs >= 230 ? 'S' : acs >= 180 ? 'A+' : acs >= 140 ? 'A' : 'B+';
+      const grade = acs >= 280 ? 'S+' : acs >= 230 ? 'S' : acs >= 180 ? 'A+' : acs >= 140 ? 'A' : (acs >= 90 ? 'B+' : 'B-');
 
       return {
         id: pid,
         name: gName,
         agent: agName,
-        role: p.agent?.role || 'Duelist',
+        agentIcon: agIcon,
+        role: p.agent?.role || 'Agent',
         rank: rName,
-        isUser: !!(p.isMe || (rawMatch.userPuuid && pid === rawMatch.userPuuid)),
+        isUser,
+        isFriendly,
         acs,
         adr,
         hs,
@@ -2360,43 +2420,37 @@
       };
     };
 
-    sourcePlayers.forEach((p, idx) => {
-      const team = (p.teamId || '').toLowerCase();
-      const isRed = team === 'red' || idx < 5;
-      if (isRed) {
-        atkPlayers.push(formatPlayer(p, idx, true));
-      } else {
-        defPlayers.push(formatPlayer(p, idx, false));
-      }
-    });
-
-    while (atkPlayers.length < 5) {
-      atkPlayers.push({ id: 'atk_' + atkPlayers.length, name: 'Agent ' + (atkPlayers.length + 1), agent: 'Jett', role: 'Duelist', rank: 'Platinum', isUser: false, acs: 200, adr: 130, hs: 25, kills: 12, deaths: 10, assists: 4, grade: 'A' });
-    }
-    while (defPlayers.length < 5) {
-      defPlayers.push({ id: 'def_' + defPlayers.length, name: 'Agent ' + (defPlayers.length + 1), agent: 'Omen', role: 'Controller', rank: 'Platinum', isUser: false, acs: 190, adr: 125, hs: 22, kills: 10, deaths: 12, assists: 6, grade: 'B+' });
-    }
+    const atkPlayers = friendlyList.map((p, idx) => formatPlayer(p, idx, true));
+    const defPlayers = enemyList.map((p, idx) => formatPlayer(p, idx, false));
 
     const allPlayersList = [...atkPlayers, ...defPlayers];
     const playerLookup = new Map();
-    allPlayersList.forEach(p => playerLookup.set(p.id, p));
+    allPlayersList.forEach(p => {
+      playerLookup.set(p.id, p);
+      if (typeof p.id === 'string') {
+        playerLookup.set(p.id.toLowerCase(), p);
+      }
+    });
 
-    // 3. Format Rounds and Trajectories
+    const finalScoreAtk = typeof rawMatch.myTeamScore === 'number' ? rawMatch.myTeamScore : (rawMatch.scoreAtk || 0);
+    const finalScoreDef = typeof rawMatch.enemyTeamScore === 'number' ? rawMatch.enemyTeamScore : (rawMatch.scoreDef || 0);
+
+    // 3. Format Real Rounds & Trajectories
     const rawRounds = Array.isArray(rawMatch.rounds) ? rawMatch.rounds : [];
     const rounds = [];
-    let redScore = 0;
-    let blueScore = 0;
+    let runningAtkScore = 0;
+    let runningDefScore = 0;
 
-    const roundCount = Math.max(rawRounds.length, (rawMatch.myTeamScore ? (rawMatch.myTeamScore + rawMatch.enemyTeamScore) : 1));
+    const roundCount = Math.max(rawRounds.length, (finalScoreAtk + finalScoreDef) || 1);
 
     for (let rIdx = 0; rIdx < roundCount; rIdx++) {
       const r = rawRounds[rIdx] || {};
       const roundNum = r.roundNum || (rIdx + 1);
-      const isRedWon = (r.winningTeam === 'Red' || r.winningTeam === 'Attackers' || (r.winningTeam && r.winningTeam.toLowerCase().includes('red')) || (rIdx % 2 === 0));
-      if (isRedWon) redScore++; else blueScore++;
+      const isAtkWin = typeof r.isMyTeamWon === 'boolean' ? r.isMyTeamWon : (r.winningTeam === rawMatch.myTeamId || (rIdx < finalScoreAtk));
+      if (isAtkWin) runningAtkScore++; else runningDefScore++;
 
-      const winType = r.winType || (r.winningTeam ? 'Elimination' : 'Elimination');
-      const roundDuration = Math.max(45, Math.min(105, r.plantRoundTime ? Math.round(r.plantRoundTime / 1000 + 45) : 75));
+      const winType = r.winType || 'Elimination';
+      const roundDuration = Math.max(35, Math.min(105, r.plantRoundTime ? Math.round(r.plantRoundTime / 1000 + 45) : 75));
       const spikePlantTime = r.plantRoundTime ? Math.round(r.plantRoundTime / 1000) : (winType.toLowerCase().includes('bomb') ? 42 : null);
       const spikeDefused = winType.toLowerCase().includes('defuse');
       const spikeSite = r.plantSite || 'A';
@@ -2409,55 +2463,78 @@
       const eventsList = [];
       const rawKills = Array.isArray(r.kills) ? r.kills : [];
 
-      rawKills.forEach(k => {
+      rawKills.forEach((k, kIdx) => {
         const kSec = Math.max(2, Math.min(roundDuration - 1, Math.round((k.timeSinceRoundStartMillis || 0) / 1000)));
-        const killer = playerLookup.get(k.killerPuuid) || { name: k.killerName || 'Killer', agent: 'Agent' };
-        const victim = playerLookup.get(k.victimPuuid) || { name: k.victimName || 'Victim', agent: 'Agent' };
+        const kIdLower = (k.killerPuuid || '').toLowerCase();
+        const vIdLower = (k.victimPuuid || '').toLowerCase();
+        const killer = playerLookup.get(kIdLower) || playerLookup.get(k.killerPuuid) || { name: k.killerName || 'Killer', agent: 'Agent', isFriendly: true };
+        const victim = playerLookup.get(vIdLower) || playerLookup.get(k.victimPuuid) || { name: k.victimName || 'Victim', agent: 'Agent', isFriendly: false };
         const vPos = worldToPercent(k.victimLocation) || (mapMeta.sites.Mid || { x: 50, y: 50 });
 
-        killsList.push({
+        const isKillerFriendly = killer.isFriendly !== undefined ? killer.isFriendly : atkPlayers.some(ap => ap.id.toLowerCase() === kIdLower);
+        const isVictimFriendly = victim.isFriendly !== undefined ? victim.isFriendly : atkPlayers.some(ap => ap.id.toLowerCase() === vIdLower);
+
+        const killObj = {
           time: kSec,
-          killerId: k.killerPuuid,
-          victimId: k.victimPuuid,
+          killerId: k.killerPuuid || killer.id,
+          victimId: k.victimPuuid || victim.id,
           killerName: killer.name,
           victimName: victim.name,
           killerAgent: killer.agent,
           victimAgent: victim.agent,
+          killerTeam: isKillerFriendly ? 'atk' : 'def',
+          victimTeam: isVictimFriendly ? 'atk' : 'def',
           weapon: k.weaponName || 'Vandal',
           x: vPos.x,
           y: vPos.y,
           isHeadshot: !!(k.finishingDamage && k.finishingDamage.damageItem)
-        });
+        };
+
+        killsList.push(killObj);
 
         eventsList.push({
+          id: `ev_${roundNum}_k${kIdx}`,
           time: kSec,
           type: 'kill',
-          text: `${killer.name} (${killer.agent}) สังหาร ${victim.name} ด้วย ${k.weaponName || 'Vandal'}`
+          killerId: killObj.killerId,
+          victimId: killObj.victimId,
+          killerName: killObj.killerName,
+          victimName: killObj.victimName,
+          killerAgent: killObj.killerAgent,
+          victimAgent: killObj.victimAgent,
+          killerTeam: killObj.killerTeam,
+          victimTeam: killObj.victimTeam,
+          weapon: killObj.weapon,
+          isHeadshot: killObj.isHeadshot,
+          text: `${killObj.killerName} (${killObj.killerAgent}) สังหาร ${killObj.victimName} (${killObj.victimAgent}) ด้วย ${killObj.weapon}`
         });
       });
 
       if (spikePlantTime) {
         eventsList.push({
+          id: `ev_${roundNum}_plant`,
           time: spikePlantTime,
           type: 'plant',
+          site: spikeSite,
           text: `วาง Spike ที่ Site ${spikeSite}`
         });
       }
       if (spikeDefused) {
         const defuseTime = r.defuseRoundTime ? Math.round(r.defuseRoundTime / 1000) : (spikePlantTime ? spikePlantTime + 30 : roundDuration - 5);
         eventsList.push({
+          id: `ev_${roundNum}_defuse`,
           time: defuseTime,
           type: 'defuse',
+          site: spikeSite,
           text: `กู้ Spike สำเร็จ! (${r.defuserName || 'Defuser'})`
         });
       }
 
       eventsList.sort((a, b) => a.time - b.time);
 
-      // Trajectories for all 10 players
       allPlayersList.forEach((p, pIdx) => {
-        const isAtk = atkPlayers.some(ap => ap.id === p.id);
-        const spawn = isAtk ? mapMeta.atkSpawn : mapMeta.defSpawn;
+        const isFriendly = atkPlayers.some(ap => ap.id === p.id);
+        const spawn = isFriendly ? mapMeta.atkSpawn : mapMeta.defSpawn;
         const jitterX = (pIdx % 5 - 2) * 4.2;
         const jitterY = Math.floor(pIdx / 5) * 3.5;
         const startX = Math.max(5, Math.min(95, (spawn?.x || 50) + jitterX));
@@ -2470,25 +2547,26 @@
           t: 0,
           x: startX,
           y: startY,
-          angle: isAtk ? 270 : 90,
+          angle: isFriendly ? 270 : 90,
           hp: 100,
           armor: 50,
           weapon: 'Vandal',
           ammo: 25
         });
 
-        const playerKill = killsList.find(k => k.victimId === p.id);
+        const pIdLower = p.id.toLowerCase();
+        const playerKill = killsList.find(k => (k.victimId && k.victimId.toLowerCase() === pIdLower));
         const killTime = playerKill ? playerKill.time : null;
 
         const t15 = Math.min(15, killTime ? Math.max(1, killTime - 3) : 15);
-        const midX = isAtk ? (startX * 0.6 + targetSite.x * 0.4) : (startX * 0.5 + targetSite.x * 0.5);
-        const midY = isAtk ? (startY * 0.6 + targetSite.y * 0.4) : (startY * 0.5 + targetSite.y * 0.5);
+        const midX = isFriendly ? (startX * 0.6 + targetSite.x * 0.4) : (startX * 0.5 + targetSite.x * 0.5);
+        const midY = isFriendly ? (startY * 0.6 + targetSite.y * 0.4) : (startY * 0.5 + targetSite.y * 0.5);
 
         keyframes.push({
           t: t15,
           x: parseFloat(midX.toFixed(1)),
           y: parseFloat(midY.toFixed(1)),
-          angle: isAtk ? 280 : 100,
+          angle: isFriendly ? 280 : 100,
           hp: 100,
           armor: 50,
           weapon: 'Vandal',
@@ -2523,7 +2601,7 @@
             t: Math.round(roundDuration * 0.65),
             x: parseFloat(finalX.toFixed(1)),
             y: parseFloat(finalY.toFixed(1)),
-            angle: isAtk ? 315 : 45,
+            angle: isFriendly ? 315 : 45,
             hp: 85,
             armor: 25,
             weapon: 'Vandal',
@@ -2533,8 +2611,8 @@
             t: roundDuration,
             x: parseFloat(finalX.toFixed(1)),
             y: parseFloat(finalY.toFixed(1)),
-            angle: isAtk ? 315 : 45,
-            hp: (isAtk ? isRedWon : !isRedWon) ? 75 : 0,
+            angle: isFriendly ? 315 : 45,
+            hp: (isFriendly ? isAtkWin : !isAtkWin) ? 75 : 0,
             armor: 15,
             weapon: 'Vandal',
             ammo: 12
@@ -2546,19 +2624,15 @@
       });
 
       rounds.push({
+        roundNum,
         roundNumber: roundNum,
-        scoreAtk: redScore,
-        scoreDef: blueScore,
-        winner: isRedWon ? 'ATK' : 'DEF',
+        winSide: isAtkWin ? 'atk' : 'def',
         winType,
+        scoreAtk: runningAtkScore,
+        scoreDef: runningDefScore,
         duration: roundDuration,
-        spike: {
-          planted: !!spikePlantTime,
-          site: spikeSite,
-          time: spikePlantTime,
-          defused: spikeDefused,
-          location: plantPct
-        },
+        spikeSite: spikeSite,
+        spikePlantTime: spikePlantTime,
         trajectories,
         kills: killsList,
         skills: [],
@@ -2566,28 +2640,28 @@
       });
     }
 
-    // 4. Metrics & AI Coach Prescription
+    // 4. Metrics & Real AI Coach Advice
     const userPlayer = allPlayersList.find(p => p.isUser) || atkPlayers[0];
-    const uHs = userPlayer.hs || 25;
-    const uAcs = userPlayer.acs || 205;
-    const uAdr = userPlayer.adr || 135;
+    const uHs = userPlayer.hs || 0;
+    const uAcs = userPlayer.acs || 0;
+    const uAdr = userPlayer.adr || 0;
     const uKd = userPlayer.deaths > 0 ? parseFloat((userPlayer.kills / userPlayer.deaths).toFixed(2)) : userPlayer.kills;
 
     const radar = {
-      reflexes: Math.min(99, Math.max(60, Math.round(180 + (280 - uAcs) * 0.35))),
-      aim: Math.min(99, Math.max(65, Math.round(uHs * 2.2 + 25))),
-      precision: Math.min(99, Math.max(60, Math.round(uAdr * 0.4 + 35))),
-      movement: Math.min(98, Math.max(65, Math.round(82 + (uKd >= 1 ? 5 : -5)))),
-      teamplay: Math.min(99, Math.max(60, Math.round(70 + userPlayer.assists * 2.5))),
-      impact: Math.min(99, Math.max(60, Math.round(uAcs * 0.28 + 15)))
+      reflexes: Math.min(99, Math.max(40, Math.round(180 + (280 - Math.max(10, uAcs)) * 0.35))),
+      aim: Math.min(99, Math.max(35, Math.round(uHs * 2.2 + 25))),
+      precision: Math.min(99, Math.max(35, Math.round(uAdr * 0.4 + 35))),
+      movement: Math.min(98, Math.max(40, Math.round(75 + (uKd >= 1 ? 10 : -10)))),
+      teamplay: Math.min(99, Math.max(40, Math.round(65 + userPlayer.assists * 3.5))),
+      impact: Math.min(99, Math.max(35, Math.round(Math.max(10, uAcs) * 0.28 + 15)))
     };
 
     return {
       matchId,
       isRealMatch: true,
       map: mapMeta,
-      scoreAtk: redScore,
-      scoreDef: blueScore,
+      scoreAtk: finalScoreAtk,
+      scoreDef: finalScoreDef,
       atkPlayers,
       defPlayers,
       rounds,
@@ -2610,22 +2684,22 @@
         prescriptions: {
           weaknesses: [
             {
-              title: 'วินัยการหยุดก่อนลั่นไก (Counter-strafing)',
-              grade: radar.movement < 80 ? 'Grade B-' : 'Grade B+',
-              desc: `ระบบตรวจพบอัตรา Headshot ${uHs}% แนะนำให้ฝึก Counter-strafing ปล่อยปุ่มเดินแล้วเคาะปุ่มตรงข้าม 1 จังหวะก่อนยิงนัดแรกเพื่อให้กระสุนตรงเป้าหมาย 100%`
+              title: uHs < 15 ? 'เพิ่มอัตราการยิงระดับศีรษะ (Headshot Rate)' : 'วินัยการหยุดก่อนลั่นไก (Counter-strafing)',
+              grade: radar.aim < 70 ? 'Grade C+' : (radar.movement < 80 ? 'Grade B-' : 'Grade B+'),
+              desc: `ในแมตช์นี้คุณทำอัตรา Headshot ได้ ${uHs}% และ ACS ${uAcs} แนะนำให้ฝึกวางเป้าดักมุม Head-level และหยุดตัวละครให้สนิทก่อนคลิกยิงนัดแรก`
             }
           ],
           strengths: [
             {
-              title: `ADR และการทำความเสียหายเฉลี่ย (${uAdr} dmg/round)`,
-              grade: uAdr > 145 ? 'Grade S+' : 'Grade A',
-              desc: `คุณทำดาเมจเฉลี่ย ${uAdr} หน่วยต่อรอบ และทำคะแนน ACS ได้ ${uAcs} มีความดุดันและสร้างความได้เปรียบให้ทีมได้ดี`
+              title: `${userPlayer.agent} · การประสานงานกับเพื่อนร่วมทีม`,
+              grade: userPlayer.assists >= 2 ? 'Grade S' : 'Grade A',
+              desc: `คุณเล่นตำแหน่ง ${userPlayer.role} (${userPlayer.agent}) ทำได้ ${userPlayer.assists} Assists และสังหารได้ ${userPlayer.kills} ตัวในแมตช์นี้`
             }
           ],
           drills: [
-            `ฝึกเคาะแบบ 2-3 Bullet Burst แล้วก้าวหลบ (Strafe) ก่อนยิงชุดถัดไปในระยะเกิน 20 เมตร`,
-            `เกาะระยะกับเพื่อนร่วมทีมไม่เกิน 10 เมตร เพื่อเทรดคิลปิดจังหวะทันทีเมื่อเพื่อนล้ม`,
-            `เปิด Shooting Error Graph ในเกม เพื่อลดเส้นสีส้ม (Movement Error) ให้เป็น 0%`
+            `เคาะแบบ 2-3 Bullet Burst แล้ว Strafe ก้าวหลบก่อนยิงชุดถัดไป`,
+            `ยืนในระยะไม่เกิน 8-10 เมตรจากเพื่อนร่วมทีม เพื่อช่วยเทรดคิลทันที`,
+            `เปิด Shooting Error Graph ในการตั้งค่าเกมเพื่อเช็คจังหวะ Counter-strafing`
           ]
         }
       }
@@ -2657,10 +2731,11 @@
 
       try {
         let fullMatchData = careerMatch;
-        // If match details not yet fully loaded (need round details from API)
-        if (!fullMatchData.rounds || !fullMatchData.players) {
+        // If match details not yet fully loaded
+        if (!fullMatchData.rounds || !fullMatchData.friendlyTeam) {
           try {
-            const res = await fetch(`/api/match/${matchId}`);
+            const fetchFn = (typeof window !== 'undefined' && window.apiFetch) ? window.apiFetch : fetch;
+            const res = await fetchFn(`/api/match/${matchId}`);
             if (res.ok) {
               const json = await res.json();
               if (json.ok && json.match) {
@@ -2680,7 +2755,9 @@
           const select = document.getElementById('replayMatchSelect');
           if (select) {
             let existingOpt = select.querySelector(`option[value="${replayKey}"]`);
-            const optLabel = `[แมตช์จริง] ${converted.map.name} (${converted.scoreAtk} - ${converted.scoreDef})`;
+            const userP = [...converted.atkPlayers, ...converted.defPlayers].find(p => p.isUser);
+            const userAgentName = userP ? userP.agent : '';
+            const optLabel = `[แมตช์จริง] ${converted.map.name} (${converted.scoreAtk} - ${converted.scoreDef} · ${userAgentName})`;
             if (!existingOpt) {
               existingOpt = document.createElement('option');
               existingOpt.value = replayKey;
@@ -2691,19 +2768,13 @@
           }
 
           loadMatch(replayKey);
-          toast(`โหลดรีเพลย์ 2D แมตช์จริงสำเร็จ! (${converted.map.name})`);
+          toast(`โหลดรีเพลย์ 2D แมตช์จริง (${converted.map.name}) สำเร็จ!`);
           return converted;
         }
       } catch (err) {
         console.error('[ReplayEngine] Failed to load real match:', err);
-        toast('ไม่สามารถโหลดข้อมูลแบบสดได้ กำลังแสดงตัวอย่างจำลอง', true);
+        toast('เกิดข้อผิดพลาดในการโหลดแมตช์จริง', true);
       }
-
-      // Graceful fallback
-      const fallback = createSampleMatch(careerMatch.mapName ? careerMatch.mapName.toLowerCase() : 'ascent');
-      fallback.matchId = 'career_' + matchId;
-      DEMO_MATCHES[fallback.matchId] = fallback;
-      loadMatch(fallback.matchId);
     }
   };
 
