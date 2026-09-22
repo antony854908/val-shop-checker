@@ -3608,6 +3608,7 @@ async function loadCareer() {
 
     if (matchRes.ok && matchRes.history) {
       allCareerMatches = matchRes.history.matches || [];
+      window.getAllCareerMatches = () => allCareerMatches;
       renderMatchesList(allCareerMatches);
     } else {
       if (container) {
@@ -3692,6 +3693,24 @@ function renderMatchesList(matches) {
   if (avgKdEl) avgKdEl.textContent = avgKd;
   if (avgAcsEl) avgAcsEl.textContent = avgAcs.toLocaleString();
 
+  // Sync career matches into 2D Replay select dropdown
+  const replaySelect = document.getElementById('replayMatchSelect');
+  if (replaySelect && Array.isArray(matches) && matches.length > 0) {
+    replaySelect.querySelectorAll('optgroup[data-career="true"], option[data-career="true"]').forEach(el => el.remove());
+    const optGroup = document.createElement('optgroup');
+    optGroup.dataset.career = 'true';
+    optGroup.label = '── แมตช์จริงของคุณ (Your Matches) ──';
+    matches.slice(0, 8).forEach(cm => {
+      const opt = document.createElement('option');
+      opt.dataset.career = 'true';
+      opt.value = `career_${cm.matchId}`;
+      const outcome = cm.outcome === 'VICTORY' ? 'ชนะ' : (cm.outcome === 'DEFEAT' ? 'แพ้' : 'เสมอ');
+      opt.textContent = `[แมตช์จริง] ${cm.map?.displayName || 'Map'} (${cm.myTeamScore}-${cm.enemyTeamScore} · ${outcome})`;
+      optGroup.appendChild(opt);
+    });
+    replaySelect.insertBefore(optGroup, replaySelect.firstChild);
+  }
+
   // Run AI Playstyle & Best Agent Analysis
   analyzePlayerPlaystyleAndBestAgent(matches);
 
@@ -3774,15 +3793,10 @@ function renderMatchesList(matches) {
     card.querySelector('.btn-view-2d-replay')?.addEventListener('click', (e) => {
       e.stopPropagation();
       playTacticalAudio('click');
-      if (window.ValReplayEngine) {
-        window.ValReplayEngine.loadFromUserCareerMatch({
-          matchId: m.matchId,
-          mapName: m.map?.displayName,
-          myTeamScore: m.myTeamScore,
-          enemyTeamScore: m.enemyTeamScore
-        });
-      }
       switchAppMode('replay');
+      if (window.ValReplayEngine) {
+        window.ValReplayEngine.loadFromUserCareerMatch(m);
+      }
     });
     container.appendChild(card);
   });
@@ -3821,15 +3835,10 @@ document.getElementById('btnOpenInFull2dReplay')?.addEventListener('click', () =
     matchModal.classList.add('hidden');
     matchModal.setAttribute('aria-hidden', 'true');
   }
-  if (currentActiveMatch && window.ValReplayEngine) {
-    window.ValReplayEngine.loadFromUserCareerMatch({
-      matchId: currentActiveMatch.matchId,
-      mapName: currentActiveMatch.map?.displayName,
-      myTeamScore: currentActiveMatch.myTeamScore,
-      enemyTeamScore: currentActiveMatch.enemyTeamScore
-    });
-  }
   switchAppMode('replay');
+  if (currentActiveMatch && window.ValReplayEngine) {
+    window.ValReplayEngine.loadFromUserCareerMatch(currentActiveMatch);
+  }
 });
 
 function openMatchScoreboard(match) {

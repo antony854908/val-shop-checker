@@ -321,7 +321,18 @@ class MatchHistoryService {
                 victimPuuid: k.victim,
                 victimName,
                 weaponName,
-                weaponIcon
+                weaponIcon,
+                victimLocation: k.victimLocation || null,
+                playerLocations: Array.isArray(k.playerLocations) ? k.playerLocations.map(pl => ({
+                  puuid: pl.subject || pl.puuid,
+                  viewRadians: typeof pl.viewRadians === 'number' ? pl.viewRadians : 0,
+                  location: pl.location || null
+                })) : [],
+                finishingDamage: k.finishingDamage ? {
+                  damageType: k.finishingDamage.damageType,
+                  damageItem: k.finishingDamage.damageItem,
+                  isSecondaryFireMode: !!k.finishingDamage.isSecondaryFireMode
+                } : null
               });
             }
           }
@@ -383,7 +394,15 @@ class MatchHistoryService {
         ceremony,
         ceremonyTh,
         planterName,
+        bombPlanter: r.bombPlanter || null,
         defuserName,
+        bombDefuser: r.bombDefuser || null,
+        plantRoundTime: r.plantRoundTime || 0,
+        plantLocation: r.plantLocation || null,
+        plantSite: r.plantSite || null,
+        defuseRoundTime: r.defuseRoundTime || 0,
+        defuseLocation: r.defuseLocation || null,
+        roundResultCode: r.roundResultCode || null,
         kills: roundKills,
         loadouts: roundPlayerLoadouts
       });

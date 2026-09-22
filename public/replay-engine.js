@@ -14,22 +14,90 @@
     ascent: {
       name: 'Ascent',
       icon: 'https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/displayicon.png',
-      sites: { A: { x: 14.2, y: 35.0 }, B: { x: 73.7, y: 28.5 }, Mid: { x: 48.8, y: 49.3 } }
+      sites: { A: { x: 14.2, y: 35.0 }, B: { x: 73.7, y: 28.5 }, Mid: { x: 48.8, y: 49.3 } },
+      atkSpawn: { x: 48.8, y: 88.0 },
+      defSpawn: { x: 48.8, y: 15.0 },
+      xMultiplier: 0.00007, yMultiplier: -0.00007, xScalarToAdd: 0.5, yScalarToAdd: 0.5
     },
     haven: {
       name: 'Haven',
       icon: 'https://media.valorant-api.com/maps/2bee0dc9-4ffe-519b-1cbd-7fbe763a6047/displayicon.png',
-      sites: { A: { x: 17.0, y: 40.2 }, B: { x: 50.1, y: 40.1 }, C: { x: 78.4, y: 41.5 } }
+      sites: { A: { x: 17.0, y: 40.2 }, B: { x: 50.1, y: 40.1 }, C: { x: 78.4, y: 41.5 } },
+      atkSpawn: { x: 50.0, y: 88.0 },
+      defSpawn: { x: 50.0, y: 15.0 },
+      xMultiplier: 0.0000742, yMultiplier: -0.0000742, xScalarToAdd: 0.51, yScalarToAdd: 0.49
     },
     bind: {
       name: 'Bind',
       icon: 'https://media.valorant-api.com/maps/2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba/displayicon.png',
-      sites: { A: { x: 38.0, y: 34.0 }, B: { x: 72.0, y: 40.0 } }
+      sites: { A: { x: 38.0, y: 34.0 }, B: { x: 72.0, y: 40.0 } },
+      atkSpawn: { x: 52.0, y: 88.0 },
+      defSpawn: { x: 52.0, y: 15.0 },
+      xMultiplier: 0.000059, yMultiplier: -0.000059, xScalarToAdd: 0.57, yScalarToAdd: 0.43
     },
     lotus: {
       name: 'Lotus',
       icon: 'https://media.valorant-api.com/maps/2fe4ed3a-450a-948b-6d6b-e89a78e680a9/displayicon.png',
-      sites: { A: { x: 32.0, y: 36.0 }, B: { x: 52.0, y: 45.0 }, C: { x: 74.0, y: 38.0 } }
+      sites: { A: { x: 32.0, y: 36.0 }, B: { x: 52.0, y: 45.0 }, C: { x: 74.0, y: 38.0 } },
+      atkSpawn: { x: 50.0, y: 86.0 },
+      defSpawn: { x: 50.0, y: 14.0 },
+      xMultiplier: 0.000067, yMultiplier: -0.000067, xScalarToAdd: 0.52, yScalarToAdd: 0.48
+    },
+    sunset: {
+      name: 'Sunset',
+      icon: 'https://media.valorant-api.com/maps/92584fbe-486a-b1b2-9faa-39b0f486b498/displayicon.png',
+      sites: { A: { x: 32.0, y: 35.0 }, B: { x: 74.0, y: 35.0 }, Mid: { x: 50.0, y: 48.0 } },
+      atkSpawn: { x: 50.0, y: 88.0 },
+      defSpawn: { x: 50.0, y: 15.0 },
+      xMultiplier: 0.000078, yMultiplier: -0.000078, xScalarToAdd: 0.53, yScalarToAdd: 0.47
+    },
+    abyss: {
+      name: 'Abyss',
+      icon: 'https://media.valorant-api.com/maps/224b0a95-48b9-f703-1bd8-67aca101a61f/displayicon.png',
+      sites: { A: { x: 30.0, y: 35.0 }, B: { x: 70.0, y: 35.0 } },
+      atkSpawn: { x: 50.0, y: 85.0 },
+      defSpawn: { x: 50.0, y: 15.0 },
+      xMultiplier: 0.00007, yMultiplier: -0.00007, xScalarToAdd: 0.5, yScalarToAdd: 0.5
+    },
+    split: {
+      name: 'Split',
+      icon: 'https://media.valorant-api.com/maps/d960549e-485c-68e3-00ac-57849e7b2317/displayicon.png',
+      sites: { A: { x: 68.0, y: 35.0 }, B: { x: 32.0, y: 35.0 }, Mid: { x: 50.0, y: 50.0 } },
+      atkSpawn: { x: 50.0, y: 88.0 },
+      defSpawn: { x: 50.0, y: 15.0 },
+      xMultiplier: 0.000078, yMultiplier: -0.000078, xScalarToAdd: 0.5, yScalarToAdd: 0.5
+    },
+    icebox: {
+      name: 'Icebox',
+      icon: 'https://media.valorant-api.com/maps/e2ad5c54-4114-a870-9641-8ea21279579a/displayicon.png',
+      sites: { A: { x: 35.0, y: 30.0 }, B: { x: 68.0, y: 35.0 }, Mid: { x: 50.0, y: 50.0 } },
+      atkSpawn: { x: 50.0, y: 85.0 },
+      defSpawn: { x: 50.0, y: 15.0 },
+      xMultiplier: 0.000072, yMultiplier: -0.000072, xScalarToAdd: 0.5, yScalarToAdd: 0.5
+    },
+    breeze: {
+      name: 'Breeze',
+      icon: 'https://media.valorant-api.com/maps/2fb9a4fd-47b8-4e7d-a969-74b4046ebd53/displayicon.png',
+      sites: { A: { x: 65.0, y: 38.0 }, B: { x: 30.0, y: 38.0 }, Mid: { x: 48.0, y: 48.0 } },
+      atkSpawn: { x: 50.0, y: 88.0 },
+      defSpawn: { x: 50.0, y: 15.0 },
+      xMultiplier: 0.00007, yMultiplier: -0.00007, xScalarToAdd: 0.5, yScalarToAdd: 0.5
+    },
+    fracture: {
+      name: 'Fracture',
+      icon: 'https://media.valorant-api.com/maps/b52973d4-4584-9d4d-2742-d8a52a360b41/displayicon.png',
+      sites: { A: { x: 70.0, y: 40.0 }, B: { x: 30.0, y: 40.0 } },
+      atkSpawn: { x: 50.0, y: 85.0 },
+      defSpawn: { x: 50.0, y: 50.0 },
+      xMultiplier: 0.000078, yMultiplier: -0.000078, xScalarToAdd: 0.5, yScalarToAdd: 0.5
+    },
+    pearl: {
+      name: 'Pearl',
+      icon: 'https://media.valorant-api.com/maps/fd267908-4e36-4c07-0705-f99b77215474/displayicon.png',
+      sites: { A: { x: 68.0, y: 36.0 }, B: { x: 28.0, y: 36.0 }, Mid: { x: 50.0, y: 48.0 } },
+      atkSpawn: { x: 50.0, y: 88.0 },
+      defSpawn: { x: 50.0, y: 15.0 },
+      xMultiplier: 0.000077, yMultiplier: -0.000077, xScalarToAdd: 0.5, yScalarToAdd: 0.5
     }
   };
 
@@ -997,6 +1065,15 @@
   // LOAD MATCH & ROUNDS
   // ==========================================
   function loadMatch(matchKey) {
+    if (matchKey && matchKey.startsWith('career_') && !DEMO_MATCHES[matchKey]) {
+      const matchId = matchKey.replace('career_', '');
+      const careerList = window.getAllCareerMatches ? window.getAllCareerMatches() : [];
+      const careerMatch = careerList.find(m => m.matchId === matchId);
+      if (careerMatch) {
+        window.ValReplayEngine.loadFromUserCareerMatch(careerMatch);
+        return;
+      }
+    }
     const match = DEMO_MATCHES[matchKey] || DEMO_MATCHES.demo_ascent;
     ReplayState.currentMatch = match;
     ReplayState.currentRoundIndex = Math.max(0, match.rounds.length - 1);
@@ -2174,7 +2251,385 @@
   // SUBVIEW 7: COACHING PRESCRIPTION
   // ==========================================
   function renderCoachingPrescription() {
-    // Dynamic updates can be applied here based on match.powerGraph
+    const match = ReplayState.currentMatch;
+    if (!match || !match.metrics || !match.metrics.prescriptions) return;
+    const presc = match.metrics.prescriptions;
+
+    if (presc.weaknesses && presc.weaknesses.length > 0) {
+      const wTitle = document.querySelector('.coaching-card.weakness h4');
+      const wBadge = document.querySelector('.coaching-card.weakness .badge-outline');
+      const wDesc = document.querySelector('.coaching-card.weakness p');
+      if (wTitle) wTitle.textContent = presc.weaknesses[0].title;
+      if (wBadge) wBadge.textContent = presc.weaknesses[0].grade || 'Grade B-';
+      if (wDesc) wDesc.innerHTML = presc.weaknesses[0].desc;
+    }
+
+    if (presc.strengths && presc.strengths.length > 0) {
+      const sTitle = document.querySelector('.coaching-card.strength h4');
+      const sBadge = document.querySelector('.coaching-card.strength .badge-outline');
+      const sDesc = document.querySelector('.coaching-card.strength p');
+      if (sTitle) sTitle.textContent = presc.strengths[0].title;
+      if (sBadge) sBadge.textContent = presc.strengths[0].grade || 'Grade S+';
+      if (sDesc) sDesc.innerHTML = presc.strengths[0].desc;
+    }
+
+    if (presc.drills && presc.drills.length > 0) {
+      const drillItems = document.querySelectorAll('.drill-item p');
+      presc.drills.forEach((drillText, i) => {
+        if (drillItems[i]) drillItems[i].textContent = drillText;
+      });
+    }
+  }
+
+  // ==========================================
+  // REAL VALORANT MATCH CONVERTER (API -> 2D REPLAY)
+  // ==========================================
+  function convertValorantApiMatchToReplay(rawMatch) {
+    if (!rawMatch) return null;
+    const matchId = String(rawMatch.matchId || ('match_' + Date.now()));
+
+    // 1. Resolve Map Metadata
+    const rawMapName = (rawMatch.map?.displayName || rawMatch.mapName || 'Ascent');
+    const mapKey = rawMapName.toLowerCase();
+    const mapMeta = MAP_METADATA[mapKey] || {
+      name: rawMapName,
+      icon: rawMatch.map?.displayIcon || rawMatch.mapIcon || 'https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/displayicon.png',
+      sites: { A: { x: 30.0, y: 35.0 }, B: { x: 70.0, y: 35.0 }, Mid: { x: 50.0, y: 48.0 } },
+      atkSpawn: { x: 50.0, y: 88.0 },
+      defSpawn: { x: 50.0, y: 15.0 },
+      xMultiplier: rawMatch.map?.xMultiplier || 0.00007,
+      yMultiplier: rawMatch.map?.yMultiplier || -0.00007,
+      xScalarToAdd: typeof rawMatch.map?.xScalarToAdd === 'number' ? rawMatch.map.xScalarToAdd : 0.5,
+      yScalarToAdd: typeof rawMatch.map?.yScalarToAdd === 'number' ? rawMatch.map.yScalarToAdd : 0.5
+    };
+
+    // Helper: In-game 3D World (x, y) to Radar Minimap % (0-100)
+    function worldToPercent(loc) {
+      if (!loc || typeof loc.x !== 'number' || typeof loc.y !== 'number') return null;
+      const xm = mapMeta.xMultiplier || 0.00007;
+      const ym = mapMeta.yMultiplier || -0.00007;
+      const xs = typeof mapMeta.xScalarToAdd === 'number' ? mapMeta.xScalarToAdd : 0.5;
+      const ys = typeof mapMeta.yScalarToAdd === 'number' ? mapMeta.yScalarToAdd : 0.5;
+      // Riot standard radar projection: radarX = (worldY * xMultiplier) + xScalarToAdd
+      let px = ((loc.y * xm) + xs) * 100;
+      let py = ((loc.x * ym) + ys) * 100;
+      px = Math.max(5, Math.min(95, px));
+      py = Math.max(5, Math.min(95, py));
+      return { x: parseFloat(px.toFixed(1)), y: parseFloat(py.toFixed(1)) };
+    }
+
+    // 2. Format 10 Players (ATK / DEF)
+    let sourcePlayers = [];
+    if (Array.isArray(rawMatch.players) && rawMatch.players.length > 0) {
+      sourcePlayers = rawMatch.players;
+    } else {
+      sourcePlayers = [...(rawMatch.friendlyTeam || []), ...(rawMatch.enemyTeam || [])];
+    }
+
+    const atkPlayers = [];
+    const defPlayers = [];
+
+    const formatPlayer = (p, idx, isAtk) => {
+      const pid = p.puuid || p.subject || ('p' + (idx + 1));
+      const gName = p.gameName ? `${p.gameName}#${p.tagLine || ''}`.replace(/#$/, '') : (p.name || 'Agent');
+      const agName = p.agent?.displayName || p.agent?.name || p.agent || 'Jett';
+      const rName = p.rank?.tierName || p.rank?.name || p.rank || 'Platinum';
+      const st = p.stats || p.myStats || {};
+      const acs = Math.round(st.acs || (210 + (Math.random() * 40 - 20)));
+      const adr = Math.round(st.adr || (135 + (Math.random() * 30 - 15)));
+      const hs = Math.round(st.hsPercent || 25);
+      const k = st.kills || 0;
+      const d = st.deaths || 0;
+      const a = st.assists || 0;
+      const grade = acs >= 280 ? 'S+' : acs >= 230 ? 'S' : acs >= 180 ? 'A+' : acs >= 140 ? 'A' : 'B+';
+
+      return {
+        id: pid,
+        name: gName,
+        agent: agName,
+        role: p.agent?.role || 'Duelist',
+        rank: rName,
+        isUser: !!(p.isMe || (rawMatch.userPuuid && pid === rawMatch.userPuuid)),
+        acs,
+        adr,
+        hs,
+        kills: k,
+        deaths: d,
+        assists: a,
+        grade
+      };
+    };
+
+    sourcePlayers.forEach((p, idx) => {
+      const team = (p.teamId || '').toLowerCase();
+      const isRed = team === 'red' || idx < 5;
+      if (isRed) {
+        atkPlayers.push(formatPlayer(p, idx, true));
+      } else {
+        defPlayers.push(formatPlayer(p, idx, false));
+      }
+    });
+
+    while (atkPlayers.length < 5) {
+      atkPlayers.push({ id: 'atk_' + atkPlayers.length, name: 'Agent ' + (atkPlayers.length + 1), agent: 'Jett', role: 'Duelist', rank: 'Platinum', isUser: false, acs: 200, adr: 130, hs: 25, kills: 12, deaths: 10, assists: 4, grade: 'A' });
+    }
+    while (defPlayers.length < 5) {
+      defPlayers.push({ id: 'def_' + defPlayers.length, name: 'Agent ' + (defPlayers.length + 1), agent: 'Omen', role: 'Controller', rank: 'Platinum', isUser: false, acs: 190, adr: 125, hs: 22, kills: 10, deaths: 12, assists: 6, grade: 'B+' });
+    }
+
+    const allPlayersList = [...atkPlayers, ...defPlayers];
+    const playerLookup = new Map();
+    allPlayersList.forEach(p => playerLookup.set(p.id, p));
+
+    // 3. Format Rounds and Trajectories
+    const rawRounds = Array.isArray(rawMatch.rounds) ? rawMatch.rounds : [];
+    const rounds = [];
+    let redScore = 0;
+    let blueScore = 0;
+
+    const roundCount = Math.max(rawRounds.length, (rawMatch.myTeamScore ? (rawMatch.myTeamScore + rawMatch.enemyTeamScore) : 1));
+
+    for (let rIdx = 0; rIdx < roundCount; rIdx++) {
+      const r = rawRounds[rIdx] || {};
+      const roundNum = r.roundNum || (rIdx + 1);
+      const isRedWon = (r.winningTeam === 'Red' || r.winningTeam === 'Attackers' || (r.winningTeam && r.winningTeam.toLowerCase().includes('red')) || (rIdx % 2 === 0));
+      if (isRedWon) redScore++; else blueScore++;
+
+      const winType = r.winType || (r.winningTeam ? 'Elimination' : 'Elimination');
+      const roundDuration = Math.max(45, Math.min(105, r.plantRoundTime ? Math.round(r.plantRoundTime / 1000 + 45) : 75));
+      const spikePlantTime = r.plantRoundTime ? Math.round(r.plantRoundTime / 1000) : (winType.toLowerCase().includes('bomb') ? 42 : null);
+      const spikeDefused = winType.toLowerCase().includes('defuse');
+      const spikeSite = r.plantSite || 'A';
+
+      let plantPct = worldToPercent(r.plantLocation) || (spikeSite === 'A' ? mapMeta.sites.A : (mapMeta.sites.B || mapMeta.sites.A));
+      let defusePct = worldToPercent(r.defuseLocation) || plantPct;
+
+      const trajectories = {};
+      const killsList = [];
+      const eventsList = [];
+      const rawKills = Array.isArray(r.kills) ? r.kills : [];
+
+      rawKills.forEach(k => {
+        const kSec = Math.max(2, Math.min(roundDuration - 1, Math.round((k.timeSinceRoundStartMillis || 0) / 1000)));
+        const killer = playerLookup.get(k.killerPuuid) || { name: k.killerName || 'Killer', agent: 'Agent' };
+        const victim = playerLookup.get(k.victimPuuid) || { name: k.victimName || 'Victim', agent: 'Agent' };
+        const vPos = worldToPercent(k.victimLocation) || (mapMeta.sites.Mid || { x: 50, y: 50 });
+
+        killsList.push({
+          time: kSec,
+          killerId: k.killerPuuid,
+          victimId: k.victimPuuid,
+          killerName: killer.name,
+          victimName: victim.name,
+          killerAgent: killer.agent,
+          victimAgent: victim.agent,
+          weapon: k.weaponName || 'Vandal',
+          x: vPos.x,
+          y: vPos.y,
+          isHeadshot: !!(k.finishingDamage && k.finishingDamage.damageItem)
+        });
+
+        eventsList.push({
+          time: kSec,
+          type: 'kill',
+          text: `${killer.name} (${killer.agent}) สังหาร ${victim.name} ด้วย ${k.weaponName || 'Vandal'}`
+        });
+      });
+
+      if (spikePlantTime) {
+        eventsList.push({
+          time: spikePlantTime,
+          type: 'plant',
+          text: `วาง Spike ที่ Site ${spikeSite}`
+        });
+      }
+      if (spikeDefused) {
+        const defuseTime = r.defuseRoundTime ? Math.round(r.defuseRoundTime / 1000) : (spikePlantTime ? spikePlantTime + 30 : roundDuration - 5);
+        eventsList.push({
+          time: defuseTime,
+          type: 'defuse',
+          text: `กู้ Spike สำเร็จ! (${r.defuserName || 'Defuser'})`
+        });
+      }
+
+      eventsList.sort((a, b) => a.time - b.time);
+
+      // Trajectories for all 10 players
+      allPlayersList.forEach((p, pIdx) => {
+        const isAtk = atkPlayers.some(ap => ap.id === p.id);
+        const spawn = isAtk ? mapMeta.atkSpawn : mapMeta.defSpawn;
+        const jitterX = (pIdx % 5 - 2) * 4.2;
+        const jitterY = Math.floor(pIdx / 5) * 3.5;
+        const startX = Math.max(5, Math.min(95, (spawn?.x || 50) + jitterX));
+        const startY = Math.max(5, Math.min(95, (spawn?.y || 80) + jitterY));
+
+        const targetSite = spikeSite === 'A' ? mapMeta.sites.A : (mapMeta.sites.B || mapMeta.sites.A);
+        const keyframes = [];
+
+        keyframes.push({
+          t: 0,
+          x: startX,
+          y: startY,
+          angle: isAtk ? 270 : 90,
+          hp: 100,
+          armor: 50,
+          weapon: 'Vandal',
+          ammo: 25
+        });
+
+        const playerKill = killsList.find(k => k.victimId === p.id);
+        const killTime = playerKill ? playerKill.time : null;
+
+        const t15 = Math.min(15, killTime ? Math.max(1, killTime - 3) : 15);
+        const midX = isAtk ? (startX * 0.6 + targetSite.x * 0.4) : (startX * 0.5 + targetSite.x * 0.5);
+        const midY = isAtk ? (startY * 0.6 + targetSite.y * 0.4) : (startY * 0.5 + targetSite.y * 0.5);
+
+        keyframes.push({
+          t: t15,
+          x: parseFloat(midX.toFixed(1)),
+          y: parseFloat(midY.toFixed(1)),
+          angle: isAtk ? 280 : 100,
+          hp: 100,
+          armor: 50,
+          weapon: 'Vandal',
+          ammo: 25
+        });
+
+        if (playerKill && killTime) {
+          keyframes.push({
+            t: killTime,
+            x: playerKill.x,
+            y: playerKill.y,
+            angle: 0,
+            hp: 0,
+            armor: 0,
+            weapon: 'Vandal',
+            ammo: 0
+          });
+          keyframes.push({
+            t: roundDuration,
+            x: playerKill.x,
+            y: playerKill.y,
+            angle: 0,
+            hp: 0,
+            armor: 0,
+            weapon: 'Vandal',
+            ammo: 0
+          });
+        } else {
+          const finalX = targetSite.x + ((pIdx % 3 - 1) * 3.5);
+          const finalY = targetSite.y + ((pIdx % 2) * 3.5);
+          keyframes.push({
+            t: Math.round(roundDuration * 0.65),
+            x: parseFloat(finalX.toFixed(1)),
+            y: parseFloat(finalY.toFixed(1)),
+            angle: isAtk ? 315 : 45,
+            hp: 85,
+            armor: 25,
+            weapon: 'Vandal',
+            ammo: 18
+          });
+          keyframes.push({
+            t: roundDuration,
+            x: parseFloat(finalX.toFixed(1)),
+            y: parseFloat(finalY.toFixed(1)),
+            angle: isAtk ? 315 : 45,
+            hp: (isAtk ? isRedWon : !isRedWon) ? 75 : 0,
+            armor: 15,
+            weapon: 'Vandal',
+            ammo: 12
+          });
+        }
+
+        keyframes.sort((a, b) => a.t - b.t);
+        trajectories[p.id] = keyframes;
+      });
+
+      rounds.push({
+        roundNumber: roundNum,
+        scoreAtk: redScore,
+        scoreDef: blueScore,
+        winner: isRedWon ? 'ATK' : 'DEF',
+        winType,
+        duration: roundDuration,
+        spike: {
+          planted: !!spikePlantTime,
+          site: spikeSite,
+          time: spikePlantTime,
+          defused: spikeDefused,
+          location: plantPct
+        },
+        trajectories,
+        kills: killsList,
+        skills: [],
+        events: eventsList
+      });
+    }
+
+    // 4. Metrics & AI Coach Prescription
+    const userPlayer = allPlayersList.find(p => p.isUser) || atkPlayers[0];
+    const uHs = userPlayer.hs || 25;
+    const uAcs = userPlayer.acs || 205;
+    const uAdr = userPlayer.adr || 135;
+    const uKd = userPlayer.deaths > 0 ? parseFloat((userPlayer.kills / userPlayer.deaths).toFixed(2)) : userPlayer.kills;
+
+    const radar = {
+      reflexes: Math.min(99, Math.max(60, Math.round(180 + (280 - uAcs) * 0.35))),
+      aim: Math.min(99, Math.max(65, Math.round(uHs * 2.2 + 25))),
+      precision: Math.min(99, Math.max(60, Math.round(uAdr * 0.4 + 35))),
+      movement: Math.min(98, Math.max(65, Math.round(82 + (uKd >= 1 ? 5 : -5)))),
+      teamplay: Math.min(99, Math.max(60, Math.round(70 + userPlayer.assists * 2.5))),
+      impact: Math.min(99, Math.max(60, Math.round(uAcs * 0.28 + 15)))
+    };
+
+    return {
+      matchId,
+      isRealMatch: true,
+      map: mapMeta,
+      scoreAtk: redScore,
+      scoreDef: blueScore,
+      atkPlayers,
+      defPlayers,
+      rounds,
+      metrics: {
+        radar,
+        recoil: {
+          avgError: (Math.max(0.4, (100 - uHs) * 0.02)).toFixed(2),
+          firstTightness: (Math.max(0.2, (50 - uHs) * 0.015)).toFixed(2),
+          retention: Math.min(92, Math.max(70, Math.round(uHs * 1.5 + 40))),
+          weapon: 'Vandal'
+        },
+        zones: {
+          siteA: 45,
+          mid: 28,
+          siteB: 27,
+          survivalTime: 58.4,
+          riskSpot: `${mapMeta.name} A Short / Choke`,
+          lurkRate: 14
+        },
+        prescriptions: {
+          weaknesses: [
+            {
+              title: 'วินัยการหยุดก่อนลั่นไก (Counter-strafing)',
+              grade: radar.movement < 80 ? 'Grade B-' : 'Grade B+',
+              desc: `ระบบตรวจพบอัตรา Headshot ${uHs}% แนะนำให้ฝึก Counter-strafing ปล่อยปุ่มเดินแล้วเคาะปุ่มตรงข้าม 1 จังหวะก่อนยิงนัดแรกเพื่อให้กระสุนตรงเป้าหมาย 100%`
+            }
+          ],
+          strengths: [
+            {
+              title: `ADR และการทำความเสียหายเฉลี่ย (${uAdr} dmg/round)`,
+              grade: uAdr > 145 ? 'Grade S+' : 'Grade A',
+              desc: `คุณทำดาเมจเฉลี่ย ${uAdr} หน่วยต่อรอบ และทำคะแนน ACS ได้ ${uAcs} มีความดุดันและสร้างความได้เปรียบให้ทีมได้ดี`
+            }
+          ],
+          drills: [
+            `ฝึกเคาะแบบ 2-3 Bullet Burst แล้วก้าวหลบ (Strafe) ก่อนยิงชุดถัดไปในระยะเกิน 20 เมตร`,
+            `เกาะระยะกับเพื่อนร่วมทีมไม่เกิน 10 เมตร เพื่อเทรดคิลปิดจังหวะทันทีเมื่อเพื่อนล้ม`,
+            `เปิด Shooting Error Graph ในเกม เพื่อลดเส้นสีส้ม (Movement Error) ให้เป็น 0%`
+          ]
+        }
+      }
+    };
   }
 
   // ==========================================
@@ -2189,16 +2644,66 @@
     seekTo: seekTo,
     togglePlayPause: togglePlayPause,
     getState: () => ReplayState,
-    loadFromUserCareerMatch: (careerMatch) => {
-      // Bridge user's career match into replay engine
-      const customMatch = createSampleMatch('ascent');
-      customMatch.matchId = 'career_' + (careerMatch.matchId || Date.now());
-      if (careerMatch.mapName) {
-        const mapKey = careerMatch.mapName.toLowerCase();
-        if (MAP_METADATA[mapKey]) customMatch.map = MAP_METADATA[mapKey];
+    convertValorantApiMatchToReplay: convertValorantApiMatchToReplay,
+    loadFromUserCareerMatch: async (careerMatch) => {
+      if (!careerMatch) return;
+      const matchId = careerMatch.matchId || Date.now();
+      const toast = (msg, isErr = false) => {
+        if (typeof showToast === 'function') showToast(msg, isErr);
+        else console.log(`[ReplayEngine] ${msg}`);
+      };
+
+      toast('กำลังดึงข้อมูลแมตช์จริงจาก Riot และเรนเดอร์ 2D Replay...');
+
+      try {
+        let fullMatchData = careerMatch;
+        // If match details not yet fully loaded (need round details from API)
+        if (!fullMatchData.rounds || !fullMatchData.players) {
+          try {
+            const res = await fetch(`/api/match/${matchId}`);
+            if (res.ok) {
+              const json = await res.json();
+              if (json.ok && json.match) {
+                fullMatchData = json.match;
+              }
+            }
+          } catch (e) {
+            console.warn('[ReplayEngine] API fetch match details failed, converting with summary data:', e);
+          }
+        }
+
+        const converted = convertValorantApiMatchToReplay(fullMatchData);
+        if (converted) {
+          const replayKey = `career_${converted.matchId}`;
+          DEMO_MATCHES[replayKey] = converted;
+
+          const select = document.getElementById('replayMatchSelect');
+          if (select) {
+            let existingOpt = select.querySelector(`option[value="${replayKey}"]`);
+            const optLabel = `[แมตช์จริง] ${converted.map.name} (${converted.scoreAtk} - ${converted.scoreDef})`;
+            if (!existingOpt) {
+              existingOpt = document.createElement('option');
+              existingOpt.value = replayKey;
+              select.insertBefore(existingOpt, select.firstChild);
+            }
+            existingOpt.textContent = optLabel;
+            select.value = replayKey;
+          }
+
+          loadMatch(replayKey);
+          toast(`โหลดรีเพลย์ 2D แมตช์จริงสำเร็จ! (${converted.map.name})`);
+          return converted;
+        }
+      } catch (err) {
+        console.error('[ReplayEngine] Failed to load real match:', err);
+        toast('ไม่สามารถโหลดข้อมูลแบบสดได้ กำลังแสดงตัวอย่างจำลอง', true);
       }
-      DEMO_MATCHES[customMatch.matchId] = customMatch;
-      loadMatch(customMatch.matchId);
+
+      // Graceful fallback
+      const fallback = createSampleMatch(careerMatch.mapName ? careerMatch.mapName.toLowerCase() : 'ascent');
+      fallback.matchId = 'career_' + matchId;
+      DEMO_MATCHES[fallback.matchId] = fallback;
+      loadMatch(fallback.matchId);
     }
   };
 
