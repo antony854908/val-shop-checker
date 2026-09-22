@@ -302,28 +302,33 @@ body::after {
 }
 .btn-outline-primary:hover:not(:disabled) { background: var(--val-red); color: #fff; }
 
-/* ปุ่มกรองโหมดใน AI Coach (เดิมไม่มี CSS เลย เลยโผล่เป็นปุ่มขาวของระบบ) */
+/* ปุ่มกรองโหมดใน AI Coach (Nexus Semantic Pill Style) */
 .ai-pill {
   font-family: var(--font-tactical);
   font-size: 10.5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  padding: 6px 12px;
-  background: rgba(236, 232, 225, 0.05);
-  border: 1px solid rgba(236, 232, 225, 0.12);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 5px 14px;
+  background: rgba(12, 18, 26, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--val-gray-2);
-  border-radius: 0;
-  clip-path: var(--clip-btn-sm);
+  border-radius: 9999px;
+  clip-path: none;
   cursor: pointer;
-  transition: background .16s var(--ease-tactical), color .16s var(--ease-tactical), border-color .16s var(--ease-tactical);
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
-.ai-pill:hover { background: rgba(236, 232, 225, 0.11); color: #fff; border-color: rgba(236, 232, 225, 0.25); }
-.ai-pill.active {
-  background: var(--val-red);
-  border-color: var(--val-red);
+.ai-pill:hover {
+  background: rgba(116, 231, 224, 0.12);
   color: #fff;
+  border-color: rgba(116, 231, 224, 0.4);
+}
+.ai-pill.active {
+  background: #E7FF72;
+  border-color: #E7FF72;
+  color: #080C10;
+  font-weight: 800;
+  box-shadow: 0 0 16px rgba(231, 255, 114, 0.45);
 }
 
 /* ปุ่มปิดหน้าต่าง (บางตัวไม่มี CSS เลย เลยเป็นปุ่มขาว) */

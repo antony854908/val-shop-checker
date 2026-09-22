@@ -19,8 +19,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Kanit:wght@200;300;400;500;600;700;800&family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7.0">
-  <link rel="stylesheet" href="theme-valorant.css?v=1.0">
+  <link rel="stylesheet" href="style.css?v=7.4">
+  <link rel="stylesheet" href="theme-valorant.css?v=1.1">
 </head>
 <body>
   <!-- High-Performance Valorant Tactical Background (Zero-Cost GPU Plane) -->
@@ -108,6 +108,13 @@
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </span>
           <span class="tab-label">ตัวละครทั้งหมด (Agents)</span>
+        </button>
+        <button id="btnTabReplay" class="mode-tab-btn">
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/></svg>
+          </span>
+          <span class="tab-label">รีเพลย์ 2D (2D Replay)</span>
+          <span class="tab-badge-pro">PRO 2D</span>
         </button>
         <button id="btnTabCatalog" class="mode-tab-btn">
           <span class="tab-icon">
@@ -247,42 +254,24 @@
             </div>
           </div>
 
-          <!-- Primary Riot Sign In Action (1-Click) -->
+          <!-- Primary Riot Sign In Action (1-Click Nexus Unified) -->
           <div class="riot-action-group">
-            <!-- Google Sign-in with Account Chooser -->
-            <a id="btnOpenGoogleAuth" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1&method=google&prompt=select_account" target="_blank" rel="noopener noreferrer" class="btn-google-signin">
-              <div class="btn-google-brand-badge">
-                <svg class="google-icon-svg" viewBox="0 0 24 24" width="20" height="20">
-                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
-                  <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                </svg>
-              </div>
-              <div class="btn-signin-labels">
-                <span class="btn-signin-title">เข้าสู่ระบบด้วย Google (เลือกบัญชี)</span>
-                <span class="btn-signin-desc">เลือกบัญชี Google ที่ผูกกับ Valorant</span>
-              </div>
-              <svg class="riot-arrow-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </a>
-
-            <!-- Riot ID Sign-in -->
-            <a id="btnOpenRiotGoogle" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1&prompt=login" target="_blank" rel="noopener noreferrer" class="btn-riot-main-signin">
-              <div class="btn-riot-brand-badge">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+            <!-- Nexus Primary Login Button (Auto-Relay Loop Guard Enabled) -->
+            <a id="btnOpenGoogleAuth" href="https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&scope=account%20openid&nonce=1&prompt=login" target="_blank" rel="noopener noreferrer" class="btn-nexus-main-login" title="เข้าสู่ระบบ Riot Games">
+              <div class="btn-nexus-login-badge">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
                   <polyline points="10 17 15 12 10 7"/>
                   <line x1="15" y1="12" x2="3" y2="12"/>
                 </svg>
               </div>
               <div class="btn-signin-labels">
-                <span class="btn-signin-title">เข้าสู่ระบบด้วย Riot ID / อื่นๆ</span>
-                <span class="btn-signin-desc">Riot Account, Apple, Facebook, Xbox</span>
+                <span class="btn-signin-title">ล็อกอิน</span>
+                <span class="btn-signin-desc">Riot Games · Google · Riot ID (ล้างเซสชันเก่า ป้องกันหน้าค้างอัตโนมัติ)</span>
               </div>
-              <svg class="riot-arrow-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg class="nexus-arrow-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
             </a>
 
@@ -318,15 +307,6 @@
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </button>
           </div>
-
-          <!-- Riot login loop rescue: clears the stale RSO session that makes authenticate.riotgames.com spin forever -->
-          <button type="button" class="btn-riot-loop-fix" onclick="window.resetRiotAuthSession?.()">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><polyline points="21 3 21 8 16 8"/>
-              <path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><polyline points="3 21 3 16 8 16"/>
-            </svg>
-            <span>หน้า Riot โหลดค้าง / วนไม่หยุด? กดที่นี่เพื่อล้างเซสชัน Riot แล้วล็อกอินใหม่</span>
-          </button>
 
           <!-- Collapsible Password Login Drawer (For Local / Power Users) -->
           <div id="riotPasswordDrawer" class="riot-local-drawer hidden">
@@ -911,6 +891,833 @@
         </div>
       </section>
 
+      <!-- ================= VALORANT 2D REPLAY & COACHING ANALYSIS (OP.GG SUITE) ================= -->
+      <section id="replaySection" class="replay-dashboard-view hidden">
+
+        <!-- Unified OP.GG Replay Esports Header Bar -->
+        <div class="replay-top-bar">
+          <div class="replay-top-left">
+            <div class="badge-tag-official">
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/></svg>
+              <span>2D REPLAY</span>
+            </div>
+            <select id="replayMatchSelect" class="modern-select replay-match-dropdown">
+              <option value="demo_ascent">Ascent - VCT Champions Grand Final (13 - 11)</option>
+              <option value="demo_haven">Haven - Radiant Rank 1 Clash (14 - 12 OT)</option>
+              <option value="demo_bind">Bind - Immortals Showdown (13 - 9)</option>
+              <option value="demo_lotus">Lotus - Masters High-Elo Duel (13 - 10)</option>
+            </select>
+          </div>
+
+          <!-- OP.GG Replay Sub-Navigation Tabs -->
+          <div class="replay-subnav-bar">
+            <button class="replay-subnav-btn active" data-subview="2d-map">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/></svg>
+              <span>รีเพลย์ 2D</span>
+            </button>
+            <button class="replay-subnav-btn" data-subview="power-graph">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+              <span>กราฟทักษะ</span>
+            </button>
+            <button class="replay-subnav-btn" data-subview="ten-players">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <span>10 ผู้เล่น</span>
+            </button>
+            <button class="replay-subnav-btn" data-subview="spray-analysis">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+              <span>สเปรย์</span>
+            </button>
+            <button class="replay-subnav-btn" data-subview="movement-heatmap">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 17l4-6 4 3 3-5"/></svg>
+              <span>ความร้อน</span>
+            </button>
+            <button class="replay-subnav-btn" data-subview="round-flow">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span>สังหาร</span>
+            </button>
+            <button class="replay-subnav-btn" data-subview="coaching">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>โค้ช</span>
+            </button>
+          </div>
+
+          <div class="replay-top-right">
+            <button id="btnOpenVrfUpload" class="btn btn-primary btn-xs btn-icon-gap">
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>อัปโหลด</span>
+            </button>
+            <button id="btnOpenVrfGuide" class="btn btn-secondary btn-xs btn-icon-gap" title="แนะนำโฟลเดอร์ไฟล์รีเพลย์ในเครื่อง">
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>โฟลเดอร์</span>
+            </button>
+            <button id="btnToggleAudioSfx" class="btn btn-secondary btn-xs btn-icon-gap active" title="เปิด/ปิด เสียงจำลองการยิงและสไปก์">
+              <svg id="iconSfxOn" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+              <span id="labelAudioSfx">เสียง</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ================= SUBVIEW 1: 2D MINIMAP REPLAY ================= -->
+        <div id="subview2dMap" class="replay-subview-panel active">
+          
+          <!-- Round Selector Bar with Win Method & Score Badges -->
+          <div class="replay-round-ribbon">
+            <div class="ribbon-title-col">
+              <span class="ribbon-label">เลือกรอบแข่งขัน (ROUNDS)</span>
+              <div id="replayMatchScoreBanner" class="ribbon-match-score">
+                <span class="score-team score-atk" id="ribbonAtkScore">13</span>
+                <span class="score-colon">:</span>
+                <span class="score-team score-def" id="ribbonDefScore">11</span>
+                <span class="ribbon-map-tag" id="ribbonMapTag">ASCENT</span>
+              </div>
+            </div>
+            <div id="replayRoundsContainer" class="ribbon-rounds-scroll">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Main 2D Stage Layout (Map + Player HUD Dossier) -->
+          <div class="replay-stage-grid">
+            
+            <!-- Left/Center: Minimap Viewer Canvas -->
+            <div class="minimap-stage-wrapper">
+              
+              <!-- Top Canvas HUD (Round Status & Dynamic Killfeed) -->
+              <div class="minimap-overlay-top">
+                <div class="minimap-round-info-pill">
+                  <span id="hudRoundLabel" class="hud-round-pill">รอบที่ 24</span>
+                  <span id="hudPhaseLabel" class="hud-phase-pill">BUY PHASE / COMBAT</span>
+                  <span id="hudTimerClock" class="hud-timer-clock">01:45</span>
+                </div>
+                <!-- Dynamic Combat Killfeed Overlay -->
+                <div id="replayKillfeedOverlay" class="replay-killfeed-column">
+                  <!-- Populated dynamically during playback -->
+                </div>
+              </div>
+
+              <!-- Spike Timer Widget (Appears when planted) -->
+              <div id="replaySpikeWidget" class="replay-spike-floating-widget hidden">
+                <div class="spike-icon-pulse">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 22 22 22 12 2"/><line x1="12" y1="9" x2="12" y2="15"/></svg>
+                </div>
+                <div class="spike-text-wrap">
+                  <span class="spike-title">SPIKE DETONATION IN</span>
+                  <span id="spikeDetonationCount" class="spike-timer-countdown">45.0s</span>
+                </div>
+                <div class="spike-progress-track">
+                  <div id="spikeProgressBar" class="spike-progress-fill" style="width: 100%;"></div>
+                </div>
+              </div>
+
+              <!-- Canvas & Layers Container -->
+              <div class="minimap-canvas-box" id="minimapCanvasBox">
+                <img id="replayMinimapBgImg" src="https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/displayicon.png" alt="Minimap" class="minimap-raster-img">
+                <canvas id="replayCanvas" width="900" height="900" class="replay-vector-canvas"></canvas>
+                <div id="replayHtmlMarkersLayer" class="replay-html-markers-layer"></div>
+              </div>
+
+              <!-- Bottom Playback Controller Bar (Single Sleek Row) -->
+              <div class="replay-control-bar">
+                <div class="ctrl-left-btns">
+                  <button id="btnReplayPlayPause" class="btn-ctrl-action" title="เล่น / หยุดชั่วคราว (Spacebar)">
+                    <svg id="iconPlay" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                    <svg id="iconPause" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="hidden"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                  </button>
+                  <button id="btnReplayPrevSec" class="btn-ctrl-sub" title="ย้อนกลับ 5 วิ">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+                  </button>
+                  <button id="btnReplayNextSec" class="btn-ctrl-sub" title="ไปข้างหน้า 5 วิ">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+                  </button>
+                </div>
+
+                <div class="ctrl-center-timeline">
+                  <span id="ctrlTimeCurrent" class="ctrl-timestamp">00:00</span>
+                  <input type="range" id="replayTimelineScrubber" min="0" max="105" value="0" step="0.1" class="modern-range replay-scrubber">
+                  <span id="ctrlTimeTotal" class="ctrl-timestamp">01:45</span>
+                </div>
+
+                <div class="ctrl-right-speeds">
+                  <button id="btnReplayNextKill" class="btn-ctrl-sub btn-ctrl-accent" title="กระโดดไปยังจังหวะสังหารถัดไป">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  </button>
+                  <button class="btn-speed-pill active" data-speed="1">1x</button>
+                  <button class="btn-speed-pill" data-speed="2">2x</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Selected Player HUD Dossier & 10-Player Quick Selector -->
+            <div class="replay-player-dossier-col">
+              
+              <!-- Focused Player HUD Card -->
+              <div class="dossier-card" id="focusedPlayerCard">
+                <div class="dossier-card-header">
+                  <div class="dossier-agent-avatar-wrap">
+                    <img id="dossierAgentImg" src="https://media.valorant-api.com/agents/add6443a-41bd-e414-f6ad-e58d267f4e95/displayicon.png" alt="Agent" class="dossier-agent-img">
+                    <span id="dossierTeamTag" class="dossier-team-badge team-atk">ATK</span>
+                  </div>
+                  <div class="dossier-player-meta">
+                    <div class="dossier-name-row">
+                      <span id="dossierPlayerName" class="dossier-player-name">TenZ</span>
+                      <span id="dossierAgentName" class="dossier-agent-name">Jett</span>
+                    </div>
+                    <div class="dossier-role-row">
+                      <span id="dossierRankTier" class="dossier-rank-tag">Radiant #1</span>
+                      <span id="dossierCallout" class="dossier-callout-tag">A Site / Default</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Health & Shield Bars (Side-by-Side) -->
+                <div class="dossier-vitals-box">
+                  <div class="vital-row">
+                    <div class="vital-label-col">
+                      <span class="vital-name">HP</span>
+                      <span id="dossierHpVal" class="vital-val-num">100</span>
+                    </div>
+                    <div class="vital-bar-track">
+                      <div id="dossierHpBar" class="vital-bar-fill vital-hp-fill" style="width: 100%;"></div>
+                    </div>
+                  </div>
+                  <div class="vital-row">
+                    <div class="vital-label-col">
+                      <span class="vital-name">ARMOR</span>
+                      <span id="dossierArmorVal" class="vital-val-num">50</span>
+                    </div>
+                    <div class="vital-bar-track">
+                      <div id="dossierArmorBar" class="vital-bar-fill vital-armor-fill" style="width: 100%;"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Weapon & Combat Status -->
+                <div class="dossier-combat-grid">
+                  <div class="combat-item">
+                    <span class="combat-item-label">อาวุธที่ถือ</span>
+                    <span id="dossierWeapon" class="combat-item-val font-accent">Vandal</span>
+                  </div>
+                  <div class="combat-item">
+                    <span class="combat-item-label">กระสุน</span>
+                    <span id="dossierAmmo" class="combat-item-val">25 / 75</span>
+                  </div>
+                  <div class="combat-item">
+                    <span class="combat-item-label">องศาการเล็ง</span>
+                    <span id="dossierFacingAngle" class="combat-item-val">42°</span>
+                  </div>
+                  <div class="combat-item">
+                    <span class="combat-item-label">คิลในรอบนี้</span>
+                    <span id="dossierRoundKills" class="combat-item-val highlight-kill">2 Kills</span>
+                  </div>
+                </div>
+
+                <!-- Ability Charges Bar -->
+                <div class="dossier-abilities-row">
+                  <span class="abilities-row-label">สกิลที่พร้อมใช้งาน:</span>
+                  <div class="dossier-ability-icons">
+                    <div class="ability-slot active" id="slotQ" title="Skill Q">Q</div>
+                    <div class="ability-slot active" id="slotE" title="Skill E">E</div>
+                    <div class="ability-slot active" id="slotC" title="Skill C">C</div>
+                    <div class="ability-slot ult-ready" id="slotX" title="Ultimate (พร้อมใช้งาน)">ULT</div>
+                  </div>
+                </div>
+
+                <!-- Round Performance Summary -->
+                <div class="dossier-stats-summary">
+                  <div class="summary-chip">
+                    <span class="chip-lbl">ACS</span>
+                    <span id="dossierAcs" class="chip-val font-accent">342</span>
+                  </div>
+                  <div class="summary-chip">
+                    <span class="chip-lbl">ADR</span>
+                    <span id="dossierAdr" class="chip-val">198</span>
+                  </div>
+                  <div class="summary-chip">
+                    <span class="chip-lbl">HS %</span>
+                    <span id="dossierHs" class="chip-val">46%</span>
+                  </div>
+                  <div class="summary-chip">
+                    <span class="chip-lbl">เกรด OP.GG</span>
+                    <span id="dossierGrade" class="chip-val grade-s">S+</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 10-Player Switcher Roster (Side-by-Side: 5 ATK vs 5 DEF) -->
+              <div class="replay-roster-switcher-card">
+                <div class="roster-header">
+                  <span class="roster-title">ผู้เล่นทั้ง 10 คน (คลิกเพื่อสลับกล้อง)</span>
+                  <span class="roster-sub">10 PLAYERS</span>
+                </div>
+                
+                <div class="roster-teams-grid">
+                  <div class="roster-team-block">
+                    <div class="roster-team-title team-atk">
+                      <span class="team-indicator-dot atk"></span>
+                      <span>โจมตี (ATK)</span>
+                    </div>
+                    <div id="rosterAtkPlayers" class="roster-player-list">
+                      <!-- Populated by JS -->
+                    </div>
+                  </div>
+
+                  <div class="roster-team-block">
+                    <div class="roster-team-title team-def">
+                      <span class="team-indicator-dot def"></span>
+                      <span>ป้องกัน (DEF)</span>
+                    </div>
+                    <div id="rosterDefPlayers" class="roster-player-list">
+                      <!-- Populated by JS -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ================= SUBVIEW 2: POWER GRAPH / SKILL HEXAGON ================= -->
+        <div id="subviewPowerGraph" class="replay-subview-panel hidden">
+          <div class="power-graph-grid">
+            
+            <!-- Left: Radar / Hexagon Canvas & Grade Badge -->
+            <div class="radar-card">
+              <div class="radar-card-header">
+                <div>
+                  <h3 class="card-title">กราฟทักษะ 6 มิติ (Skill Hexagon)</h3>
+                  <p class="card-desc">วัดส่วนที่มองไม่เห็นของทักษะ เปรียบเทียบกับเกณฑ์มาตรฐานผู้เล่นระดับ Radiant</p>
+                </div>
+                <div id="powerGradeBadge" class="power-grade-badge grade-s">
+                  <span class="grade-tier">S+</span>
+                  <span class="grade-label">TOP 1.5%</span>
+                </div>
+              </div>
+
+              <div class="radar-canvas-container">
+                <canvas id="skillRadarCanvas" width="500" height="500" class="skill-radar-canvas"></canvas>
+              </div>
+
+              <div class="radar-legend-row">
+                <div class="legend-item"><span class="legend-dot my-dot"></span><span>คะแนนของคุณ</span></div>
+                <div class="legend-item"><span class="legend-dot radiant-dot"></span><span>ค่าเฉลี่ย Radiant</span></div>
+                <div class="legend-item"><span class="legend-dot immortal-dot"></span><span>ค่าเฉลี่ย Immortal</span></div>
+              </div>
+            </div>
+
+            <!-- Right: 6 Dimensional Drilldown Cards -->
+            <div class="power-metrics-column">
+              
+              <!-- 1. Reflexes -->
+              <div class="metric-card">
+                <div class="metric-card-top">
+                  <span class="metric-dim-name">1. เวลาตอบสนอง (Reflexes)</span>
+                  <span id="gradeReflexes" class="metric-tier-pill grade-s">Grade S</span>
+                </div>
+                <div class="metric-detail-row">
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Reaction Time</span>
+                    <span id="statReactionTime" class="stat-val font-accent">182 ms</span>
+                  </div>
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Aim Settle Time</span>
+                    <span id="statAimSettle" class="stat-val">110 ms</span>
+                  </div>
+                </div>
+                <p class="metric-tip">เวลาตั้งแต่เห็นศัตรูจนถึงกระสุนนัดแรก เร็วกว่าผู้เล่นเฉลี่ย 94%</p>
+              </div>
+
+              <!-- 2. Aim -->
+              <div class="metric-card">
+                <div class="metric-card-top">
+                  <span class="metric-dim-name">2. การเล็ง (Aim)</span>
+                  <span id="gradeAim" class="metric-tier-pill grade-s">Grade S+</span>
+                </div>
+                <div class="metric-detail-row">
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Pre-aim Error</span>
+                    <span id="statPreAim" class="stat-val font-accent">4.2°</span>
+                  </div>
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Head-Level Aim</span>
+                    <span id="statHeadLevel" class="stat-val">84%</span>
+                  </div>
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">First Bullet Acc</span>
+                    <span id="statFirstBullet" class="stat-val">76%</span>
+                  </div>
+                </div>
+                <p class="metric-tip">Crosshair Placement ระดับศีรษะและการวางเป้าดักมุมทำได้ไร้ที่ติ</p>
+              </div>
+
+              <!-- 3. Precision -->
+              <div class="metric-card">
+                <div class="metric-card-top">
+                  <span class="metric-dim-name">3. ความแม่นยำ (Precision)</span>
+                  <span id="gradePrecision" class="metric-tier-pill grade-a">Grade A+</span>
+                </div>
+                <div class="metric-detail-row">
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Hit Rate</span>
+                    <span id="statHitRate" class="stat-val font-accent">48%</span>
+                  </div>
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Headshot %</span>
+                    <span id="statHsPercent" class="stat-val">38%</span>
+                  </div>
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Damage Eff.</span>
+                    <span id="statDmgEff" class="stat-val">1.42</span>
+                  </div>
+                </div>
+                <p class="metric-tip">อัตรา Headshot สูงมากเมื่อใช้ Vandal และ Sheriff ในระยะกลาง</p>
+              </div>
+
+              <!-- 4. Movement Discipline -->
+              <div class="metric-card">
+                <div class="metric-card-top">
+                  <span class="metric-dim-name">4. วินัยการเคลื่อนไหว (Movement Discipline)</span>
+                  <span id="gradeMovement" class="metric-tier-pill grade-b">Grade B</span>
+                </div>
+                <div class="metric-detail-row">
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Counter-strafing</span>
+                    <span id="statCounterStrafe" class="stat-val font-accent">81%</span>
+                  </div>
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Still-shot Share</span>
+                    <span id="statStillShot" class="stat-val">78%</span>
+                  </div>
+                </div>
+                <p class="metric-tip warning-tip">มีการยิงระหว่างยังขยับตัวอยู่ 22% ทำให้กระสุนนัดแรกกระจายตัว</p>
+              </div>
+
+              <!-- 5. Teamplay -->
+              <div class="metric-card">
+                <div class="metric-card-top">
+                  <span class="metric-dim-name">5. การเล่นเป็นทีม (Teamplay)</span>
+                  <span id="gradeTeamplay" class="metric-tier-pill grade-s">Grade S</span>
+                </div>
+                <div class="metric-detail-row">
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Deaths Traded</span>
+                    <span id="statDeathsTraded" class="stat-val font-accent">72%</span>
+                  </div>
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Trade Conversion</span>
+                    <span id="statTradeConv" class="stat-val">68%</span>
+                  </div>
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Bait Rate</span>
+                    <span id="statBaitRate" class="stat-val">4% (ดีมาก)</span>
+                  </div>
+                </div>
+                <p class="metric-tip">จังหวะเข้าเทรดร่วมกับเพื่อนมีประสิทธิภาพสูง เข้าแลกทันภายใน 1.5 วินาที</p>
+              </div>
+
+              <!-- 6. Impact -->
+              <div class="metric-card">
+                <div class="metric-card-top">
+                  <span class="metric-dim-name">6. อิมแพ็คต่อเกม (Impact)</span>
+                  <span id="gradeImpact" class="metric-tier-pill grade-s">Grade S+</span>
+                </div>
+                <div class="metric-detail-row">
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">ACS</span>
+                    <span id="statAcsImpact" class="stat-val font-accent">312</span>
+                  </div>
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">K/D Ratio</span>
+                    <span id="statKdImpact" class="stat-val">1.64</span>
+                  </div>
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Opening Duel Win</span>
+                    <span id="statFirstDuel" class="stat-val">67%</span>
+                  </div>
+                  <div class="metric-sub-stat">
+                    <span class="stat-lbl">Clutch Win Rate</span>
+                    <span id="statClutch" class="stat-val">38%</span>
+                  </div>
+                </div>
+                <p class="metric-tip">สร้างความได้เปรียบด้วย First Blood ให้ทีมในหลายรอบสำคัญ</p>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ================= SUBVIEW 3: 10 PLAYERS COMPARISON ================= -->
+        <div id="subviewTenPlayers" class="replay-subview-panel hidden">
+          
+          <!-- Team Head-to-Head Comparison Bar -->
+          <div class="team-h2h-summary-card">
+            <div class="h2h-col h2h-left">
+              <div class="h2h-team-name team-atk">TEAM A (ATTACKERS)</div>
+              <div class="h2h-big-stat" id="h2hScoreAtk">13 WINS</div>
+              <div class="h2h-meta-stat">Avg ACS: <span id="h2hAvgAcsAtk">238</span> · Kills: <span id="h2hKillsAtk">84</span></div>
+            </div>
+            <div class="h2h-center-vs">
+              <span class="vs-circle">VS</span>
+            </div>
+            <div class="h2h-col h2h-right">
+              <div class="h2h-team-name team-def">TEAM B (DEFENDERS)</div>
+              <div class="h2h-big-stat" id="h2hScoreDef">11 WINS</div>
+              <div class="h2h-meta-stat">Avg ACS: <span id="h2hAvgAcsDef">214</span> · Kills: <span id="h2hKillsDef">76</span></div>
+            </div>
+          </div>
+
+          <!-- 10 Players Detailed Grid -->
+          <div class="ten-players-roster-grid">
+            <div class="roster-side-col">
+              <h4 class="roster-side-title team-atk">ผู้เล่นฝั่งโจมตี (TEAM A)</h4>
+              <div id="gridAtkCards" class="player-cards-stack">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+            <div class="roster-side-col">
+              <h4 class="roster-side-title team-def">ผู้เล่นฝั่งป้องกัน (TEAM B)</h4>
+              <div id="gridDefCards" class="player-cards-stack">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= SUBVIEW 4: SPRAY ANALYSIS ================= -->
+        <div id="subviewSprayAnalysis" class="replay-subview-panel hidden">
+          <div class="spray-analysis-grid">
+            
+            <!-- Left: Recoil Visualizer Canvas (5° Grid) -->
+            <div class="spray-canvas-card">
+              <div class="spray-header">
+                <div>
+                  <h3 class="card-title">การวิเคราะห์วิถีสเปรย์ (Recoil Pattern Visualizer)</h3>
+                  <p class="card-desc">สเกล 1 ช่องกริด = 5 องศา แสดงจุดตกกระสุนจริงเทียบกับจุดกึ่งกลางเป้าหมาย</p>
+                </div>
+                <button id="btnAnimateSpray" class="btn btn-secondary btn-sm btn-icon-gap">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                  <span>เล่นแอนิเมชันสเปรย์</span>
+                </button>
+              </div>
+
+              <!-- Weapon Switcher & Bullets Filter -->
+              <div class="spray-filter-row">
+                <div class="weapon-pills-row">
+                  <button class="weapon-spray-pill active" data-weapon="vandal">Vandal</button>
+                  <button class="weapon-spray-pill" data-weapon="phantom">Phantom</button>
+                  <button class="weapon-spray-pill" data-weapon="spectre">Spectre</button>
+                  <button class="weapon-spray-pill" data-weapon="sheriff">Sheriff</button>
+                  <button class="weapon-spray-pill" data-weapon="odin">Odin</button>
+                </div>
+                <div class="bullet-sequence-row">
+                  <button class="seq-pill active" data-seq="all">กระสุนทั้งหมด (All)</button>
+                  <button class="seq-pill" data-seq="first4">4 นัดแรก (Burst)</button>
+                  <button class="seq-pill" data-seq="mid">นัดที่ 5 - 12</button>
+                  <button class="seq-pill" data-seq="late">นัดที่ 13 - 25</button>
+                </div>
+              </div>
+
+              <!-- Spray Pattern Canvas -->
+              <div class="spray-canvas-wrapper">
+                <canvas id="sprayCanvas" width="540" height="540" class="spray-render-canvas"></canvas>
+                <div class="spray-scale-badge">1 Grid = 5.0°</div>
+              </div>
+
+              <div class="spray-canvas-footer">
+                <label class="toggle-checkbox-label">
+                  <input type="checkbox" id="chkShowRecoilComp" checked>
+                  <span>แสดงเส้นชดเชยแรงดีดในอุดมคติ (Ideal Compensation Vector)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Right: Spray Metrics & Accuracy Analysis -->
+            <div class="spray-stats-card">
+              <h3 class="card-title">สถิติการคุมแรงดีด (Spray Discipline)</h3>
+              
+              <div class="spray-stat-block">
+                <div class="spray-stat-head">
+                  <span class="spray-stat-title">ความคลาดเคลื่อนเฉลี่ย (Avg Recoil Error)</span>
+                  <span id="sprayAvgError" class="spray-badge-grade grade-s">0.82° · ระดับโปร</span>
+                </div>
+                <div class="spray-stat-bar-track">
+                  <div id="sprayAvgErrorBar" class="spray-stat-bar-fill" style="width: 88%;"></div>
+                </div>
+                <p class="spray-stat-desc">การดึงเมาส์คุมแรงดีดในแนวตั้งอยู่ในเกณฑ์แม่นยำสูงมาก กระสุนเกาะกลุ่มแน่น</p>
+              </div>
+
+              <div class="spray-stat-block">
+                <div class="spray-stat-head">
+                  <span class="spray-stat-title">กลุ่มกระสุน 4 นัดแรก (Opening 4-Bullet Tightness)</span>
+                  <span id="sprayFirst4Tightness" class="spray-badge-grade grade-s">0.34° · ยอดเยี่ยม</span>
+                </div>
+                <div class="spray-stat-bar-track">
+                  <div class="spray-stat-bar-fill" style="width: 95%;"></div>
+                </div>
+                <p class="spray-stat-desc">จังหวะ Burst 3-4 นัดแรกตรงเป้าหมายแทบไม่เบี่ยงเบน ปิดฉากศัตรูได้ในจังหวะแรก</p>
+              </div>
+
+              <div class="spray-stat-block">
+                <div class="spray-stat-head">
+                  <span class="spray-stat-title">การคุมสเปรย์ระยะยาว (Long-Spray Retention)</span>
+                  <span id="sprayLongRetention" class="spray-badge-grade grade-a">78% · ดี</span>
+                </div>
+                <div class="spray-stat-bar-track">
+                  <div class="spray-stat-bar-fill" style="width: 78%;"></div>
+                </div>
+                <p class="spray-stat-desc">ช่วงกระสุนนัดที่ 12 เป็นต้นไปมีอาการสะบัดซ้ายขวาเล็กน้อย แนะนำสลับเป็นจังหวะ Burst reset</p>
+              </div>
+
+              <div class="spray-weapon-spec-box">
+                <h4 class="spec-box-title" id="sprayWeaponTitle">Vandal Weapon Profile</h4>
+                <div class="spec-grid">
+                  <div class="spec-item"><span class="spec-k">ความเร็วยิง:</span><span class="spec-v" id="specFireRate">9.75 นัด/วินาที</span></div>
+                  <div class="spec-item"><span class="spec-k">ความเร็ววิ่ง:</span><span class="spec-v" id="specRunSpeed">5.4 ม./วินาที</span></div>
+                  <div class="spec-item"><span class="spec-k">Headshot DMG:</span><span class="spec-v" id="specHeadDmg">160 (ทุกระยะ)</span></div>
+                  <div class="spec-item"><span class="spec-k">Body DMG:</span><span class="spec-v" id="specBodyDmg">40</span></div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ================= SUBVIEW 5: MOVEMENT HEATMAP ================= -->
+        <div id="subviewMovementHeatmap" class="replay-subview-panel hidden">
+          <div class="heatmap-layout-grid">
+            
+            <!-- Left: Map Heatmap Canvas -->
+            <div class="heatmap-canvas-card">
+              <div class="heatmap-toolbar">
+                <div class="heatmap-phase-selector">
+                  <button class="heatmap-phase-btn active" data-phase="all">ตลอดทั้งแมตช์</button>
+                  <button class="heatmap-phase-btn" data-phase="atk">ช่วงบุก (Attack Phase)</button>
+                  <button class="heatmap-phase-btn" data-phase="def">ช่วงกัน (Defense Phase)</button>
+                </div>
+
+                <div class="heatmap-layer-selector">
+                  <button class="heatmap-layer-btn active" data-layer="me">ความร้อนของผู้เล่นคุณ</button>
+                  <button class="heatmap-layer-btn" data-layer="team">ฝั่งเพื่อนร่วมทีม</button>
+                  <button class="heatmap-layer-btn" data-layer="enemy">ฝั่งศัตรู</button>
+                  <button class="heatmap-layer-btn" data-layer="all">รวมทุกคน</button>
+                </div>
+              </div>
+
+              <div class="heatmap-canvas-box" id="heatmapCanvasBox">
+                <img id="heatmapBgImg" src="https://media.valorant-api.com/maps/7eaecc1b-4337-bbf6-6ab9-04b8f06b3319/displayicon.png" alt="Heatmap Map" class="heatmap-raster-img">
+                <canvas id="movementHeatmapCanvas" width="800" height="800" class="heatmap-render-canvas"></canvas>
+              </div>
+
+              <!-- Thermal Ramp Indicator -->
+              <div class="heatmap-legend-bar">
+                <span class="ramp-label">ความหนาแน่นต่ำ (ผ่านชั่วคราว)</span>
+                <div class="thermal-gradient-ramp"></div>
+                <span class="ramp-label">ความหนาแน่นสูง (จุดปะทะ / ยึดพื้นที่นาน)</span>
+              </div>
+            </div>
+
+            <!-- Right: Route & Zone Distribution Stats -->
+            <div class="heatmap-stats-card">
+              <h3 class="card-title">สัดส่วนการเข้าทำพื้นที่ (Route & Zone Distribution)</h3>
+              
+              <div class="zone-dist-list">
+                <div class="zone-dist-item">
+                  <div class="zone-meta-row">
+                    <span class="zone-name font-accent">Site A (A Main &amp; A Site)</span>
+                    <span id="pctSiteA" class="zone-pct font-accent">44%</span>
+                  </div>
+                  <div class="zone-bar-track">
+                    <div id="barSiteA" class="zone-bar-fill fill-accent" style="width: 44%;"></div>
+                  </div>
+                  <span class="zone-detail">เข้าทำ 11 รอบ · Win Rate 73%</span>
+                </div>
+
+                <div class="zone-dist-item">
+                  <div class="zone-meta-row">
+                    <span class="zone-name">Mid (Courtyard, Catwalk, Market)</span>
+                    <span id="pctMid" class="zone-pct">28%</span>
+                  </div>
+                  <div class="zone-bar-track">
+                    <div id="barMid" class="zone-bar-fill fill-teal" style="width: 28%;"></div>
+                  </div>
+                  <span class="zone-detail">เข้าทำ 7 รอบ · Win Rate 57%</span>
+                </div>
+
+                <div class="zone-dist-item">
+                  <div class="zone-meta-row">
+                    <span class="zone-name">Site B (B Main &amp; B Site)</span>
+                    <span id="pctSiteB" class="zone-pct">28%</span>
+                  </div>
+                  <div class="zone-bar-track">
+                    <div id="barSiteB" class="zone-bar-fill fill-gold" style="width: 28%;"></div>
+                  </div>
+                  <span class="zone-detail">เข้าทำ 7 รอบ · Win Rate 57%</span>
+                </div>
+              </div>
+
+              <div class="heatmap-key-metrics">
+                <div class="key-metric-chip">
+                  <span class="k-label">ระยะเวลารอดเฉลี่ย</span>
+                  <span id="statSurvivalTime" class="k-val">58.4 วินาที</span>
+                </div>
+                <div class="key-metric-chip">
+                  <span class="k-label">จุดเสี่ยงโดนดักมากที่สุด</span>
+                  <span id="statDangerZone" class="k-val font-accent">A Short / Tree</span>
+                </div>
+                <div class="key-metric-chip">
+                  <span class="k-label">อัตรา Lurk / Flank</span>
+                  <span id="statFlankRate" class="k-val">14%</span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ================= SUBVIEW 6: ROUND FLOW ================= -->
+        <div id="subviewRoundFlow" class="replay-subview-panel hidden">
+          <div class="round-flow-container">
+            <div class="flow-header-row">
+              <div>
+                <h3 class="card-title">ลำดับเหตุการณ์การสังหารในแต่ละรอบ (Combat Timeline)</h3>
+                <p class="card-desc">คลิกที่เหตุการณ์ใดก็ได้เพื่อกระโดดไปยังวินาทีนั้นในรีเพลย์ 2D ทันที</p>
+              </div>
+              <div class="flow-filter-tags">
+                <span class="filter-pill-tag active" data-flowfilter="all">ทั้งหมด</span>
+                <span class="filter-pill-tag" data-flowfilter="firstblood">First Blood</span>
+                <span class="filter-pill-tag" data-flowfilter="clutch">Clutch</span>
+              </div>
+            </div>
+
+            <!-- Event Cards Stream -->
+            <div id="roundFlowEventStream" class="flow-event-stream">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SUBVIEW 7: COACHING PRESCRIPTION ================= -->
+        <div id="subviewCoaching" class="replay-subview-panel hidden">
+          <div class="coaching-prescriptions-grid">
+            
+            <!-- Prescription 1: One-Pick (The One Thing To Fix) -->
+            <div class="prescription-card highlight-fix">
+              <div class="card-badge-header">
+                <span class="badge-tag-danger">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  ONE-PICK · จุดสำคัญที่สุดที่ต้องแก้ไขทันที
+                </span>
+                <span id="coachOnePickGrade" class="prescription-grade-tag grade-b">Grade B-</span>
+              </div>
+              
+              <h3 id="coachOnePickTitle" class="prescription-heading">วินัยการเคลื่อนไหวขณะลั่นไก (Movement Discipline)</h3>
+              <p id="coachOnePickDesc" class="prescription-body">
+                ระบบตรวจพบว่าคุณมีจังหวะยิงระหว่างที่ตัวละครยังไม่หยุดนิ่ง <strong>22% (Still-shot share: 78%)</strong> โดยเฉพาะเมื่อถูกศัตรู Peek ใส่ ทำให้เกิด Movement Error ส่งผลให้กระสุนนัดแรกเบี่ยงออกจากศีรษะ
+              </p>
+
+              <div class="coach-action-box">
+                <h4 class="action-box-title">คำแนะนำจากโค้ช AI (AI Coach Prescription):</h4>
+                <ul class="action-checklist">
+                  <li>
+                    <label class="check-item-label">
+                      <input type="checkbox" class="modern-checkbox">
+                      <span>ฝึกจังหวะ Counter-strafing ในสนามซ้อม: ปล่อยปุ่มเดินแล้วเคาะปุ่มทิศทางตรงข้าม 1 ครั้งเพื่อหยุดนิ่ง 100% ทันทีก่อนคลิกซ้าย</span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="check-item-label">
+                      <input type="checkbox" class="modern-checkbox">
+                      <span>ไม่ยิงแบบ Run-and-Gun ด้วย Vandal แม้ในระยะประชิด ให้ใช้จังหวะ Burst 2 นัดแล้ว Strafe หลบ</span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="check-item-label">
+                      <input type="checkbox" class="modern-checkbox">
+                      <span>เปิดตัวเลือก "Shooting Error Graph" ในการตั้งค่าเกมเพื่อตรวจสอบกราฟสีส้ม (Movement error) หลังจบไฟต์</span>
+                    </label>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Prescription 2: Keep (Already Strong) -->
+            <div class="prescription-card highlight-keep">
+              <div class="card-badge-header">
+                <span class="badge-tag-success">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  KEEP · จุดแข็งที่ยอดเยี่ยม ให้รักษาไว้
+                </span>
+                <span class="prescription-grade-tag grade-s">Grade S+</span>
+              </div>
+
+              <h3 class="prescription-heading">การวางเป้าดักมุม (Head-Level Crosshair Placement) &amp; ADR</h3>
+              <p class="prescription-body">
+                คุณทำสถิติ Head-Level Aim สูงถึง <strong>84%</strong> และทำความเสียหายเฉลี่ยต่อรอบ (ADR) ได้ถึง <strong>198 หน่วย</strong> ซึ่งจัดอยู่ในกลุ่มผู้เล่นระดับท็อป 1.8% ของ Radiant เมื่อคุณหยุดนิ่ง ศัตรูแทบไม่มีโอกาสตอบโต้
+              </p>
+
+              <div class="keep-highlights-row">
+                <div class="keep-stat-badge">
+                  <span class="keep-k">Pre-aim Angle</span>
+                  <span class="keep-v font-accent">4.2° (S+)</span>
+                </div>
+                <div class="keep-stat-badge">
+                  <span class="keep-k">Deaths Traded</span>
+                  <span class="keep-v font-accent">72% (S)</span>
+                </div>
+                <div class="keep-stat-badge">
+                  <span class="keep-k">Opening Duels</span>
+                  <span class="keep-v font-accent">67% (S+)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prescription 3: Next Match 3 Goals -->
+            <div class="prescription-card highlight-goals">
+              <div class="card-badge-header">
+                <span class="badge-tag-info">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  NEXT MATCH · 3 เป้าหมายปฏิบัติจริงในเกมถัดไป
+                </span>
+              </div>
+
+              <div class="goals-checklist-stack">
+                <div class="goal-item-card">
+                  <span class="goal-num">01</span>
+                  <div class="goal-content">
+                    <span class="goal-title">Counter-strafe ทุกครั้งที่ดักมุม A Main</span>
+                    <span class="goal-desc">หยุดตัวละครให้สนิทก่อนลั่นไกนัดแรก ตั้งเป้า Still-shot share ให้เกิน 90%</span>
+                  </div>
+                </div>
+
+                <div class="goal-item-card">
+                  <span class="goal-num">02</span>
+                  <div class="goal-content">
+                    <span class="goal-title">ยืนในระยะเทรดเพื่อนร่วมทีมไม่เกิน 8 เมตร</span>
+                    <span class="goal-desc">ลดจังหวะ Untraded Death ลงอย่างน้อย 2 ครั้ง เพื่อรักษาความได้เปรียบจำนวนคน</span>
+                  </div>
+                </div>
+
+                <div class="goal-item-card">
+                  <span class="goal-num">03</span>
+                  <div class="goal-content">
+                    <span class="goal-title">จำกัดการสเปรย์ต่อเนื่องไม่เกิน 4 นัดต่อชุด</span>
+                    <span class="goal-desc">ใช้เทคนิค 2-3 Bullet Burst แล้วก้าวหลบ (Strafe) รีเซ็ตแรงดีดก่อนยิงชุดถัดไป</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
     </main>
 
     <!-- ================= SKIN INSPECTOR MODAL ================= -->
@@ -1140,6 +1947,10 @@
           <button id="btnTabMatchStats" class="subnav-tab-btn" data-subtab="stats">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
             <span>สถิติเจาะลึก (Combat & Econ)</span>
+          </button>
+          <button id="btnOpenInFull2dReplay" class="subnav-tab-btn" style="color:var(--val-red); border-color:rgba(255,70,85,0.4); margin-left:auto;" title="เปิดแมตช์นี้ในห้องวิเคราะห์ 2D Replay Suite">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+            <span style="font-weight:700;">เปิดใน รีเพลย์ 2D (OP.GG)</span>
           </button>
         </div>
 
@@ -1714,6 +2525,10 @@
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
           <span>บันเดิลปืน (Bundles)</span>
         </button>
+        <button type="button" class="mob-menu-btn" data-mob-tab="replay">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ff4655" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="#ff4655"/></svg>
+          <span style="color: #ff4655; font-weight: 700;">รีเพลย์ 2D (2D Replay PRO)</span>
+        </button>
         <button type="button" class="mob-menu-btn" data-mob-tab="agents">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <span>ตัวละครเอเจนท์ (Agents)</span>
@@ -1807,13 +2622,6 @@
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               <span>เปิดรับ Token ใหม่ (1 คลิก)</span>
             </a>
-            <button type="button" class="btn-riot-loop-fix" onclick="window.resetRiotAuthSession?.()">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><polyline points="21 3 21 8 16 8"/>
-                <path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><polyline points="3 21 3 16 8 16"/>
-              </svg>
-              <span>ถ้าหน้า Riot หมุนโหลดไม่หยุด กดนี่เพื่อล้างเซสชัน Riot ก่อน</span>
-            </button>
           </div>
         </div>
 
@@ -1847,6 +2655,82 @@
     </div>
   </div>
 
-           <script src="app.js?v=7.6"></script>
+  <!-- ================= VRF REPLAY UPLOADER & WINDOWS PATH MODAL ================= -->
+  <div id="vrfUploadModal" class="modal-backdrop-layer hidden" aria-hidden="true">
+    <div class="modal-box modal-vrf-box" role="dialog" aria-modal="true" aria-labelledby="vrfModalTitle">
+      <div class="modal-header">
+        <div class="modal-header-titles">
+          <div class="modal-badge-tag" style="color:var(--val-cyan); border-color:var(--val-cyan);">DEMO PARSER</div>
+          <h3 id="vrfModalTitle" class="modal-title">อัปโหลดไฟล์รีเพลย์ Valorant (.vrf)</h3>
+          <p class="modal-subtitle">เปิดไฟล์รีเพลย์จากการแข่งขันจริง เพื่อรับชม 2D Replay และการวิเคราะห์แบบ OP.GG</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="btnCloseVrfModal" aria-label="ปิด">&times;</button>
+      </div>
+
+      <div class="modal-body vrf-modal-body">
+        
+        <!-- Windows Explorer Helper Card with 1-Click Copy -->
+        <div class="vrf-path-helper-card">
+          <div class="vrf-path-title-row">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <span>ตำแหน่งโฟลเดอร์รีเพลย์ใน Windows:</span>
+          </div>
+          <div class="vrf-path-copy-box">
+            <code id="vrfWindowsPathCode" class="vrf-code-text">%localappdata%\VALORANT\Saved\Demos</code>
+            <button id="btnCopyVrfPath" class="btn btn-secondary btn-sm" title="คัดลอกพาธ">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span id="btnCopyVrfPathLabel">คัดลอกพาธ</span>
+            </button>
+          </div>
+          <div class="vrf-steps-list">
+            <span class="vrf-step-chip">1. กดปุ่มคัดลอกพาธ</span>
+            <span class="vrf-step-chip">2. กด Win + R หรือเปิด File Explorer แล้ววาง (Ctrl+V)</span>
+            <span class="vrf-step-chip">3. ลากไฟล์ .vrf มาวางในช่องด้านล่าง</span>
+          </div>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div id="vrfDropZone" class="vrf-drop-zone">
+          <input type="file" id="vrfFileInput" accept=".vrf,.dem,.json" class="hidden">
+          <div class="drop-zone-content">
+            <div class="drop-zone-icon">
+              <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="var(--val-red)" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <h4 class="drop-zone-title">ลากไฟล์ .vrf มาวางที่นี่</h4>
+            <p class="drop-zone-desc">หรือคลิกเพื่อเลือกไฟล์จากคอมพิวเตอร์ของคุณ</p>
+            <button type="button" id="btnBrowseVrfFile" class="btn btn-primary btn-sm">เลือกไฟล์จากเครื่อง</button>
+            <span class="drop-zone-note">รองรับไฟล์ Valorant Replay (.vrf) และไฟล์จำลอง JSON</span>
+          </div>
+        </div>
+
+        <!-- Sample Replay Demos Quick Selector -->
+        <div class="vrf-quick-demos-section">
+          <h5 class="quick-demos-title">หรือทดลองเล่นด้วยไฟล์รีเพลย์ตัวอย่างระดับทัวร์นาเมนต์:</h5>
+          <div class="quick-demos-grid">
+            <button class="btn-quick-demo" data-demo="demo_ascent">
+              <span class="demo-map">Ascent</span>
+              <span class="demo-desc">VCT Champions Grand Final (13 - 11)</span>
+            </button>
+            <button class="btn-quick-demo" data-demo="demo_haven">
+              <span class="demo-map">Haven</span>
+              <span class="demo-desc">Radiant Rank 1 Overtime (14 - 12)</span>
+            </button>
+            <button class="btn-quick-demo" data-demo="demo_bind">
+              <span class="demo-map">Bind</span>
+              <span class="demo-desc">Immortals High-Elo Duel (13 - 9)</span>
+            </button>
+            <button class="btn-quick-demo" data-demo="demo_lotus">
+              <span class="demo-map">Lotus</span>
+              <span class="demo-desc">Masters Tokyo Decider (13 - 10)</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="replay-engine.js?v=1.9.4"></script>
+  <script src="app.js?v=1.9.4"></script>
 </body>
 </html>

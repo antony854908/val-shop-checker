@@ -1148,7 +1148,7 @@ async function switchAccount(puuid) {
   }
 
   showLoginView();
-  showAlert(googleAlert, `เซสชันของบัญชี <strong>${escapeHtml(acc.gameName)}#${escapeHtml(acc.tagLine)}</strong> หมดอายุแล้ว กรุณากดปุ่ม <strong>เข้าสู่ระบบด้วย Google (เลือกบัญชี)</strong> ด้านล่างเพื่ออัปเดต`, 'warning');
+  showAlert(googleAlert, `เซสชันของบัญชี <strong>${escapeHtml(acc.gameName)}#${escapeHtml(acc.tagLine)}</strong> หมดอายุแล้ว กรุณากดปุ่ม <strong>ล็อกอิน</strong> ด้านล่างเพื่ออัปเดต`, 'warning');
   const googleBtn = document.getElementById('btnOpenGoogleAuth');
   if (googleBtn) {
     googleBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1189,7 +1189,7 @@ function activateGoogleWaitingState() {
   if (googleWaitingBanner) googleWaitingBanner.classList.remove('hidden');
   showAlert(
     googleAlert,
-    'เปิดหน้าระบบเลือกบัญชีแล้ว! ให้เลือกบัญชี Google และเข้าสู่ระบบ จากนั้นคัดลอกลิงก์หรือ Token มาวางด้านล่าง',
+    'เปิดหน้าต่างล็อกอินแล้ว! กรุณาเข้าสู่ระบบ Riot Games / Google จากนั้นคัดลอกลิงก์หรือ Token มาวางด้านล่าง (ระบบตรวจจับและวางให้อัตโนมัติ)',
     'info'
   );
   if (quickPasteInput) {
@@ -2977,11 +2977,13 @@ const btnTabInventory = document.getElementById('btnTabInventory');
 const btnTabCrosshairs = document.getElementById('btnTabCrosshairs');
 const btnTabCareer = document.getElementById('btnTabCareer');
 const btnTabAgents = document.getElementById('btnTabAgents');
+const btnTabReplay = document.getElementById('btnTabReplay');
 const btnTabCatalog = document.getElementById('btnTabCatalog');
 const btnMobOpenVp = document.getElementById('btnMobOpenVp');
 
 const inventorySection = document.getElementById('inventorySection');
 const crosshairsSection = document.getElementById('crosshairsSection');
+const replaySection = document.getElementById('replaySection');
 
 function triggerSectionAnimation(el) {
   if (!el) return;
@@ -3000,6 +3002,7 @@ function switchAppMode(mode) {
   btnTabCrosshairs?.classList.toggle('active', mode === 'crosshairs');
   btnTabCareer?.classList.toggle('active', mode === 'career');
   btnTabAgents?.classList.toggle('active', mode === 'agents');
+  btnTabReplay?.classList.toggle('active', mode === 'replay');
   btnTabCatalog?.classList.toggle('active', mode === 'catalog');
 
   // Update mobile bottom nav items
@@ -3013,6 +3016,13 @@ function switchAppMode(mode) {
   storeSection?.classList.add('hidden');
   inventorySection?.classList.add('hidden');
   crosshairsSection?.classList.add('hidden');
+  replaySection?.classList.add('hidden');
+
+  // Zero-scroll viewport lock is only for the 2D replay dashboard.
+  // Leaving replay must also release the hard scroll lock, otherwise
+  // every other tab inherits a frozen viewport.
+  document.body.classList.toggle('replay-mode', mode === 'replay');
+  if (mode !== 'replay') document.body.classList.remove('replay-locked');
 
   if (mode === 'store') {
     if (currentUser) {
@@ -3077,6 +3087,19 @@ function switchAppMode(mode) {
     catalogSection?.classList.remove('hidden');
     triggerSectionAnimation(catalogSection);
     resetAndLoadCatalog();
+  } else if (mode === 'replay') {
+    loginSection?.classList.add('hidden');
+    storeSection?.classList.add('hidden');
+    careerSection?.classList.add('hidden');
+    agentsSection?.classList.add('hidden');
+    catalogSection?.classList.add('hidden');
+    inventorySection?.classList.add('hidden');
+    crosshairsSection?.classList.add('hidden');
+    replaySection?.classList.remove('hidden');
+    triggerSectionAnimation(replaySection);
+    if (window.ValReplayEngine) {
+      window.ValReplayEngine.switchSubView('2d-map');
+    }
   }
 }
 
@@ -3085,6 +3108,7 @@ btnTabInventory?.addEventListener('click', () => switchAppMode('inventory'));
 btnTabCrosshairs?.addEventListener('click', () => switchAppMode('crosshairs'));
 btnTabCareer?.addEventListener('click', () => switchAppMode('career'));
 btnTabAgents?.addEventListener('click', () => switchAppMode('agents'));
+btnTabReplay?.addEventListener('click', () => switchAppMode('replay'));
 btnTabCatalog?.addEventListener('click', () => switchAppMode('catalog'));
 
 // Mobile Bottom Nav Click Handlers
@@ -3736,13 +3760,30 @@ function renderMatchesList(matches) {
 
       <div class="match-action-box">
         <button class="btn btn-outline-primary btn-sm btn-view-scoreboard">
-          ตารางคะแนน 10 คน
+          ตารางคะแนน
+        </button>
+        <button class="btn btn-primary btn-sm btn-view-2d-replay btn-icon-gap" title="วิเคราะห์แมตช์นี้ในรีเพลย์ 2D OP.GG">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+          <span>รีเพลย์ 2D</span>
         </button>
       </div>
     `;
 
     card.addEventListener('mouseenter', () => playTacticalAudio('hover'));
     card.querySelector('.btn-view-scoreboard')?.addEventListener('click', () => openMatchScoreboard(m));
+    card.querySelector('.btn-view-2d-replay')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playTacticalAudio('click');
+      if (window.ValReplayEngine) {
+        window.ValReplayEngine.loadFromUserCareerMatch({
+          matchId: m.matchId,
+          mapName: m.map?.displayName,
+          myTeamScore: m.myTeamScore,
+          enemyTeamScore: m.enemyTeamScore
+        });
+      }
+      switchAppMode('replay');
+    });
     container.appendChild(card);
   });
 }
@@ -3770,8 +3811,25 @@ function switchMatchModalSubtab(tabName) {
 
 document.querySelectorAll('.subnav-tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    switchMatchModalSubtab(btn.dataset.subtab);
+    if (btn.dataset.subtab) switchMatchModalSubtab(btn.dataset.subtab);
   });
+});
+
+document.getElementById('btnOpenInFull2dReplay')?.addEventListener('click', () => {
+  const matchModal = document.getElementById('matchScoreboardModal');
+  if (matchModal) {
+    matchModal.classList.add('hidden');
+    matchModal.setAttribute('aria-hidden', 'true');
+  }
+  if (currentActiveMatch && window.ValReplayEngine) {
+    window.ValReplayEngine.loadFromUserCareerMatch({
+      matchId: currentActiveMatch.matchId,
+      mapName: currentActiveMatch.map?.displayName,
+      myTeamScore: currentActiveMatch.myTeamScore,
+      enemyTeamScore: currentActiveMatch.enemyTeamScore
+    });
+  }
+  switchAppMode('replay');
 });
 
 function openMatchScoreboard(match) {
@@ -3901,19 +3959,31 @@ async function loadAllAgents() {
 }
 
 function getFullAgentData(agentRef) {
-  if (!agentRef) return null;
+  if (!agentRef) {
+    return {
+      displayName: 'Agent',
+      role: 'Duelist',
+      roleIcon: null,
+      displayIcon: 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png',
+      fullPortrait: 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png',
+      description: 'เจ้าหน้าที่พิเศษแห่งหน่วย VALORANT Protocol',
+      abilities: []
+    };
+  }
   const name = typeof agentRef === 'string' ? agentRef : (agentRef.displayName || agentRef.uuid || '');
-  const found = allPlayableAgentsMap.get(name.toLowerCase()) || allPlayableAgentsMap.get((agentRef.uuid || '').toLowerCase());
+  const uuid = typeof agentRef === 'object' && agentRef ? (agentRef.uuid || '') : '';
+  const found = (name ? allPlayableAgentsMap.get(name.toLowerCase()) : null) || (uuid ? allPlayableAgentsMap.get(uuid.toLowerCase()) : null);
   if (found) return found;
 
+  const fallbackName = typeof agentRef === 'string' ? agentRef : (agentRef.displayName || 'Agent');
   return {
-    displayName: agentRef.displayName || 'Agent',
-    role: agentRef.role || 'Duelist',
-    roleIcon: agentRef.roleIcon || null,
-    displayIcon: agentRef.displayIcon || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png',
-    fullPortrait: agentRef.fullPortrait || agentRef.displayIcon || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png',
-    description: agentRef.description || 'เจ้าหน้าที่พิเศษแห่งหน่วย VALORANT Protocol',
-    abilities: agentRef.abilities || []
+    displayName: fallbackName,
+    role: (agentRef && typeof agentRef === 'object' && agentRef.role) || 'Duelist',
+    roleIcon: (agentRef && typeof agentRef === 'object' && agentRef.roleIcon) || null,
+    displayIcon: (agentRef && typeof agentRef === 'object' && agentRef.displayIcon) || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png',
+    fullPortrait: (agentRef && typeof agentRef === 'object' && (agentRef.fullPortrait || agentRef.displayIcon)) || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png',
+    description: (agentRef && typeof agentRef === 'object' && agentRef.description) || 'เจ้าหน้าที่พิเศษแห่งหน่วย VALORANT Protocol',
+    abilities: (agentRef && typeof agentRef === 'object' && agentRef.abilities) || []
   };
 }
 
@@ -4186,8 +4256,8 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
   let overallDefuses = 0;
 
   matches.forEach(m => {
-    const ag = m.myAgent;
-    const agUuid = ag?.uuid || ag?.displayName || 'agent';
+    const ag = m.myAgent || m.agent || getFullAgentData(m.characterName || m.characterId);
+    const agUuid = ag?.uuid || ag?.displayName || m.characterId || m.characterName || 'agent';
     if (!agentMap.has(agUuid)) {
       agentMap.set(agUuid, {
         agent: ag,
@@ -4267,9 +4337,9 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
   const bestAgent = agentResults[0];
 
   // Render Best Agent Card
-  if (bestAgent && bestAgent.agent) {
-    const fullBest = getFullAgentData(bestAgent.agent);
-    const portrait = fullBest.fullPortrait || fullBest.displayIcon;
+  if (bestAgent && (bestAgent.agent || bestAgent.characterName || bestAgent.characterId)) {
+    const fullBest = getFullAgentData(bestAgent.agent || bestAgent.characterName || bestAgent.characterId) || {};
+    const portrait = fullBest.fullPortrait || fullBest.displayIcon || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png';
     const agentName = fullBest.displayName || 'Agent';
     const agentRole = fullBest.role || 'Duelist';
 
@@ -4394,10 +4464,10 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
   if (agentsListEl) {
     agentsListEl.innerHTML = '';
     agentResults.forEach(agData => {
-      const fullAg = getFullAgentData(agData.agent);
+      const fullAg = getFullAgentData(agData.agent) || { displayName: agData.agent || 'Agent', role: 'Agent' };
       const item = document.createElement('div');
       item.className = 'agent-perf-card';
-      item.title = `คลิกเพื่อดูสถิติเจาะลึกและสกิลของ ${fullAg.displayName}`;
+      item.title = `คลิกเพื่อดูสถิติเจาะลึกและสกิลของ ${fullAg.displayName || 'Agent'}`;
       const portrait = fullAg.fullPortrait || fullAg.displayIcon || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png';
       
       item.innerHTML = `
