@@ -3098,9 +3098,16 @@ function switchAppMode(mode) {
     replaySection?.classList.remove('hidden');
     triggerSectionAnimation(replaySection);
     if (window.ValReplayEngine) {
-      const current = window.ValReplayEngine.getState()?.currentMatch;
-      if ((!current || !current.isRealMatch) && Array.isArray(allCareerMatches) && allCareerMatches.length > 0) {
-        window.ValReplayEngine.loadFromUserCareerMatch(allCareerMatches[0]);
+      let targetMatch = null;
+      try {
+        const stored = localStorage.getItem('val_selected_replay_match');
+        if (stored) targetMatch = JSON.parse(stored);
+      } catch (_) {}
+      if (!targetMatch && Array.isArray(allCareerMatches) && allCareerMatches.length > 0) {
+        targetMatch = allCareerMatches[0];
+      }
+      if (targetMatch) {
+        window.ValReplayEngine.loadFromUserCareerMatch(targetMatch);
       }
       window.ValReplayEngine.switchSubView('2d-map');
     }
@@ -3803,10 +3810,13 @@ function renderMatchesList(matches) {
     card.querySelector('.btn-view-2d-replay')?.addEventListener('click', (e) => {
       e.stopPropagation();
       playTacticalAudio('click');
-      switchAppMode('replay');
+      try {
+        localStorage.setItem('val_selected_replay_match', JSON.stringify(m));
+      } catch (_) {}
       if (window.ValReplayEngine) {
         window.ValReplayEngine.loadFromUserCareerMatch(m);
       }
+      switchAppMode('replay');
     });
     container.appendChild(card);
   });
@@ -3845,10 +3855,15 @@ document.getElementById('btnOpenInFull2dReplay')?.addEventListener('click', () =
     matchModal.classList.add('hidden');
     matchModal.setAttribute('aria-hidden', 'true');
   }
-  switchAppMode('replay');
-  if (currentActiveMatch && window.ValReplayEngine) {
-    window.ValReplayEngine.loadFromUserCareerMatch(currentActiveMatch);
+  if (currentActiveMatch) {
+    try {
+      localStorage.setItem('val_selected_replay_match', JSON.stringify(currentActiveMatch));
+    } catch (_) {}
+    if (window.ValReplayEngine) {
+      window.ValReplayEngine.loadFromUserCareerMatch(currentActiveMatch);
+    }
   }
+  switchAppMode('replay');
 });
 
 function openMatchScoreboard(match) {

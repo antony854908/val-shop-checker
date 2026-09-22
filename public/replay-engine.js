@@ -292,21 +292,21 @@
   function createSampleMatch(mapId = 'ascent') {
     const meta = MAP_METADATA[mapId] || MAP_METADATA.ascent;
     
-    // 10 Tournament Players
+    // 10 Sample Players (Demo fallback only)
     const atkPlayers = [
-      { id: 'p1', name: 'TenZ', agent: 'Jett', role: 'Duelist', rank: 'Radiant #1', isUser: true, acs: 342, adr: 198, hs: 46, kills: 24, deaths: 14, assists: 6, grade: 'S+' },
-      { id: 'p2', name: 'zekken', agent: 'Raze', role: 'Duelist', rank: 'Radiant #7', isUser: false, acs: 284, adr: 165, hs: 38, kills: 19, deaths: 15, assists: 7, grade: 'S' },
-      { id: 'p3', name: 'Sacy', agent: 'Sova', role: 'Initiator', rank: 'Radiant #22', isUser: false, acs: 218, adr: 135, hs: 32, kills: 14, deaths: 13, assists: 14, grade: 'A+' },
-      { id: 'p4', name: 'johnqt', agent: 'Cypher', role: 'Sentinel', rank: 'Radiant #35', isUser: false, acs: 192, adr: 122, hs: 29, kills: 15, deaths: 12, assists: 9, grade: 'A' },
-      { id: 'p5', name: 'Zellsis', agent: 'Omen', role: 'Controller', rank: 'Radiant #44', isUser: false, acs: 178, adr: 115, hs: 28, kills: 12, deaths: 14, assists: 11, grade: 'B+' }
+      { id: 'p1', name: 'ตัวอย่าง 1', agent: 'Jett', role: 'Duelist', rank: 'Platinum', isUser: false, acs: 242, adr: 158, hs: 26, kills: 18, deaths: 14, assists: 4, grade: 'A+' },
+      { id: 'p2', name: 'ตัวอย่าง 2', agent: 'Raze', role: 'Duelist', rank: 'Platinum', isUser: false, acs: 214, adr: 145, hs: 22, kills: 15, deaths: 15, assists: 5, grade: 'A' },
+      { id: 'p3', name: 'ตัวอย่าง 3', agent: 'Sova', role: 'Initiator', rank: 'Gold', isUser: false, acs: 188, adr: 125, hs: 18, kills: 12, deaths: 13, assists: 11, grade: 'B+' },
+      { id: 'p4', name: 'ตัวอย่าง 4', agent: 'Cypher', role: 'Sentinel', rank: 'Gold', isUser: false, acs: 172, adr: 112, hs: 19, kills: 11, deaths: 12, assists: 7, grade: 'B' },
+      { id: 'p5', name: 'ตัวอย่าง 5', agent: 'Omen', role: 'Controller', rank: 'Platinum', isUser: false, acs: 168, adr: 105, hs: 20, kills: 10, deaths: 14, assists: 9, grade: 'B' }
     ];
 
     const defPlayers = [
-      { id: 'p6', name: 'Boaster', agent: 'Omen', role: 'Controller', rank: 'Radiant #15', isUser: false, acs: 195, adr: 124, hs: 27, kills: 14, deaths: 16, assists: 12, grade: 'A' },
-      { id: 'p7', name: 'Derke', agent: 'Jett', role: 'Duelist', rank: 'Radiant #3', isUser: false, acs: 310, adr: 182, hs: 41, kills: 22, deaths: 17, assists: 5, grade: 'S' },
-      { id: 'p8', name: 'Alfajer', agent: 'Killjoy', role: 'Sentinel', rank: 'Radiant #8', isUser: false, acs: 276, adr: 160, hs: 44, kills: 18, deaths: 15, assists: 4, grade: 'S' },
-      { id: 'p9', name: 'Chronicle', agent: 'Fade', role: 'Initiator', rank: 'Radiant #19', isUser: false, acs: 205, adr: 130, hs: 31, kills: 13, deaths: 14, assists: 10, grade: 'A' },
-      { id: 'p10', name: 'Leo', agent: 'Sova', role: 'Initiator', rank: 'Radiant #11', isUser: false, acs: 225, adr: 142, hs: 34, kills: 15, deaths: 14, assists: 12, grade: 'A+' }
+      { id: 'p6', name: 'ฝ่ายตรงข้าม 1', agent: 'Omen', role: 'Controller', rank: 'Platinum', isUser: false, acs: 185, adr: 120, hs: 21, kills: 13, deaths: 14, assists: 8, grade: 'A' },
+      { id: 'p7', name: 'ฝ่ายตรงข้าม 2', agent: 'Jett', role: 'Duelist', rank: 'Diamond', isUser: false, acs: 250, adr: 162, hs: 28, kills: 19, deaths: 15, assists: 4, grade: 'A+' },
+      { id: 'p8', name: 'ฝ่ายตรงข้าม 3', agent: 'Killjoy', role: 'Sentinel', rank: 'Platinum', isUser: false, acs: 216, adr: 140, hs: 24, kills: 15, deaths: 13, assists: 4, grade: 'A' },
+      { id: 'p9', name: 'ฝ่ายตรงข้าม 4', agent: 'Fade', role: 'Initiator', rank: 'Gold', isUser: false, acs: 175, adr: 118, hs: 18, kills: 11, deaths: 14, assists: 8, grade: 'B' },
+      { id: 'p10', name: 'ฝ่ายตรงข้าม 5', agent: 'Sova', role: 'Initiator', rank: 'Platinum', isUser: false, acs: 195, adr: 132, hs: 20, kills: 13, deaths: 13, assists: 10, grade: 'B+' }
     ];
 
     // Build 24 detailed rounds
@@ -746,8 +746,30 @@
     setupVrfModal();
     setupAudioToggle();
 
-    // Initial render
-    loadMatch('demo_ascent');
+    // Check if user has real career matches or selected match stored
+    let initialMatchLoaded = false;
+    try {
+      const storedMatch = localStorage.getItem('val_selected_replay_match');
+      if (storedMatch) {
+        const parsed = JSON.parse(storedMatch);
+        if (parsed && (parsed.friendlyTeam || parsed.players)) {
+          window.ValReplayEngine.loadFromUserCareerMatch(parsed);
+          initialMatchLoaded = true;
+        }
+      }
+    } catch (_) {}
+
+    if (!initialMatchLoaded) {
+      const careerList = (typeof window !== 'undefined' && window.getAllCareerMatches) ? window.getAllCareerMatches() : [];
+      if (Array.isArray(careerList) && careerList.length > 0) {
+        window.ValReplayEngine.loadFromUserCareerMatch(careerList[0]);
+        initialMatchLoaded = true;
+      }
+    }
+
+    if (!initialMatchLoaded) {
+      loadMatch('demo_ascent');
+    }
 
     // Start requestAnimationFrame loop
     requestAnimationFrame(renderLoop);
