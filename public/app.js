@@ -2977,13 +2977,11 @@ const btnTabInventory = document.getElementById('btnTabInventory');
 const btnTabCrosshairs = document.getElementById('btnTabCrosshairs');
 const btnTabCareer = document.getElementById('btnTabCareer');
 const btnTabAgents = document.getElementById('btnTabAgents');
-const btnTabReplay = document.getElementById('btnTabReplay');
 const btnTabCatalog = document.getElementById('btnTabCatalog');
 const btnMobOpenVp = document.getElementById('btnMobOpenVp');
 
 const inventorySection = document.getElementById('inventorySection');
 const crosshairsSection = document.getElementById('crosshairsSection');
-const replaySection = document.getElementById('replaySection');
 
 function triggerSectionAnimation(el) {
   if (!el) return;
@@ -3002,7 +3000,6 @@ function switchAppMode(mode) {
   btnTabCrosshairs?.classList.toggle('active', mode === 'crosshairs');
   btnTabCareer?.classList.toggle('active', mode === 'career');
   btnTabAgents?.classList.toggle('active', mode === 'agents');
-  btnTabReplay?.classList.toggle('active', mode === 'replay');
   btnTabCatalog?.classList.toggle('active', mode === 'catalog');
 
   // Update mobile bottom nav items
@@ -3016,13 +3013,6 @@ function switchAppMode(mode) {
   storeSection?.classList.add('hidden');
   inventorySection?.classList.add('hidden');
   crosshairsSection?.classList.add('hidden');
-  replaySection?.classList.add('hidden');
-
-  // Zero-scroll viewport lock is only for the 2D replay dashboard.
-  // Leaving replay must also release the hard scroll lock, otherwise
-  // every other tab inherits a frozen viewport.
-  document.body.classList.toggle('replay-mode', mode === 'replay');
-  if (mode !== 'replay') document.body.classList.remove('replay-locked');
 
   if (mode === 'store') {
     if (currentUser) {
@@ -3087,30 +3077,6 @@ function switchAppMode(mode) {
     catalogSection?.classList.remove('hidden');
     triggerSectionAnimation(catalogSection);
     resetAndLoadCatalog();
-  } else if (mode === 'replay') {
-    loginSection?.classList.add('hidden');
-    storeSection?.classList.add('hidden');
-    careerSection?.classList.add('hidden');
-    agentsSection?.classList.add('hidden');
-    catalogSection?.classList.add('hidden');
-    inventorySection?.classList.add('hidden');
-    crosshairsSection?.classList.add('hidden');
-    replaySection?.classList.remove('hidden');
-    triggerSectionAnimation(replaySection);
-    if (window.ValReplayEngine) {
-      let targetMatch = null;
-      try {
-        const stored = localStorage.getItem('val_selected_replay_match');
-        if (stored) targetMatch = JSON.parse(stored);
-      } catch (_) {}
-      if (!targetMatch && Array.isArray(allCareerMatches) && allCareerMatches.length > 0) {
-        targetMatch = allCareerMatches[0];
-      }
-      if (targetMatch) {
-        window.ValReplayEngine.loadFromUserCareerMatch(targetMatch);
-      }
-      window.ValReplayEngine.switchSubView('2d-map');
-    }
   }
 }
 
@@ -3119,7 +3085,6 @@ btnTabInventory?.addEventListener('click', () => switchAppMode('inventory'));
 btnTabCrosshairs?.addEventListener('click', () => switchAppMode('crosshairs'));
 btnTabCareer?.addEventListener('click', () => switchAppMode('career'));
 btnTabAgents?.addEventListener('click', () => switchAppMode('agents'));
-btnTabReplay?.addEventListener('click', () => switchAppMode('replay'));
 btnTabCatalog?.addEventListener('click', () => switchAppMode('catalog'));
 
 // Mobile Bottom Nav Click Handlers
@@ -3704,30 +3669,6 @@ function renderMatchesList(matches) {
   if (avgKdEl) avgKdEl.textContent = avgKd;
   if (avgAcsEl) avgAcsEl.textContent = avgAcs.toLocaleString();
 
-  // Sync career matches into 2D Replay select dropdown
-  const replaySelect = document.getElementById('replayMatchSelect');
-  if (replaySelect && Array.isArray(matches) && matches.length > 0) {
-    replaySelect.querySelectorAll('optgroup[data-career="true"], option[data-career="true"]').forEach(el => el.remove());
-    const optGroup = document.createElement('optgroup');
-    optGroup.dataset.career = 'true';
-    optGroup.label = '── แมตช์จริงของคุณ (Your Matches) ──';
-    matches.slice(0, 10).forEach(cm => {
-      const opt = document.createElement('option');
-      opt.dataset.career = 'true';
-      opt.value = `career_${cm.matchId}`;
-      const outcome = cm.outcome === 'VICTORY' ? 'ชนะ' : (cm.outcome === 'DEFEAT' ? 'แพ้' : 'เสมอ');
-      const agentName = cm.myAgent?.displayName || cm.myAgent?.name || '';
-      opt.textContent = `[แมตช์จริง] ${cm.map?.displayName || 'Map'} (${cm.myTeamScore}-${cm.enemyTeamScore} · ${agentName} · ${outcome})`;
-      optGroup.appendChild(opt);
-    });
-    replaySelect.insertBefore(optGroup, replaySelect.firstChild);
-
-    // Auto-load latest real match into 2D Replay so it displays real user match immediately
-    if (window.ValReplayEngine) {
-      window.ValReplayEngine.loadFromUserCareerMatch(matches[0]);
-    }
-  }
-
   // Run AI Playstyle & Best Agent Analysis
   analyzePlayerPlaystyleAndBestAgent(matches);
 
@@ -3798,26 +3739,11 @@ function renderMatchesList(matches) {
         <button class="btn btn-outline-primary btn-sm btn-view-scoreboard">
           ตารางคะแนน
         </button>
-        <button class="btn btn-primary btn-sm btn-view-2d-replay btn-icon-gap" title="วิเคราะห์แมตช์นี้ในรีเพลย์ 2D OP.GG">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
-          <span>รีเพลย์ 2D</span>
-        </button>
       </div>
     `;
 
     card.addEventListener('mouseenter', () => playTacticalAudio('hover'));
     card.querySelector('.btn-view-scoreboard')?.addEventListener('click', () => openMatchScoreboard(m));
-    card.querySelector('.btn-view-2d-replay')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      playTacticalAudio('click');
-      try {
-        localStorage.setItem('val_selected_replay_match', JSON.stringify(m));
-      } catch (_) {}
-      if (window.ValReplayEngine) {
-        window.ValReplayEngine.loadFromUserCareerMatch(m);
-      }
-      switchAppMode('replay');
-    });
     container.appendChild(card);
   });
 }
@@ -3847,23 +3773,6 @@ document.querySelectorAll('.subnav-tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     if (btn.dataset.subtab) switchMatchModalSubtab(btn.dataset.subtab);
   });
-});
-
-document.getElementById('btnOpenInFull2dReplay')?.addEventListener('click', () => {
-  const matchModal = document.getElementById('matchScoreboardModal');
-  if (matchModal) {
-    matchModal.classList.add('hidden');
-    matchModal.setAttribute('aria-hidden', 'true');
-  }
-  if (currentActiveMatch) {
-    try {
-      localStorage.setItem('val_selected_replay_match', JSON.stringify(currentActiveMatch));
-    } catch (_) {}
-    if (window.ValReplayEngine) {
-      window.ValReplayEngine.loadFromUserCareerMatch(currentActiveMatch);
-    }
-  }
-  switchAppMode('replay');
 });
 
 function openMatchScoreboard(match) {

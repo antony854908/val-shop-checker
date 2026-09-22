@@ -1,11 +1,10 @@
-const CACHE_NAME = 'valstore-v1.9.7';
+const CACHE_NAME = 'valstore-v1.9.8';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/style.css',
   '/theme-valorant.css',
   '/app.js',
-  '/replay-engine.js',
   '/manifest.json',
   '/favicon.ico',
   '/assets/icon-192.png',
