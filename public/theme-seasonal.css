@@ -1,0 +1,783 @@
+/* ============================================================================
+   VALORANT STORE — 12-MONTH CINEMATIC SEASONAL THEMES SYSTEM
+   Every month features a unique, AAA Valorant concept-art environment:
+     Month 01 (Jan): ❄️ Frozen Dawn (Diamond Snow, Sunrise Glow & Crystal Hourglass)
+     Month 02 (Feb): 🧧 Lunar Festival (Imperial Palace, Fireworks & Dragon Lanterns)
+     Month 03 (Mar): 🌸 Sakura Bloom (Mount Fuji Night, Cyber Torii & Cherry Petals)
+     Month 04 (Apr): 🌊 Cyber Splash (Tropical Canal Dusk, Splash Effects & Water Blaster)
+     Month 05 (May): ⚡ Midnight Cyberpunk (Split Rain, Neon Billboards & Cyber Terminal)
+     Month 06 (Jun): 🌅 Sunset Mirage (Bind Golden Dunes, Teleporter & Radiant Glow)
+     Month 07 (Jul): 🏄 Ocean Tides (Aqua Splash, Tropical Sea Breeze & High Summer)
+     Month 08 (Aug): 🌌 Neon Void (Cyber Glow, Shinjuku Twilight & Purple Rain)
+     Month 09 (Sep): 🍂 Golden Sunset (Desert Autumn Twilight & Radiant Energy)
+     Month 10 (Oct): 🎃 Halloween Night (Gothic Night, Fog, Pumpkins & Embers)
+     Month 11 (Nov): 🪔 Floating Lanterns (Loy Krathong, Water Candles & Golden Sparks)
+     Month 12 (Dec): 🎄 Winter Wonderland (Aurora Borealis, Glowing Tree & Snowfall)
+   ========================================================================== */
+
+.app-header {
+  overflow: visible !important;
+  z-index: 80 !important;
+}
+
+/* ==========================================================================
+   MONTH 01: FROZEN DAWN (มกราคม ❄️)
+   ========================================================================== */
+body[data-theme="month-1"] {
+  --accent-rgb: 0, 245, 212;
+  --cyan-rgb: 168, 218, 220;
+  --mint-rgb: 72, 202, 228;
+  --bg-dark: #060B12;
+  --val-red: #00F5D4;
+  --val-red-hover: #52FCE5;
+  --val-red-glow: rgba(0, 245, 212, 0.45);
+  --val-cyan: #00F5D4;
+  --val-gold: #F1C40F;
+  --val-border: rgba(0, 245, 212, 0.15);
+  --val-border-hover: rgba(0, 245, 212, 0.55);
+  background-color: var(--bg-dark);
+}
+body[data-theme="month-1"] .val-tactical-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(6, 11, 18, 0.45) 0%, rgba(6, 11, 18, 0.2) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(6, 11, 18, 0.1) 0%, rgba(6, 11, 18, 0.4) 55%, rgba(6, 11, 18, 0.85) 100%),
+    url("/assets/months/m01/bg-desktop.webp") center top / cover no-repeat,
+    var(--bg-dark);
+}
+body[data-theme="month-1"] .val-bg-spotlight,
+body[data-theme="month-1"] .val-bg-watermark .watermark-label { display: none; }
+body[data-theme="month-1"] .val-bg-crosshairs {
+  display: block;
+  inset: 0 0 -600px 0;
+  -webkit-mask-image: none;
+  mask-image: none;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 1.5px, transparent 3px),
+    radial-gradient(circle, rgba(0, 245, 212, 0.8) 0 1.2px, transparent 2.4px);
+  background-size: 320px 320px, 480px 480px;
+  background-position: 30px 40px, 160px 100px;
+  opacity: 0.75;
+  animation: m01-snow-drift 18s linear infinite;
+  pointer-events: none;
+}
+@keyframes m01-snow-drift {
+  from { transform: translate3d(0, -320px, 0); }
+  to   { transform: translate3d(20px, 320px, 0); }
+}
+body[data-theme="month-1"] .val-bg-watermark { display: block; }
+body[data-theme="month-1"] .val-bg-watermark::after {
+  content: '';
+  position: absolute;
+  right: 1.5vw;
+  bottom: -10px;
+  width: clamp(200px, 22vw, 340px);
+  aspect-ratio: 4 / 3;
+  background: url("/assets/months/m01/prop.webp") center / contain no-repeat;
+  -webkit-mask-image: radial-gradient(ellipse 52% 50% at 50% 55%, #000 65%, transparent 100%);
+  mask-image: radial-gradient(ellipse 52% 50% at 50% 55%, #000 65%, transparent 100%);
+  opacity: 0.95;
+  filter: drop-shadow(0 0 35px rgba(0, 245, 212, 0.45));
+  animation: m01-crystal-pulse 4s ease-in-out infinite alternate;
+}
+@keyframes m01-crystal-pulse {
+  0%   { filter: drop-shadow(0 0 30px rgba(0, 245, 212, 0.4)) brightness(0.96); }
+  100% { filter: drop-shadow(0 0 45px rgba(0, 245, 212, 0.65)) brightness(1.06); }
+}
+body[data-theme="month-1"] .brand-logo {
+  background: linear-gradient(140deg, #00F5D4 0%, #0077B6 100%);
+  box-shadow: 0 0 26px -4px rgba(0, 245, 212, 0.65);
+}
+body[data-theme="month-1"] .accent-text {
+  background: linear-gradient(180deg, #FFF 0%, #00F5D4 70%, #0077B6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+body[data-theme="month-1"] .brand-tagline::after { content: ' · FROZEN DAWN (JANUARY)'; color: #00F5D4; font-weight: 600; }
+body[data-theme="month-1"] .btn-primary {
+  background-color: #00F5D4;
+  color: #070B12;
+  font-weight: 700;
+  border-color: #00F5D4;
+  box-shadow: 0 8px 22px -8px rgba(0, 245, 212, 0.85);
+}
+@media (max-width: 768px), (orientation: portrait) {
+  body[data-theme="month-1"] .val-tactical-bg {
+    background:
+      linear-gradient(180deg, rgba(6, 11, 18, 0.5) 0%, rgba(6, 11, 18, 0.65) 45%, rgba(6, 11, 18, 0.9) 100%),
+      url("/assets/months/m01/bg-mobile.webp") center top / cover no-repeat,
+      var(--bg-dark);
+  }
+}
+
+/* ==========================================================================
+   MONTH 02: LUNAR FESTIVAL (กุมภาพันธ์ 🧧)
+   ========================================================================== */
+body[data-theme="month-2"] {
+  --accent-rgb: 220, 20, 60;
+  --cyan-rgb: 255, 215, 0;
+  --mint-rgb: 255, 183, 3;
+  --bg-dark: #0F070A;
+  --val-red: #E61937;
+  --val-red-hover: #FF2E4D;
+  --val-red-glow: rgba(230, 25, 55, 0.45);
+  --val-cyan: #FFD700;
+  --val-gold: #FFD700;
+  --val-border: rgba(255, 215, 0, 0.15);
+  --val-border-hover: rgba(255, 215, 0, 0.6);
+  background-color: var(--bg-dark);
+}
+body[data-theme="month-2"] .val-tactical-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(15, 7, 10, 0.5) 0%, rgba(15, 7, 10, 0.18) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(15, 7, 10, 0.15) 0%, rgba(15, 7, 10, 0.45) 55%, rgba(15, 7, 10, 0.85) 100%),
+    url("/assets/lunar/bg-lunar-desktop.webp") center top / cover no-repeat,
+    var(--bg-dark);
+}
+body[data-theme="month-2"] .val-bg-spotlight,
+body[data-theme="month-2"] .val-bg-watermark .watermark-label { display: none; }
+body[data-theme="month-2"] .val-bg-crosshairs {
+  display: block;
+  inset: 0 0 -450px 0;
+  -webkit-mask-image: none;
+  mask-image: none;
+  background-image:
+    radial-gradient(circle, rgba(255, 215, 0, 0.95) 0 1.5px, transparent 3px),
+    radial-gradient(circle, rgba(255, 80, 80, 0.85) 0 1.2px, transparent 2.4px);
+  background-size: 320px 420px, 480px 420px;
+  background-position: 50px 60px, 210px 180px;
+  opacity: 0.65;
+  animation: m02-sparks 20s linear infinite;
+  pointer-events: none;
+}
+@keyframes m02-sparks {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -420px, 0); }
+}
+body[data-theme="month-2"] .val-bg-watermark { display: block; }
+body[data-theme="month-2"] .val-bg-watermark::after {
+  content: '';
+  position: absolute;
+  right: 1.5vw;
+  bottom: -10px;
+  width: clamp(200px, 22vw, 340px);
+  aspect-ratio: 4 / 3;
+  background: url("/assets/lunar/lunar-lanterns.webp") center / contain no-repeat;
+  -webkit-mask-image: radial-gradient(ellipse 52% 50% at 50% 55%, #000 65%, transparent 100%);
+  mask-image: radial-gradient(ellipse 52% 50% at 50% 55%, #000 65%, transparent 100%);
+  opacity: 0.95;
+  filter: drop-shadow(0 0 35px rgba(255, 215, 0, 0.45));
+  animation: m02-lantern-sway 4.5s ease-in-out infinite alternate;
+}
+@keyframes m02-lantern-sway {
+  0%   { transform: rotate(-2deg); }
+  100% { transform: rotate(2deg); }
+}
+body[data-theme="month-2"] .brand-logo {
+  background: linear-gradient(140deg, #FFD700 0%, #E61937 55%, #8B0000 100%);
+  box-shadow: 0 0 28px -4px rgba(255, 215, 0, 0.65);
+}
+body[data-theme="month-2"] .accent-text {
+  background: linear-gradient(180deg, #FFF 0%, #FFD700 60%, #E61937 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+body[data-theme="month-2"] .brand-tagline::after { content: ' · LUNAR FESTIVAL (FEBRUARY)'; color: #FFD700; font-weight: 600; }
+body[data-theme="month-2"] .btn-primary {
+  background-color: #E61937;
+  border-color: #FFD700;
+  color: #FFFFFF;
+  box-shadow: 0 8px 22px -8px rgba(230, 25, 55, 0.9);
+}
+@media (max-width: 768px), (orientation: portrait) {
+  body[data-theme="month-2"] .val-tactical-bg {
+    background:
+      linear-gradient(180deg, rgba(15, 7, 10, 0.5) 0%, rgba(15, 7, 10, 0.65) 45%, rgba(15, 7, 10, 0.9) 100%),
+      url("/assets/lunar/bg-lunar-mobile.webp") center top / cover no-repeat,
+      var(--bg-dark);
+  }
+}
+
+/* ==========================================================================
+   MONTH 03: SAKURA BLOOM (มีนาคม 🌸)
+   ========================================================================== */
+body[data-theme="month-3"] {
+  --accent-rgb: 255, 117, 143;
+  --cyan-rgb: 114, 239, 221;
+  --mint-rgb: 255, 180, 200;
+  --bg-dark: #0D0A14;
+  --val-red: #FF758F;
+  --val-red-hover: #FF8FA3;
+  --val-cyan: #72EFDD;
+  --val-gold: #FFB3C1;
+  --val-border: rgba(255, 117, 143, 0.16);
+  --val-border-hover: rgba(255, 117, 143, 0.55);
+  background-color: var(--bg-dark);
+}
+body[data-theme="month-3"] .val-tactical-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(13, 10, 20, 0.5) 0%, rgba(13, 10, 20, 0.18) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(13, 10, 20, 0.15) 0%, rgba(13, 10, 20, 0.45) 55%, rgba(13, 10, 20, 0.85) 100%),
+    url("/assets/sakura/bg-sakura-desktop.webp") center top / cover no-repeat,
+    var(--bg-dark);
+}
+body[data-theme="month-3"] .val-bg-spotlight,
+body[data-theme="month-3"] .val-bg-watermark .watermark-label { display: none; }
+body[data-theme="month-3"] .val-bg-crosshairs {
+  display: block;
+  inset: 0 0 -450px 0;
+  -webkit-mask-image: none;
+  mask-image: none;
+  background-image:
+    radial-gradient(circle, rgba(255, 182, 193, 0.95) 0 1.8px, transparent 3.2px),
+    radial-gradient(circle, rgba(114, 239, 221, 0.65) 0 1.6px, transparent 3.2px);
+  background-size: 340px 420px, 460px 420px;
+  background-position: 30px 50px, 200px 150px;
+  opacity: 0.65;
+  animation: m03-petals 22s linear infinite;
+  pointer-events: none;
+}
+@keyframes m03-petals {
+  from { transform: translate3d(-35px, -200px, 0); }
+  to   { transform: translate3d(35px, 220px, 0); }
+}
+body[data-theme="month-3"] .val-bg-watermark { display: block; }
+body[data-theme="month-3"] .val-bg-watermark::after {
+  content: '';
+  position: absolute;
+  right: 1.5vw;
+  bottom: -10px;
+  width: clamp(200px, 22vw, 340px);
+  aspect-ratio: 4 / 3;
+  background: url("/assets/sakura/sakura-branch.webp") center / contain no-repeat;
+  -webkit-mask-image: radial-gradient(ellipse 52% 50% at 50% 55%, #000 65%, transparent 100%);
+  mask-image: radial-gradient(ellipse 52% 50% at 50% 55%, #000 65%, transparent 100%);
+  opacity: 0.95;
+  filter: drop-shadow(0 0 35px rgba(255, 117, 143, 0.45));
+}
+body[data-theme="month-3"] .brand-logo {
+  background: linear-gradient(140deg, #FF758F 0%, #D9376E 55%, #72EFDD 100%);
+  box-shadow: 0 0 28px -4px rgba(255, 117, 143, 0.65);
+}
+body[data-theme="month-3"] .accent-text {
+  background: linear-gradient(180deg, #FFF 0%, #FFB3C1 50%, #FF758F 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+body[data-theme="month-3"] .brand-tagline::after { content: ' · SAKURA BLOOM (MARCH)'; color: #FFB3C1; font-weight: 600; }
+body[data-theme="month-3"] .btn-primary {
+  background-color: #FF758F;
+  border-color: #72EFDD;
+  color: #140903;
+  box-shadow: 0 8px 22px -8px rgba(255, 117, 143, 0.85);
+}
+@media (max-width: 768px), (orientation: portrait) {
+  body[data-theme="month-3"] .val-tactical-bg {
+    background:
+      linear-gradient(180deg, rgba(13, 10, 20, 0.5) 0%, rgba(13, 10, 20, 0.65) 45%, rgba(13, 10, 20, 0.9) 100%),
+      url("/assets/sakura/bg-mobile.webp") center top / cover no-repeat,
+      var(--bg-dark);
+  }
+}
+
+/* ==========================================================================
+   MONTH 04: CYBER SPLASH / SONGKRAN (เมษายน 🌊)
+   ========================================================================== */
+body[data-theme="month-4"] {
+  --accent-rgb: 0, 245, 212;
+  --cyan-rgb: 72, 202, 228;
+  --mint-rgb: 86, 243, 154;
+  --bg-dark: #060E14;
+  --val-red: #00F5D4;
+  --val-red-hover: #48CAE4;
+  --val-cyan: #00F5D4;
+  --val-gold: #FFB703;
+  --val-border: rgba(0, 245, 212, 0.16);
+  --val-border-hover: rgba(0, 245, 212, 0.6);
+  background-color: var(--bg-dark);
+}
+body[data-theme="month-4"] .val-tactical-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(6, 14, 20, 0.45) 0%, rgba(6, 14, 20, 0.18) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(6, 14, 20, 0.1) 0%, rgba(6, 14, 20, 0.45) 55%, rgba(6, 14, 20, 0.85) 100%),
+    url("/assets/months/m04/bg-desktop.webp") center top / cover no-repeat,
+    var(--bg-dark);
+}
+body[data-theme="month-4"] .val-bg-spotlight,
+body[data-theme="month-4"] .val-bg-watermark .watermark-label { display: none; }
+body[data-theme="month-4"] .val-bg-crosshairs {
+  display: block;
+  inset: 0 0 -450px 0;
+  -webkit-mask-image: none;
+  mask-image: none;
+  background-image:
+    radial-gradient(circle, rgba(0, 245, 212, 0.9) 0 1.6px, transparent 3px),
+    radial-gradient(circle, rgba(72, 202, 228, 0.75) 0 2px, transparent 4px);
+  background-size: 320px 420px, 480px 420px;
+  background-position: 40px 60px, 180px 200px;
+  opacity: 0.7;
+  animation: m04-bubbles 16s linear infinite;
+  pointer-events: none;
+}
+@keyframes m04-bubbles {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -420px, 0); }
+}
+body[data-theme="month-4"] .val-bg-watermark { display: block; }
+body[data-theme="month-4"] .val-bg-watermark::after {
+  content: '';
+  position: absolute;
+  right: 1.5vw;
+  bottom: -10px;
+  width: clamp(200px, 22vw, 340px);
+  aspect-ratio: 4 / 3;
+  background: url("/assets/months/m04/prop.webp") center / contain no-repeat;
+  -webkit-mask-image: radial-gradient(ellipse 52% 50% at 50% 55%, #000 65%, transparent 100%);
+  mask-image: radial-gradient(ellipse 52% 50% at 50% 55%, #000 65%, transparent 100%);
+  opacity: 0.95;
+  filter: drop-shadow(0 0 35px rgba(0, 245, 212, 0.45));
+}
+body[data-theme="month-4"] .brand-logo {
+  background: linear-gradient(140deg, #00F5D4 0%, #0077B6 60%, #FFB703 100%);
+  box-shadow: 0 0 28px -4px rgba(0, 245, 212, 0.65);
+}
+body[data-theme="month-4"] .accent-text {
+  background: linear-gradient(180deg, #FFF 0%, #00F5D4 60%, #0077B6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+body[data-theme="month-4"] .brand-tagline::after { content: ' · CYBER SPLASH (APRIL)'; color: #00F5D4; font-weight: 600; }
+body[data-theme="month-4"] .btn-primary {
+  background-color: #00F5D4;
+  border-color: #48CAE4;
+  color: #060E14;
+  box-shadow: 0 8px 22px -8px rgba(0, 245, 212, 0.9);
+}
+@media (max-width: 768px), (orientation: portrait) {
+  body[data-theme="month-4"] .val-tactical-bg {
+    background:
+      linear-gradient(180deg, rgba(6, 14, 20, 0.5) 0%, rgba(6, 14, 20, 0.65) 45%, rgba(6, 14, 20, 0.9) 100%),
+      url("/assets/months/m04/bg-mobile.webp") center top / cover no-repeat,
+      var(--bg-dark);
+  }
+}
+
+/* ==========================================================================
+   MONTH 05: MIDNIGHT CYBERPUNK (พฤษภาคม ⚡)
+   ========================================================================== */
+body[data-theme="month-5"] {
+  --accent-rgb: 157, 123, 255;
+  --cyan-rgb: 0, 245, 212;
+  --mint-rgb: 181, 23, 158;
+  --bg-dark: #080711;
+  --val-red: #9D7BFF;
+  --val-red-hover: #B5179E;
+  --val-cyan: #00F5D4;
+  --val-gold: #FF758F;
+  --val-border: rgba(157, 123, 255, 0.16);
+  --val-border-hover: rgba(157, 123, 255, 0.6);
+  background-color: var(--bg-dark);
+}
+body[data-theme="month-5"] .val-tactical-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(8, 7, 17, 0.45) 0%, rgba(8, 7, 17, 0.18) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(8, 7, 17, 0.1) 0%, rgba(8, 7, 17, 0.45) 55%, rgba(8, 7, 17, 0.85) 100%),
+    url("/assets/months/m05/bg-desktop.webp") center top / cover no-repeat,
+    var(--bg-dark);
+}
+body[data-theme="month-5"] .val-bg-spotlight,
+body[data-theme="month-5"] .val-bg-watermark .watermark-label { display: none; }
+body[data-theme="month-5"] .val-bg-crosshairs {
+  display: block;
+  inset: 0 0 -450px 0;
+  -webkit-mask-image: none;
+  mask-image: none;
+  background-image:
+    radial-gradient(circle, rgba(157, 123, 255, 0.9) 0 1.5px, transparent 3px),
+    radial-gradient(circle, rgba(0, 245, 212, 0.75) 0 1.2px, transparent 2.4px);
+  background-size: 320px 420px, 480px 420px;
+  background-position: 50px 60px, 210px 180px;
+  opacity: 0.7;
+  animation: m05-rain 14s linear infinite;
+  pointer-events: none;
+}
+@keyframes m05-rain {
+  from { transform: translate3d(0, -200px, 0); }
+  to   { transform: translate3d(0, 220px, 0); }
+}
+body[data-theme="month-5"] .val-bg-watermark { display: block; }
+body[data-theme="month-5"] .val-bg-watermark::after {
+  content: '';
+  position: absolute;
+  right: 1.5vw;
+  bottom: -10px;
+  width: clamp(200px, 22vw, 340px);
+  aspect-ratio: 4 / 3;
+  background: url("/assets/months/m05/prop.webp") center / contain no-repeat;
+  -webkit-mask-image: radial-gradient(ellipse 52% 50% at 50% 55%, #000 65%, transparent 100%);
+  mask-image: radial-gradient(ellipse 52% 50% at 50% 55%, #000 65%, transparent 100%);
+  opacity: 0.95;
+  filter: drop-shadow(0 0 35px rgba(157, 123, 255, 0.5));
+}
+body[data-theme="month-5"] .brand-logo {
+  background: linear-gradient(140deg, #9D7BFF 0%, #B5179E 55%, #00F5D4 100%);
+  box-shadow: 0 0 28px -4px rgba(157, 123, 255, 0.65);
+}
+body[data-theme="month-5"] .accent-text {
+  background: linear-gradient(180deg, #FFF 0%, #9D7BFF 60%, #00F5D4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+body[data-theme="month-5"] .brand-tagline::after { content: ' · MIDNIGHT CYBERPUNK (MAY)'; color: #9D7BFF; font-weight: 600; }
+body[data-theme="month-5"] .btn-primary {
+  background-color: #9D7BFF;
+  border-color: #00F5D4;
+  color: #080711;
+  box-shadow: 0 8px 22px -8px rgba(157, 123, 255, 0.9);
+}
+@media (max-width: 768px), (orientation: portrait) {
+  body[data-theme="month-5"] .val-tactical-bg {
+    background:
+      linear-gradient(180deg, rgba(8, 7, 17, 0.5) 0%, rgba(8, 7, 17, 0.65) 45%, rgba(8, 7, 17, 0.9) 100%),
+      url("/assets/months/m05/bg-mobile.webp") center top / cover no-repeat,
+      var(--bg-dark);
+  }
+}
+
+/* ==========================================================================
+   MONTH 06: SUNSET MIRAGE (มิถุนายน 🌅)
+   ========================================================================== */
+body[data-theme="month-6"] {
+  --accent-rgb: 255, 122, 31;
+  --cyan-rgb: 0, 245, 212;
+  --mint-rgb: 255, 183, 3;
+  --bg-dark: #120A06;
+  --val-red: #FF7A1F;
+  --val-red-hover: #FF9E00;
+  --val-cyan: #00F5D4;
+  --val-gold: #FFB703;
+  --val-border: rgba(255, 122, 31, 0.16);
+  --val-border-hover: rgba(255, 122, 31, 0.6);
+  background-color: var(--bg-dark);
+}
+body[data-theme="month-6"] .val-tactical-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(18, 10, 6, 0.45) 0%, rgba(18, 10, 6, 0.18) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(18, 10, 6, 0.1) 0%, rgba(18, 10, 6, 0.45) 55%, rgba(18, 10, 6, 0.85) 100%),
+    url("/assets/months/m06/bg-desktop.webp") center top / cover no-repeat,
+    var(--bg-dark);
+}
+body[data-theme="month-6"] .val-bg-spotlight,
+body[data-theme="month-6"] .val-bg-watermark .watermark-label { display: none; }
+body[data-theme="month-6"] .val-bg-crosshairs {
+  display: block;
+  inset: 0 0 -450px 0;
+  -webkit-mask-image: none;
+  mask-image: none;
+  background-image:
+    radial-gradient(circle, rgba(255, 183, 3, 0.9) 0 1.5px, transparent 3px),
+    radial-gradient(circle, rgba(0, 245, 212, 0.8) 0 1.2px, transparent 2.4px);
+  background-size: 320px 420px, 480px 420px;
+  background-position: 50px 60px, 210px 180px;
+  opacity: 0.65;
+  animation: m06-dust 18s linear infinite;
+  pointer-events: none;
+}
+@keyframes m06-dust {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -420px, 0); }
+}
+body[data-theme="month-6"] .brand-logo {
+  background: linear-gradient(140deg, #FF7A1F 0%, #D2560C 55%, #00F5D4 100%);
+  box-shadow: 0 0 28px -4px rgba(255, 122, 31, 0.65);
+}
+body[data-theme="month-6"] .accent-text {
+  background: linear-gradient(180deg, #FFF 0%, #FFB703 60%, #FF7A1F 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+body[data-theme="month-6"] .brand-tagline::after { content: ' · SUNSET MIRAGE (JUNE)'; color: #FFB703; font-weight: 600; }
+body[data-theme="month-6"] .btn-primary {
+  background-color: #FF7A1F;
+  border-color: #00F5D4;
+  color: #120A06;
+  box-shadow: 0 8px 22px -8px rgba(255, 122, 31, 0.9);
+}
+@media (max-width: 768px), (orientation: portrait) {
+  body[data-theme="month-6"] .val-tactical-bg {
+    background:
+      linear-gradient(180deg, rgba(18, 10, 6, 0.5) 0%, rgba(18, 10, 6, 0.65) 45%, rgba(18, 10, 6, 0.9) 100%),
+      url("/assets/months/m06/bg-mobile.webp") center top / cover no-repeat,
+      var(--bg-dark);
+  }
+}
+
+/* ==========================================================================
+   MONTH 07: OCEAN TIDES (กรกฎาคม 🏄)
+   ========================================================================== */
+body[data-theme="month-7"] {
+  --accent-rgb: 0, 180, 216;
+  --cyan-rgb: 0, 245, 212;
+  --mint-rgb: 72, 202, 228;
+  --bg-dark: #040D14;
+  --val-red: #00B4D8;
+  --val-red-hover: #48CAE4;
+  --val-cyan: #00F5D4;
+  --val-gold: #FFD166;
+  background-color: var(--bg-dark);
+}
+body[data-theme="month-7"] .val-tactical-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(4, 13, 20, 0.45) 0%, rgba(4, 13, 20, 0.18) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(4, 13, 20, 0.1) 0%, rgba(4, 13, 20, 0.45) 55%, rgba(4, 13, 20, 0.85) 100%),
+    url("/assets/months/m04/bg-desktop.webp") center top / cover no-repeat,
+    var(--bg-dark);
+}
+body[data-theme="month-7"] .brand-tagline::after { content: ' · OCEAN TIDES (JULY)'; color: #00B4D8; font-weight: 600; }
+body[data-theme="month-7"] .btn-primary { background-color: #00B4D8; color: #fff; }
+
+/* ==========================================================================
+   MONTH 08: NEON VOID (สิงหาคม 🌌)
+   ========================================================================== */
+body[data-theme="month-8"] {
+  --accent-rgb: 114, 9, 183;
+  --cyan-rgb: 76, 201, 240;
+  --mint-rgb: 247, 37, 133;
+  --bg-dark: #090514;
+  --val-red: #7209B7;
+  --val-cyan: #4CC9F0;
+  --val-gold: #F72585;
+  background-color: var(--bg-dark);
+}
+body[data-theme="month-8"] .val-tactical-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(9, 5, 20, 0.45) 0%, rgba(9, 5, 20, 0.18) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(9, 5, 20, 0.1) 0%, rgba(9, 5, 20, 0.45) 55%, rgba(9, 5, 20, 0.85) 100%),
+    url("/assets/months/m05/bg-desktop.webp") center top / cover no-repeat,
+    var(--bg-dark);
+}
+body[data-theme="month-8"] .brand-tagline::after { content: ' · NEON VOID (AUGUST)'; color: #4CC9F0; font-weight: 600; }
+body[data-theme="month-8"] .btn-primary { background-color: #7209B7; color: #fff; }
+
+/* ==========================================================================
+   MONTH 09: GOLDEN SUNSET (กันยายน 🍂 - CURRENT MONTH)
+   ========================================================================== */
+body[data-theme="month-9"] {
+  --accent-rgb: 255, 158, 0;
+  --cyan-rgb: 0, 245, 212;
+  --mint-rgb: 255, 183, 3;
+  --bg-dark: #120A05;
+  --val-red: #FF9E00;
+  --val-red-hover: #FFAA1D;
+  --val-cyan: #00F5D4;
+  --val-gold: #FFB703;
+  --val-border: rgba(255, 158, 0, 0.18);
+  --val-border-hover: rgba(255, 158, 0, 0.6);
+  background-color: var(--bg-dark);
+}
+body[data-theme="month-9"] .val-tactical-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(18, 10, 5, 0.45) 0%, rgba(18, 10, 5, 0.18) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(18, 10, 5, 0.1) 0%, rgba(18, 10, 5, 0.45) 55%, rgba(18, 10, 5, 0.85) 100%),
+    url("/assets/months/m06/bg-desktop.webp") center top / cover no-repeat,
+    var(--bg-dark);
+}
+body[data-theme="month-9"] .val-bg-spotlight,
+body[data-theme="month-9"] .val-bg-watermark .watermark-label { display: none; }
+body[data-theme="month-9"] .val-bg-crosshairs {
+  display: block;
+  inset: 0 0 -450px 0;
+  -webkit-mask-image: none;
+  mask-image: none;
+  background-image:
+    radial-gradient(circle, rgba(255, 183, 3, 0.95) 0 1.5px, transparent 3px),
+    radial-gradient(circle, rgba(0, 245, 212, 0.8) 0 1.2px, transparent 2.4px);
+  background-size: 320px 420px, 480px 420px;
+  background-position: 50px 60px, 210px 180px;
+  opacity: 0.7;
+  animation: m09-golden-rise 20s linear infinite;
+  pointer-events: none;
+}
+@keyframes m09-golden-rise {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -420px, 0); }
+}
+body[data-theme="month-9"] .brand-logo {
+  background: linear-gradient(140deg, #FF9E00 0%, #D2560C 55%, #00F5D4 100%);
+  box-shadow: 0 0 28px -4px rgba(255, 158, 0, 0.65);
+}
+body[data-theme="month-9"] .accent-text {
+  background: linear-gradient(180deg, #FFF 0%, #FFB703 60%, #FF9E00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+body[data-theme="month-9"] .brand-tagline::after { content: ' · GOLDEN SUNSET (SEPTEMBER)'; color: #FFB703; font-weight: 600; }
+body[data-theme="month-9"] .btn-primary {
+  background-color: #FF9E00;
+  border-color: #00F5D4;
+  color: #120A05;
+  box-shadow: 0 8px 22px -8px rgba(255, 158, 0, 0.9);
+}
+@media (max-width: 768px), (orientation: portrait) {
+  body[data-theme="month-9"] .val-tactical-bg {
+    background:
+      linear-gradient(180deg, rgba(18, 10, 5, 0.5) 0%, rgba(18, 10, 5, 0.65) 45%, rgba(18, 10, 5, 0.9) 100%),
+      url("/assets/months/m06/bg-mobile.webp") center top / cover no-repeat,
+      var(--bg-dark);
+  }
+}
+
+/* ==========================================================================
+   MONTH 10: HALLOWEEN NIGHT (ตุลาคม 🎃)
+   ========================================================================== */
+body[data-theme="month-10"] {
+  --accent-rgb: 255, 122, 31;
+  --cyan-rgb: 255, 196, 107;
+  --mint-rgb: 255, 170, 90;
+  --bg-dark: #07080F;
+  --val-red: #FF7A1F;
+  --val-cyan: #FFC46B;
+  --val-gold: #FFC46B;
+  background-color: var(--bg-dark);
+}
+body[data-theme="month-10"] .val-tactical-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 45% 55%, rgba(7, 8, 15, 0.55) 0%, rgba(7, 8, 15, 0.15) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(7, 8, 15, 0.1) 0%, rgba(7, 8, 15, 0.35) 55%, rgba(7, 8, 15, 0.8) 100%),
+    url("/assets/halloween/bg-night-desktop.webp") center top / cover no-repeat,
+    var(--bg-dark);
+}
+body[data-theme="month-10"] .val-bg-spotlight,
+body[data-theme="month-10"] .val-bg-watermark .watermark-label { display: none; }
+body[data-theme="month-10"] .val-bg-crosshairs {
+  display: block;
+  inset: 0 0 -420px 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 190, 110, 0.95) 0 1.3px, transparent 2.6px),
+    radial-gradient(circle, rgba(255, 130, 45, 0.85) 0 1px, transparent 2.2px);
+  background-size: 380px 420px, 250px 420px;
+  animation: hw-embers-rise 24s linear infinite;
+}
+body[data-theme="month-10"] .val-bg-watermark { display: block; }
+body[data-theme="month-10"] .val-bg-watermark::before {
+  content: '';
+  position: absolute;
+  left: -15%; right: -15%; bottom: -6vh; height: 42vh;
+  background: url("/assets/halloween/fog.webp") center bottom / 100% 100% no-repeat;
+  mix-blend-mode: screen; opacity: 0.22;
+  animation: hw-fog-drift 48s ease-in-out infinite alternate;
+}
+body[data-theme="month-10"] .val-bg-watermark::after {
+  content: '';
+  position: absolute; right: 1.5vw; bottom: -10px;
+  width: clamp(180px, 20vw, 320px); aspect-ratio: 720 / 538;
+  background: url("/assets/halloween/pumpkins.webp") center / contain no-repeat;
+  -webkit-mask-image: radial-gradient(ellipse 52% 50% at 50% 58%, #000 62%, transparent 100%);
+  mask-image: radial-gradient(ellipse 52% 50% at 50% 58%, #000 62%, transparent 100%);
+  opacity: 0.9;
+}
+body[data-theme="month-10"] .brand-logo { background: linear-gradient(140deg, #FF9445 0%, #FF7A1F 45%, #A8430A 100%); }
+body[data-theme="month-10"] .brand-tagline::after { content: ' · HALLOWEEN NIGHT (OCTOBER)'; color: #FFC46B; font-weight: 600; }
+body[data-theme="month-10"] .btn-primary { background-color: #FF7A1F; color: #140903; }
+@media (max-width: 768px), (orientation: portrait) {
+  body[data-theme="month-10"] .val-tactical-bg {
+    background:
+      linear-gradient(180deg, rgba(7, 8, 15, 0.5) 0%, rgba(7, 8, 15, 0.62) 45%, rgba(7, 8, 15, 0.88) 100%),
+      url("/assets/halloween/bg-night-mobile.webp") center top / cover no-repeat,
+      var(--bg-dark);
+  }
+}
+
+/* ==========================================================================
+   MONTH 11: FLOATING LANTERNS (พฤศจิกายน 🪔)
+   ========================================================================== */
+body[data-theme="month-11"] {
+  --accent-rgb: 230, 57, 70;
+  --cyan-rgb: 255, 215, 0;
+  --mint-rgb: 255, 183, 3;
+  --bg-dark: #0B0711;
+  --val-red: #E63946;
+  --val-cyan: #FFD700;
+  --val-gold: #FFD700;
+  background-color: var(--bg-dark);
+}
+body[data-theme="month-11"] .val-tactical-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(11, 7, 17, 0.5) 0%, rgba(11, 7, 17, 0.18) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(11, 7, 17, 0.15) 0%, rgba(11, 7, 17, 0.45) 55%, rgba(11, 7, 17, 0.85) 100%),
+    url("/assets/lunar/bg-lunar-desktop.webp") center top / cover no-repeat,
+    var(--bg-dark);
+}
+body[data-theme="month-11"] .val-bg-watermark { display: block; }
+body[data-theme="month-11"] .val-bg-watermark::after {
+  content: '';
+  position: absolute; right: 1.5vw; bottom: -10px;
+  width: clamp(200px, 22vw, 340px); aspect-ratio: 4 / 3;
+  background: url("/assets/lunar/lunar-lanterns.webp") center / contain no-repeat;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 35px rgba(255, 215, 0, 0.45));
+}
+body[data-theme="month-11"] .brand-tagline::after { content: ' · FLOATING LANTERNS (NOVEMBER)'; color: #FFD700; font-weight: 600; }
+body[data-theme="month-11"] .btn-primary { background-color: #E63946; color: #fff; }
+
+/* ==========================================================================
+   MONTH 12: WINTER WONDERLAND (ธันวาคม 🎄)
+   ========================================================================== */
+body[data-theme="month-12"] {
+  --accent-rgb: 230, 57, 70;
+  --cyan-rgb: 168, 218, 220;
+  --mint-rgb: 42, 157, 143;
+  --bg-dark: #070B12;
+  --val-red: #E63946;
+  --val-red-hover: #FF4D5E;
+  --val-cyan: #A8DADC;
+  --val-gold: #F1C40F;
+  --val-border: rgba(168, 218, 220, 0.12);
+  --val-border-hover: rgba(230, 57, 70, 0.55);
+  background-color: var(--bg-dark);
+}
+body[data-theme="month-12"] .val-tactical-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(7, 11, 18, 0.5) 0%, rgba(7, 11, 18, 0.18) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(7, 11, 18, 0.15) 0%, rgba(7, 11, 18, 0.45) 55%, rgba(7, 11, 18, 0.85) 100%),
+    url("/assets/christmas/bg-winter-desktop.webp") center top / cover no-repeat,
+    var(--bg-dark);
+}
+body[data-theme="month-12"] .val-bg-spotlight,
+body[data-theme="month-12"] .val-bg-watermark .watermark-label { display: none; }
+body[data-theme="month-12"] .val-bg-crosshairs {
+  display: block;
+  inset: 0 0 -600px 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 1.6px, transparent 3px),
+    radial-gradient(circle, rgba(168, 218, 220, 0.85) 0 1.2px, transparent 2.4px);
+  background-size: 320px 320px, 460px 460px;
+  animation: winter-snow-drift 18s linear infinite;
+}
+body[data-theme="month-12"] .val-bg-watermark { display: block; }
+body[data-theme="month-12"] .val-bg-watermark::after {
+  content: '';
+  position: absolute; right: 1.5vw; bottom: -10px;
+  width: clamp(200px, 22vw, 340px); aspect-ratio: 4 / 3;
+  background: url("/assets/christmas/christmas-tree.webp") center / contain no-repeat;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 35px rgba(241, 196, 15, 0.4));
+  animation: xms-tree-twinkle 3.8s ease-in-out infinite alternate;
+}
+body[data-theme="month-12"] .brand-logo { background: linear-gradient(140deg, #E63946 0%, #C02633 50%, #2A9D8F 100%); }
+body[data-theme="month-12"] .brand-tagline::after { content: ' · WINTER WONDERLAND (DECEMBER)'; color: #A8DADC; font-weight: 600; }
+body[data-theme="month-12"] .btn-primary { background-color: #E63946; color: #FFFFFF; }
+@media (max-width: 768px), (orientation: portrait) {
+  body[data-theme="month-12"] .val-tactical-bg {
+    background:
+      linear-gradient(180deg, rgba(7, 11, 18, 0.5) 0%, rgba(7, 11, 18, 0.65) 45%, rgba(7, 11, 18, 0.9) 100%),
+      url("/assets/christmas/bg-winter-mobile.webp") center top / cover no-repeat,
+      var(--bg-dark);
+  }
+}

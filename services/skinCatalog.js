@@ -557,6 +557,7 @@ class SkinCatalog {
           const tB = b.startTime ? new Date(b.startTime).getTime() : 0;
           return tA - tB;
         });
+        this.orderedSeasonIds = []; // reset so periodic refresh does not duplicate acts
         for (const s of sorted) {
           const sObj = {
             uuid: s.uuid,
@@ -628,6 +629,51 @@ class SkinCatalog {
   getBundleById(uuid) {
     if (!uuid) return null;
     return this.bundles.get(uuid.toLowerCase()) || null;
+  }
+
+  // Make sure the catalog is loaded before hydrating store data. Serverless cold
+  // starts can race or fail the first init; retry once and share in-flight work.
+  async ensureReady() {
+    for (let attempt = 0; attempt < 2 && !this.initialized; attempt++) {
+      if (!this._initPromise) {
+        this._initPromise = this.init().finally(() => { this._initPromise = null; });
+      }
+      await this._initPromise;
+    }
+    return this.initialized;
+  }
+
+  // On-demand lookup for bundles missing from the bulk list (e.g. a bundle
+  // released after the cached catalog was built). Misses are cached for 1h.
+  async fetchBundleMeta(uuid) {
+    if (!uuid || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uuid)) return null;
+    const key = uuid.toLowerCase();
+    const known = this.bundles.get(key);
+    if (known) return known;
+    this._bundleMisses = this._bundleMisses || new Map();
+    const missAt = this._bundleMisses.get(key);
+    if (missAt && Date.now() - missAt < 3600 * 1000) return null;
+    try {
+      const res = await fetch(`https://valorant-api.com/v1/bundles/${key}`, { signal: AbortSignal.timeout(4000) });
+      const json = res.ok ? await res.json() : null;
+      const b = json && json.data;
+      if (!b) { this._bundleMisses.set(key, Date.now()); return null; }
+      const meta = {
+        uuid: b.uuid,
+        name: b.displayName,
+        subName: b.displayNameSubText || '',
+        description: b.description || '',
+        displayIcon: b.displayIcon,
+        displayIcon2: b.displayIcon2,
+        verticalPromoImage: b.verticalPromoImage,
+        logoIcon: b.logoIcon
+      };
+      this.bundles.set(key, meta);
+      return meta;
+    } catch (e) {
+      this._bundleMisses.set(key, Date.now());
+      return null;
+    }
   }
 
   getWeaponsList() {
@@ -871,6 +917,52 @@ class SkinCatalog {
 
   getClientVersion() {
     return this.clientVersion;
+  }
+
+  // Catalog is considered stale after 6h so long-running servers pick up new
+  // patches (skins, bundles, agents, maps, client version) without a restart.
+  isStale(maxAgeMs = 6 * 3600 * 1000) {
+    // _lastRefreshAttempt throttles retries when valorant-api.com is down
+    const last = Math.max(this.lastFetch, this._lastRefreshAttempt || 0);
+    return this.initialized && Date.now() - last > maxAgeMs;
+  }
+
+  // Called when the store contains items the catalog does not know (new patch
+  // content). If valorant-api.com has published a newer game version than the
+  // one we hold, reload the catalog right away instead of waiting for the 6h
+  // stale window. Blocks at most `waitMs` so the store response stays fast.
+  // Version checks are throttled to one per 10 minutes per instance.
+  async refreshIfNewPatch(waitMs = 8000) {
+    const now = Date.now();
+    if (this._patchCheckAt && now - this._patchCheckAt < 10 * 60 * 1000) return false;
+    this._patchCheckAt = now;
+    try {
+      const res = await fetch('https://valorant-api.com/v1/version', { signal: AbortSignal.timeout(3000) });
+      const latest = res.ok ? (await res.json())?.data?.riotClientVersion : null;
+      if (!latest || latest === this.clientVersion) return false;
+      console.log(`[SkinCatalog] New patch detected (${this.clientVersion} -> ${latest}), reloading catalog`);
+      let timer;
+      await Promise.race([
+        this.refreshInBackground(),
+        new Promise(resolve => { timer = setTimeout(resolve, waitMs); })
+      ]);
+      clearTimeout(timer);
+      return this.clientVersion === latest;
+    } catch (err) {
+      console.warn('[SkinCatalog] Patch check failed:', err.message);
+      return false;
+    }
+  }
+
+  // Non-blocking background refresh; keeps serving the old data until the new
+  // fetch completes. Concurrent callers share one in-flight request.
+  refreshInBackground() {
+    if (this._refreshing) return this._refreshing;
+    this._lastRefreshAttempt = Date.now();
+    this._refreshing = this.init()
+      .catch(err => console.error('[SkinCatalog] Background refresh failed:', err.message))
+      .finally(() => { this._refreshing = null; });
+    return this._refreshing;
   }
 }
 

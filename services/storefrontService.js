@@ -1,5 +1,6 @@
 const config = require('../config');
 const skinCatalog = require('./skinCatalog');
+const { getItemOverride, getBundleOverride } = require('./patchOverrides');
 
 const DEFAULT_ITEM_TYPES = {
   SKIN: 'e7c63390-eda7-46e0-bb7a-a6abdacd2433',
@@ -8,6 +9,45 @@ const DEFAULT_ITEM_TYPES = {
   SPRAY: 'd5f120f8-ff8c-4aac-92ea-f2b5acbe9e47',
   TITLE: 'de7caa6b-adf7-4588-bbd1-143831e786c6'
 };
+
+const UNKNOWN_ITEM_NAMES = {
+  skin: 'สกินปืนใหม่ (รอข้อมูลแพตช์)',
+  buddy: 'พวงกุญแจใหม่ (รอข้อมูลแพตช์)',
+  card: 'การ์ดผู้เล่นใหม่ (รอข้อมูลแพตช์)',
+  spray: 'สเปรย์ใหม่ (รอข้อมูลแพตช์)',
+  title: 'ฉายาใหม่ (รอข้อมูลแพตช์)',
+  item: 'ไอเทมใหม่ (รอข้อมูลแพตช์)'
+};
+
+// Bundle skins share a collection prefix ("Reaver Vandal", "Reaver Phantom");
+// use it as the bundle name when valorant-api.com has no bundle metadata.
+function deriveBundleName(items) {
+  const names = items.filter(i => i.isWeaponSkin && !i.isUnreleasedData && i.name).map(i => i.name.split(' '));
+  if (names.length < 2) return null;
+  const prefix = [];
+  for (let i = 0; i < names[0].length - 1; i++) {
+    const word = names[0][i];
+    if (names.every(n => n[i] === word)) prefix.push(word); else break;
+  }
+  return prefix.length ? prefix.join(' ') : null;
+}
+
+// Every item ID a storefront payload can reference (daily, bundles, night market)
+function collectStoreItemIds(raw) {
+  const ids = new Set();
+  const add = id => { if (typeof id === 'string' && id) ids.add(id.toLowerCase()); };
+  (raw.SkinsPanelLayout?.SingleItemOffers || []).forEach(add);
+  const fb = raw.FeaturedBundle || {};
+  const bundles = fb.Bundles || (fb.Bundle ? [fb.Bundle] : []);
+  for (const b of bundles) {
+    for (const e of [...(b?.Items || []), ...(b?.ItemOffers || [])]) {
+      if (typeof e === 'string') add(e);
+      else add(e?.Offer?.Rewards?.[0]?.ItemID || e?.Item?.ItemID || e?.ItemID);
+    }
+  }
+  for (const o of raw.BonusStore?.BonusStoreOffers || []) add(o?.Offer?.Rewards?.[0]?.ItemID);
+  return [...ids];
+}
 
 /**
  * Valorant Storefront Service
@@ -51,6 +91,14 @@ class StorefrontService {
     }
 
     const raw = result?.data || {};
+    // Hydration depends on the catalog; without it every bundle item gets dropped
+    await skinCatalog.ensureReady();
+    // Items from a patch the catalog has not seen yet -> try a catalog reload first
+    const unknownIds = collectStoreItemIds(raw).filter(id => !skinCatalog.getItemById(id) && !skinCatalog.getSkinById(id));
+    if (unknownIds.length > 0) {
+      console.log(`[StorefrontService] ${unknownIds.length} item(s) missing from catalog ${skinCatalog.getClientVersion()}: ${unknownIds.join(', ')}`);
+      await skinCatalog.refreshIfNewPatch();
+    }
     const activeShard = result?.activeShard || region || 'ap';
     const itemTypes = config.ITEM_TYPES || DEFAULT_ITEM_TYPES;
 
@@ -88,6 +136,24 @@ class StorefrontService {
             price,
             offerId: itemUuid
           });
+        } else if (!item) {
+          // Skin from a patch valorant-api.com has not indexed yet: still show the slot + price
+          dailyOffers.push({
+            uuid: itemUuid,
+            name: UNKNOWN_ITEM_NAMES.skin,
+            weaponType: 'Weapon',
+            weaponCategory: 'Weapon',
+            tier: { uuid: 'unknown', name: 'New Release', highlightColor: '#FF7518', displayIcon: null },
+            displayIcon: '/assets/placeholder-skin.svg',
+            chromas: [],
+            levels: [],
+            hasVideo: false,
+            itemType: 'Weapon Skin',
+            isWeaponSkin: true,
+            isUnreleasedData: true,
+            price,
+            offerId: itemUuid
+          });
         }
       }
     }
@@ -100,7 +166,8 @@ class StorefrontService {
 
     for (const b of bundlesList) {
       if (!b) continue;
-      const bundleMeta = skinCatalog.getBundleById(b.DataAssetID || b.ID);
+      const bundleMeta = skinCatalog.getBundleById(b.DataAssetID || b.ID) ||
+                         await skinCatalog.fetchBundleMeta(b.DataAssetID);
       const bundleItems = [];
 
       // Merge items from b.Items and b.ItemOffers
@@ -184,13 +251,16 @@ class StorefrontService {
           displayIcon = fallbackAcc?.largeArt || fallbackAcc?.displayIcon || null;
         }
 
-        if (!displayIcon) {
-          continue;
-        }
+        // Keep items that valorant-api.com has not published yet (brand-new
+        // patch content) so the bundle still lists what is on sale with prices.
+        const isUnreleasedData = !itemMeta && !displayIcon;
+        const override = isUnreleasedData ? getItemOverride(itemRewardId, itemType) : null;
+        if (override) itemType = override.itemType;
 
         bundleItems.push({
           uuid: itemRewardId,
-          name: displayName,
+          name: override ? override.name : isUnreleasedData ? UNKNOWN_ITEM_NAMES[itemType] || UNKNOWN_ITEM_NAMES.item : displayName,
+          isUnreleasedData,
           itemType: itemType,
           isWeaponSkin: isWeaponSkin,
           displayIcon: displayIcon,
@@ -247,10 +317,16 @@ class StorefrontService {
                                      raw.FeaturedBundle?.BundleRemainingDurationInSeconds || 
                                      0;
 
+      const bundleOverride = bundleMeta ? null : getBundleOverride(uniqueItems.map(i => i.uuid));
+      if (!bundleMeta) {
+        console.log(`[StorefrontService] Bundle ${b.DataAssetID} not in catalog; items: ${uniqueItems.map(i => `${i.uuid}=${i.itemType}/${i.price}`).join(', ')}`);
+      }
+
       featuredBundles.push({
         id: b.ID || b.DataAssetID,
-        name: bundleMeta?.name || 'Featured Bundle',
-        description: bundleMeta?.description || '',
+        name: bundleMeta?.name || bundleOverride?.name || deriveBundleName(uniqueItems) || 'Featured Bundle',
+        subName: bundleMeta?.subName || bundleOverride?.subName || '',
+        description: bundleMeta?.description || bundleOverride?.description || '',
         displayIcon: bundleMeta?.displayIcon || bundleMeta?.displayIcon2 || (uniqueItems[0]?.displayIcon) || null,
         price: bundlePrice,
         basePrice: totalBasePrice,
@@ -278,6 +354,7 @@ class StorefrontService {
             offerId: offer.BonusOfferID,
             originalPrice: originalCost,
             discountPrice: discountedCost,
+            discountedPrice: discountedCost, // field name read by the frontend + skin modal
             discountPercent,
             isPurchased: !!offer.IsPurchased
           });

@@ -39,6 +39,8 @@ app.use(helmet({
       mediaSrc: ["'self'", "blob:", "https:", "https://*.riotcdn.net", "https://valorant.dyn.riotcdn.net"],
       connectSrc: [
         "'self'",
+        "blob:",
+        "data:",
         "https://auth.riotgames.com",
         "https://entitlements.auth.riotgames.com",
         "https://*.pvp.net",
@@ -51,6 +53,8 @@ app.use(helmet({
         "https://*.riotcdn.net",
         "https://valorant.dyn.riotcdn.net"
       ],
+      frameSrc: ["'self'"],
+      workerSrc: ["'self'", "blob:"],
       frameAncestors: ["'none'"],
       baseUri: ["'self'"],
       formAction: ["'self'"],
@@ -114,6 +118,9 @@ app.use(async (req, res, next) => {
     } catch (e) {
       console.error('[SkinCatalog Lazy Init Error]:', e.message);
     }
+  } else if (skinCatalog.isStale()) {
+    // Pull the latest patch data (new skins/bundles/agents/client version) without blocking the request
+    skinCatalog.refreshInBackground();
   }
   next();
 });
@@ -533,6 +540,113 @@ app.get('/api/inventory', async (req, res) => {
       return res.status(401).json({ ok: false, error: 'Access Token หมดอายุ กรุณาเข้าสู่ระบบใหม่' });
     }
     res.status(500).json({ ok: false, error: err.message || 'ไม่สามารถโหลดคลังสกินได้' });
+  }
+});
+
+// Endpoint: Get Player Battle Pass Progression
+app.get('/api/battlepass', async (req, res) => {
+  const auth = req.valSession.auth;
+  if (!auth) {
+    return res.status(401).json({ ok: false, error: 'กรุณาเข้าสู่ระบบก่อนดูข้อมูล Battle Pass' });
+  }
+
+  try {
+    const bp = await valorantApi.getPlayerBattlepass(
+      auth.puuid,
+      auth.region,
+      auth.accessToken,
+      auth.entitlementsToken
+    );
+
+    res.json({
+      ok: true,
+      battlepass: bp
+    });
+  } catch (err) {
+    console.error('[Battlepass Error]:', err.message);
+    res.status(500).json({ ok: false, error: err.message || 'ไม่สามารถโหลดข้อมูล Battle Pass ได้' });
+  }
+});
+
+// Endpoint: Dispatch Discord Webhook Notification for Wishlist / Test
+app.post('/api/notify/discord', async (req, res) => {
+  try {
+    const { webhookUrl, testOnly, skin, playerName, remainingDuration } = req.body;
+
+    if (!webhookUrl || typeof webhookUrl !== 'string') {
+      return res.status(400).json({ ok: false, error: 'กรุณาระบุ Discord Webhook URL' });
+    }
+
+    // SSRF Prevention: strictly whitelist official Discord webhook endpoints
+    const DISCORD_WEBHOOK_REGEX = /^https:\/\/(?:ptb\.|canary\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[A-Za-z0-9_-]+$/i;
+    if (!DISCORD_WEBHOOK_REGEX.test(webhookUrl.trim())) {
+      return res.status(400).json({ ok: false, error: 'Webhook URL ต้องเป็นลิงก์ Discord Webhook ที่ถูกต้องเท่านั้น' });
+    }
+
+    let payload;
+    if (testOnly) {
+      payload = {
+        username: 'VALORANT Store Alert',
+        avatar_url: 'https://val-shop-checker.vercel.app/assets/icon-192.png',
+        embeds: [{
+          title: '✅ ทดสอบเชื่อมต่อ Discord Webhook สำเร็จ!',
+          description: `การแจ้งเตือนสกิน Wishlist ของผู้เล่น **${playerName || 'Agent'}** เชื่อมต่อสมบูรณ์แล้ว\nระบบจะส่งข้อความแจ้งเตือนทันทีเมื่อสกินที่อยากได้ปรากฏในร้านค้าประจำวัน!`,
+          color: 0x00F5D4,
+          fields: [
+            { name: '🌐 บริการ', value: '[VALORANT Shop Checker](https://val-shop-checker.vercel.app)', inline: true },
+            { name: '⚡ สถานะ', value: '🟢 พร้อมใช้งาน', inline: true }
+          ],
+          footer: { text: 'VALORANT Store Notification System' },
+          timestamp: new Date().toISOString()
+        }]
+      };
+    } else {
+      const skinName = skin?.name || 'สกินใน Wishlist';
+      const skinPrice = skin?.price ? `${Number(skin.price).toLocaleString()} VP` : 'ดูในร้านค้า';
+      const skinIcon = skin?.displayIcon || 'https://val-shop-checker.vercel.app/assets/icon-192.png';
+      const thbPrice = skin?.price ? `~${Math.round(skin.price * 0.238).toLocaleString()} บาท (เรทเว็บเติม)` : '';
+
+      payload = {
+        username: 'VALORANT Store Alert',
+        avatar_url: 'https://val-shop-checker.vercel.app/assets/icon-192.png',
+        content: `🚨 **สกินใน Wishlist โผล่มาในร้านค้าแล้ว!** (@everyone)`,
+        embeds: [{
+          title: `🎯 ${skinName}`,
+          description: `สกินที่คุณเล็งไว้เข้ามาใน Daily Store ของ **${playerName || 'Agent'}** แล้ววันนี้!`,
+          color: 0xFF4655,
+          thumbnail: { url: skinIcon },
+          fields: [
+            { name: '💰 ราคา', value: skinPrice + (thbPrice ? ` (${thbPrice})` : ''), inline: true },
+            { name: '⏳ เวลาที่เหลือ', value: remainingDuration || 'รีเซ็ต 07:00 น.', inline: true },
+            { name: '🛒 เข้าดูร้านค้า', value: '[คลิกเพื่อเปิดเว็บ](https://val-shop-checker.vercel.app)', inline: false }
+          ],
+          image: { url: skinIcon },
+          footer: { text: 'VALORANT Store Checker · Wishlist Alert' },
+          timestamp: new Date().toISOString()
+        }]
+      };
+    }
+
+    const abortCtrl = new AbortController();
+    const timeout = setTimeout(() => abortCtrl.abort(), 6000);
+
+    const discordRes = await fetch(webhookUrl.trim(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: abortCtrl.signal
+    });
+    clearTimeout(timeout);
+
+    if (!discordRes.ok) {
+      const errText = await discordRes.text().catch(() => '');
+      return res.status(400).json({ ok: false, error: `Discord ปฏิเสธคำขอ (${discordRes.status}): ${errText.slice(0, 100)}` });
+    }
+
+    res.json({ ok: true, message: 'ส่งการแจ้งเตือนเข้า Discord สำเร็จแล้ว!' });
+  } catch (err) {
+    console.error('[Discord Webhook Error]:', err.message);
+    res.status(500).json({ ok: false, error: err.message || 'ส่งแจ้งเตือน Discord ล้มเหลว' });
   }
 });
 

@@ -1,0 +1,273 @@
+/* ============================================================================
+   SOFT UI LAYER — v1.0 (โหลดหลัง theme-valorant.css ก่อนธีมสีตามฤดูกาล)
+   - เปลี่ยนภาษารูปทรงจาก "มุมตัดเฉียง" เป็น "ขอบมน" ทั้งเว็บผ่าน token
+     (--shape-* ถูกใช้ใน theme-valorant.css, --radius-* ใช้ใน style.css)
+   - ระบบ motion: การ์ดเด้งเข้าแบบ stagger, hover ลอย+เรืองแสง, ปุ่มมีแสงวิ่ง,
+     แท็บแบบ segmented pill, modal pop แบบสปริง, เปิดเผยตามการเลื่อน (ถ้าเบราว์เซอร์รองรับ)
+   - สีไม่ถูกกำหนดที่นี่ (ใช้ตัวแปรจากธีมสี) → ถอดธีมฮาโลวีนแล้วยังมนเหมือนเดิม
+   ========================================================================== */
+
+/* ==========================================================================
+   1. SHAPE TOKENS
+   ========================================================================== */
+:root {
+  --shape-modal: 24px;
+  --shape-panel: 20px;
+  --shape-panel-sm: 16px;
+  --shape-card: 18px;
+  --shape-inner: 12px;
+  --shape-inner-sm: 10px;
+  --shape-btn: 12px;
+  --shape-input: 12px;
+  --shape-pill: 999px;
+  --shape-round: 50%;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-card: 18px;
+
+  /* ปิดมุมตัดเฉียงทั้งหมด (clip-path: none) */
+  --clip-card: none;
+  --clip-panel: none;
+  --clip-btn: none;
+  --clip-btn-sm: none;
+  --clip-tag: none;
+  --clip-chip: none;
+
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --soft-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+/* ==========================================================================
+   2. SURFACES — header / panels / cards
+   ========================================================================== */
+.app-header {
+  border-left-width: 1px;
+  box-shadow: 0 20px 50px -24px rgba(0, 0, 0, 0.9), var(--soft-highlight);
+}
+.app-header::after { border-radius: 0 var(--shape-panel) var(--shape-panel) 0; }
+
+.brand-logo { border-radius: 14px; }
+
+/* แถบแท็บ: segmented pill */
+.mode-switcher-bar {
+  padding: 5px;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+.mode-tab-btn {
+  border-radius: 11px;
+  border-bottom: 0;
+  padding: 10px 16px;
+  transition: color .25s var(--ease-smooth), background .25s var(--ease-smooth),
+              box-shadow .25s var(--ease-smooth), transform .2s var(--ease-smooth);
+}
+.mode-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
+}
+.mode-tab-btn.active {
+  background: linear-gradient(180deg, rgba(var(--accent-rgb, 255, 70, 85), 0.28) 0%, rgba(var(--accent-rgb, 255, 70, 85), 0.12) 100%);
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb, 255, 70, 85), 0.45),
+              0 8px 22px -10px rgba(var(--accent-rgb, 255, 70, 85), 0.8);
+}
+.mode-tab-btn .tab-icon { transition: transform .35s var(--ease-spring); }
+.mode-tab-btn:hover .tab-icon,
+.mode-tab-btn.active .tab-icon { transform: scale(1.15) rotate(-6deg); }
+
+/* หัวข้อ section: เส้นใต้แบบแคปซูลเรืองแสง */
+.dashboard-header-bar::after {
+  height: 3px;
+  border-radius: 999px;
+  animation: soft-underline-in .8s var(--ease-smooth) both;
+}
+@keyframes soft-underline-in {
+  from { width: 0; opacity: 0; }
+  to   { width: 74px; opacity: 1; }
+}
+.dash-title h2 svg, .section-title-svg { transition: transform .4s var(--ease-spring); }
+.dashboard-header-bar:hover .section-title-svg { transform: rotate(-10deg) scale(1.12); }
+
+/* กล่องนับเวลา: แคปซูล + จุดไฟกะพริบ */
+.dash-timer-card,
+.val-stat-card, .career-stat-box, .career-summary-card {
+  border-left-width: 1px;
+}
+.dash-timer-card {
+  border-radius: 999px !important;
+  padding: 8px 16px;
+  box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.8), var(--soft-highlight);
+}
+
+/* การ์ดทุกประเภท */
+.skin-card, .inv-skin-card, .nm-card, .crosshair-card, .agent-catalog-card, .match-card {
+  overflow: hidden;
+  box-shadow: 0 14px 30px -16px rgba(0, 0, 0, 0.9), var(--soft-highlight);
+  transition: transform .45s var(--ease-spring), box-shadow .35s var(--ease-smooth),
+              border-color .3s var(--ease-smooth);
+}
+/* !important: style.css มี .skin-card:hover { transform/box-shadow ... !important } อยู่แล้ว */
+.skin-card:hover, .inv-skin-card:hover, .nm-card:hover, .crosshair-card:hover, .agent-catalog-card:hover {
+  transform: translateY(-6px) scale(1.012) !important;
+  filter: none;
+  box-shadow: 0 26px 44px -18px rgba(0, 0, 0, 0.95),
+              0 0 0 1px rgba(var(--accent-rgb, 255, 70, 85), 0.25),
+              0 0 32px -6px var(--card-tier-glow, rgba(var(--accent-rgb, 255, 70, 85), 0.35)),
+              var(--soft-highlight) !important;
+}
+.skin-card:active, .inv-skin-card:active, .nm-card:active { transform: translateY(-2px) scale(0.985); }
+.skin-card::before {
+  left: 18px;
+  right: 18px;
+  border-radius: 0 0 6px 6px !important;
+}
+.skin-image-box { border-radius: var(--shape-inner); }
+
+/* การ์ดเข้าแบบเด้งนุ่ม (ทับ keyframe เดิมชื่อเดียวกัน) */
+/* ใช้ translate/scale แยก (ไม่ใช่ transform) เพื่อไม่ให้ fill-mode ไปทับ transform ตอน hover */
+@keyframes cardTacticalEnter {
+  0%   { opacity: 0; translate: 0 18px; scale: 0.96; }
+  60%  { opacity: 1; translate: 0 -3px; scale: 1.005; }
+  100% { opacity: 1; translate: 0 0; scale: 1; }
+}
+.skins-card-grid > *, .nm-card-grid > * { animation-duration: .6s; }
+
+/* บันเดิล */
+.bundle-display-card, .bundle-hero, .bundle-mini-item { border-radius: var(--shape-card); }
+.bundle-hero { overflow: hidden; }
+.bundle-mini-item {
+  transition: transform .4s var(--ease-spring), border-color .25s ease, box-shadow .3s ease, background .25s ease;
+}
+.bundle-mini-item:hover {
+  transform: translateY(-4px);
+  border-color: rgba(var(--accent-rgb, 255, 70, 85), 0.45);
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: 0 16px 30px -16px rgba(0, 0, 0, 0.9), 0 0 22px -8px rgba(var(--accent-rgb, 255, 70, 85), 0.6);
+}
+.bundle-mini-item img { transition: transform .45s var(--ease-spring); }
+.bundle-mini-item:hover img { transform: scale(1.08) rotate(-2deg); }
+.bundle-hero-collage img { transition: transform .6s var(--ease-smooth); }
+.bundle-hero:hover .bundle-hero-collage img { transform: scale(1.05); }
+.bundle-hero:hover .bundle-hero-collage img:nth-child(2) { transform: scale(1.08) translateY(-4px); }
+
+/* ==========================================================================
+   3. BUTTONS / CHIPS / INPUTS
+   ========================================================================== */
+/* ใช้ translate/scale แยก เพื่อไม่ชนกับปุ่มที่ใช้ transform จัดตำแหน่งอยู่แล้ว */
+.btn {
+  transition: background .25s var(--ease-smooth), background-position .7s var(--ease-smooth), color .2s ease,
+              border-color .25s ease, box-shadow .3s var(--ease-smooth), transform .35s var(--ease-spring),
+              translate .35s var(--ease-spring), scale .15s ease;
+}
+.btn:hover:not(:disabled) { translate: 0 -1px; }
+.btn:active:not(:disabled) { scale: 0.97; }
+
+.cat-pill, .ch-cat-pill, .inv-tier-chip, .provider-chip, .calc-preset-btn, .playstyle-pill {
+  transition: background .25s var(--ease-smooth), color .2s ease, border-color .25s ease,
+              transform .35s var(--ease-spring), box-shadow .3s ease;
+}
+.cat-pill:hover, .ch-cat-pill:hover, .calc-preset-btn:hover { transform: translateY(-2px); }
+.cat-pill.active, .ch-cat-pill.active, .calc-preset-btn.active, .inv-tier-chip.active {
+  box-shadow: 0 8px 20px -10px rgba(var(--accent-rgb, 255, 70, 85), 0.9);
+}
+
+.btn-wishlist-star { transition: transform .4s var(--ease-spring), background .2s ease; }
+.btn-wishlist-star:hover { transform: scale(1.15) rotate(12deg); }
+
+input[type="text"], input[type="password"], input[type="email"], input[type="number"], textarea, select {
+  transition: border-color .25s ease, box-shadow .3s var(--ease-smooth), background .25s ease;
+}
+
+.btn:focus-visible, .mode-tab-btn:focus-visible, .cat-pill:focus-visible, .mobile-nav-item:focus-visible,
+a:focus-visible, button:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb, 255, 70, 85), 0.85);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   4. MODALS / SHEETS
+   ========================================================================== */
+.modal-tactical-dialog { border-radius: var(--shape-modal) !important; }
+@keyframes modalTacticalZoom {
+  0%   { opacity: 0; transform: scale(0.9) translateY(20px); }
+  65%  { opacity: 1; transform: scale(1.01) translateY(-2px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+.mob-more-sheet { border-radius: 24px 24px 0 0 !important; }
+
+/* keyframes ที่ style.css อ้างถึงแต่ไม่เคยถูกประกาศ (ทำให้แอนิเมชันไม่ทำงาน) */
+@keyframes fadeIn {
+  from { opacity: 0; translate: 0 6px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; translate: 16px 0; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+/* ==========================================================================
+   5. MOBILE BOTTOM NAV — แคปซูลลอย
+   ========================================================================== */
+@media (max-width: 900px) {
+  .mobile-bottom-nav {
+    left: 10px;
+    right: 10px;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    height: 64px;
+    padding: 6px;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 18px 40px -10px rgba(0, 0, 0, 0.9), var(--soft-highlight);
+  }
+  .mobile-nav-item {
+    border-radius: 16px;
+    transition: color .25s ease, background .3s var(--ease-smooth), transform .35s var(--ease-spring);
+  }
+  .mobile-nav-item.active {
+    background: rgba(var(--accent-rgb, 255, 70, 85), 0.14);
+    transform: translateY(-2px);
+  }
+  .mobile-nav-item.active::before {
+    top: auto;
+    bottom: 4px;
+    width: 18px;
+    height: 3px;
+    border-radius: 999px;
+  }
+  .mobile-nav-item svg { transition: transform .4s var(--ease-spring); }
+  .mobile-nav-item.active svg { transform: scale(1.12); }
+}
+
+/* ==========================================================================
+   6. SCROLL REVEAL (progressive enhancement: Chrome/Edge 115+)
+   ========================================================================== */
+@supports (animation-timeline: view()) {
+  .dashboard-header-bar,
+  .bundle-display-card,
+  .bundle-mini-item {
+    animation: soft-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+}
+@keyframes soft-reveal {
+  from { opacity: 0; translate: 0 24px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+/* ==========================================================================
+   7. REDUCED MOTION
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-header-bar::after,
+  .dashboard-header-bar,
+  .bundle-display-card,
+  .bundle-mini-item { animation: none !important; }
+  .skin-card:hover, .inv-skin-card:hover, .nm-card:hover, .crosshair-card:hover,
+  .agent-catalog-card:hover { transform: none !important; }
+  .btn:hover:not(:disabled), .btn:active:not(:disabled) { translate: none; scale: none; }
+}

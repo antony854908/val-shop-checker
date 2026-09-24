@@ -2016,6 +2016,11 @@ function renderDailyShop(skins) {
     return;
   }
 
+  window._currentDailySkins = validSkins;
+  if (typeof checkAndTriggerDiscordWishlistAlert === 'function') {
+    checkAndTriggerDiscordWishlistAlert(validSkins);
+  }
+
   validSkins.forEach((skin, idx) => {
     const skinPrice = skin.price || 0;
     const walletVp = getCurrentWalletVp();
@@ -2224,15 +2229,28 @@ function renderBundles(bundles) {
   }
 
   bundleContainerEl.classList.remove('hidden');
-  const b = bundles[0];
-  bundleRemaining = b.remainingDurationInSeconds || 0;
+  // Header countdown tracks the bundle that leaves the store first
+  const timers = bundles.map(x => x.remainingDurationInSeconds || 0).filter(t => t > 0);
+  bundleRemaining = timers.length ? Math.min(...timers) : 0;
 
+  // Riot rotates several featured bundles at once (e.g. Champions + Warden Launch)
+  bundles.forEach(b => renderSingleBundle(container, b, bundles.length > 1));
+}
+
+function renderSingleBundle(container, b, showOwnTimer) {
   const bundlePrice = b.totalDiscountedCost || b.totalBaseCost || b.price || 0;
   const overEst = Math.round(bundlePrice * 0.238);
   const officialEst = Math.round(bundlePrice * 0.292);
   const savings = Math.max(0, officialEst - overEst);
 
-  const heroImage = b.displayIcon || b.verticalPromoImage || (b.items && b.items.find(i => i.displayIcon)?.displayIcon) || '/assets/placeholder-skin.svg';
+  // Hero art priority: official bundle art -> collage of the weapons on sale -> themed "new drop" panel
+  const knownItemIcons = (b.items || []).filter(i => i.displayIcon && !i.isUnreleasedData).map(i => i.displayIcon);
+  const officialArt = b.displayIcon || b.verticalPromoImage || null;
+  const heroVisual = officialArt
+    ? `<img src="${officialArt}" alt="${b.name}">`
+    : knownItemIcons.length > 0
+      ? `<div class="bundle-hero-collage" data-count="${Math.min(knownItemIcons.length, 4)}">${knownItemIcons.slice(0, 4).map(src => `<img src="${src}" alt="" loading="lazy" onerror="this.remove()">`).join('')}</div>`
+      : `<div class="bundle-hero-fallback"><img src="/assets/placeholder-skin.svg" alt=""><span>บันเดิลใหม่ล่าสุด — รูปภาพจะขึ้นอัตโนมัติเมื่อฐานข้อมูลเกมอัปเดต</span></div>`;
 
   const heroDiv = document.createElement('div');
   heroDiv.className = 'bundle-hero';
@@ -2243,11 +2261,12 @@ function renderBundles(bundles) {
     window.openBundleModal(b);
   });
   heroDiv.innerHTML = `
-    <img src="${heroImage}" alt="${b.name}">
+    ${heroVisual}
     <div class="bundle-overlay">
       <div class="bundle-info">
         <h3>${b.name}</h3>
         <p>${b.subName || 'Featured Valorant Collection'}</p>
+        ${showOwnTimer && b.remainingDurationInSeconds > 0 ? `<p class="bundle-own-timer">เหลือเวลา ${Math.floor(b.remainingDurationInSeconds / 86400)} วัน ${Math.floor((b.remainingDurationInSeconds % 86400) / 3600)} ชม.</p>` : ''}
       </div>
       <div class="bundle-pricing-action-box">
         <div class="skin-price-tag" style="font-size: 20px;">
@@ -2284,7 +2303,7 @@ function renderBundles(bundles) {
       const s = item.skin;
       const isSkin = !!(item.isWeaponSkin || (s && (s.chromas || s.levels || s.weaponType)));
       const itemName = item.name || s?.name || 'Bundle Item';
-      const itemIcon = item.displayIcon || s?.displayIcon || (s?.chromas && s.chromas[0]?.displayIcon) || ('https://media.valorant-api.com/weaponskinlevels/' + item.uuid + '/displayicon.png');
+      const itemIcon = item.isUnreleasedData ? '/assets/placeholder-skin.svg' : item.displayIcon || s?.displayIcon || (s?.chromas && s.chromas[0]?.displayIcon) || ('https://media.valorant-api.com/weaponskinlevels/' + item.uuid + '/displayicon.png');
       const itemBadge = isSkin ? (item.itemType || 'สกินปืน') : (item.itemType || 'ไอเทม');
       const actionText = isSkin ? '<span class="bundle-inspect-hint">กดดูเอฟเฟกต์ & สี</span>' : '<span class="bundle-inspect-hint">แตะเพื่อดูรูปภาพ HD</span>';
       const itemPrice = item.discountedPrice || item.basePrice || 0;
@@ -2431,7 +2450,7 @@ window.openBundleModal = function(b) {
       const s = item.skin;
       const isSkin = !!(item.isWeaponSkin || (s && (s.chromas || s.levels || s.weaponType)));
       const itemName = item.name || s?.name || "Bundle Item";
-      const itemIcon = item.displayIcon || s?.displayIcon || (s?.chromas && s.chromas[0]?.displayIcon) || ("https://media.valorant-api.com/weaponskinlevels/" + item.uuid + "/displayicon.png");
+      const itemIcon = item.isUnreleasedData ? '/assets/placeholder-skin.svg' : item.displayIcon || s?.displayIcon || (s?.chromas && s.chromas[0]?.displayIcon) || ("https://media.valorant-api.com/weaponskinlevels/" + item.uuid + "/displayicon.png");
       const tierColor = s?.tier?.highlightColor || "#00F5D4";
       const chromasCount = s?.chromas ? s.chromas.length : 1;
       const hasVideo = s?.hasVideo || (s?.levels && s.levels.some(l => l.streamedVideo));
@@ -2523,7 +2542,8 @@ function renderNightMarket(nm) {
     card.style.animationDelay = (idx * 0.08) + 's';
     const safeIcon = offer.displayIcon || '/assets/placeholder-skin.svg';
     const starred = isWishlisted(offer.uuid);
-    const skinPrice = offer.discountedPrice || 0;
+    const skinPrice = offer.discountedPrice ?? offer.discountPrice ?? 0;
+    const originalPrice = offer.originalPrice || skinPrice;
     const walletVp = getCurrentWalletVp();
     const opt = window.calculateOptimalOverTopup(skinPrice, true, walletVp);
 
@@ -2548,9 +2568,9 @@ function renderNightMarket(nm) {
         <div class="skin-name">${offer.name}</div>
         <div class="skin-meta-row">
           <div class="skin-price-tag">
-            <span class="original-price">${offer.originalPrice.toLocaleString()}</span>
+            <span class="original-price">${originalPrice.toLocaleString()}</span>
             <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="currency-icon">
-            <span style="color:var(--val-gold)">${offer.discountedPrice.toLocaleString()}</span>
+            <span style="color:var(--val-gold)">${skinPrice.toLocaleString()}</span>
             <span class="skin-thb-quick-tag ${opt.hasEnoughVp ? 'covered' : ''}" title="${opt.hasEnoughVp ? `มี VP ในไอดีพอแล้ว (${walletVp.toLocaleString()} VP)` : (walletVp > 0 ? `คำนวณเติมเพิ่ม ${opt.neededVp.toLocaleString()} VP (หัก ${walletVp.toLocaleString()} VP ในไอดีแล้ว) จาก OverTopup: ${opt.comboText}` : `แพ็กเกจ OverTopup แนะนำ: ${opt.comboText}`)}" data-vp="${skinPrice}">${opt.shortTag || ("~" + Math.round(skinPrice * 0.238) + " ฿")}${!opt.hasEnoughVp && walletVp > 0 ? `<span class="tag-deduct-chip">หัก ${walletVp.toLocaleString()} VP</span>` : ''}</span>
           </div>
           <button class="btn btn-primary btn-sm btn-inspect"><span>ดูสกิน & สี</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
@@ -2891,6 +2911,7 @@ function switchMediaView(view) {
     imgBox?.classList.remove('hidden');
     btnVid?.classList.remove('active');
     btnImg?.classList.add('active');
+    exitVideoFullscreen();
     if (player) player.pause();
   }
 }
@@ -2919,6 +2940,43 @@ document.getElementById('btnTogglePlay')?.addEventListener('click', () => {
   }
 });
 
+// Fullscreen skin video. The whole box goes fullscreen so the custom sound/play
+// controls stay usable; iOS Safari only supports fullscreen on <video> itself.
+function getFullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || null;
+}
+
+function toggleVideoFullscreen() {
+  const box = document.getElementById('videoPreviewBox');
+  const player = document.getElementById('modalVideoPlayer');
+  if (!box || !player) return;
+
+  if (getFullscreenElement()) {
+    (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+    return;
+  }
+  const request = box.requestFullscreen || box.webkitRequestFullscreen;
+  if (request) {
+    Promise.resolve(request.call(box)).catch(() => player.webkitEnterFullscreen?.());
+  } else if (player.webkitEnterFullscreen) {
+    player.webkitEnterFullscreen();
+  }
+}
+
+function exitVideoFullscreen() {
+  if (getFullscreenElement()) (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+}
+
+function syncFullscreenButton() {
+  const label = document.getElementById('btnToggleFullscreenText');
+  if (label) label.textContent = getFullscreenElement() ? 'ออกจากเต็มจอ' : 'เต็มจอ';
+}
+
+document.getElementById('btnToggleFullscreen')?.addEventListener('click', toggleVideoFullscreen);
+document.getElementById('modalVideoPlayer')?.addEventListener('dblclick', toggleVideoFullscreen);
+document.addEventListener('fullscreenchange', syncFullscreenButton);
+document.addEventListener('webkitfullscreenchange', syncFullscreenButton);
+
 document.getElementById('btnShowImage')?.addEventListener('click', () => switchMediaView('image'));
 document.getElementById('btnShowVideo')?.addEventListener('click', () => switchMediaView('video'));
 
@@ -2927,6 +2985,7 @@ function closeModalHandler() {
   playTacticalAudio('close');
   stopAutoSpin360();
   skinModal?.classList.add('hidden');
+  exitVideoFullscreen();
   const player = document.getElementById('modalVideoPlayer');
   if (player) {
     player.pause();
@@ -3496,10 +3555,6 @@ function renderAllAgentsGrid(agents) {
           ${ag.roleIcon ? `<img src="${ag.roleIcon}" alt="" class="role-mini-icon">` : ''}
           <span>${ag.role || 'AGENT'}</span>
         </div>
-        <span class="agent-match-badge ${matchClass}">
-          ${matchPct >= 90 ? '<svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' : ''}
-          <span>${matchLabel}</span>
-        </span>
       </div>
 
       <div class="agent-card-portrait-wrap">
@@ -4406,27 +4461,30 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
   // 3. Render Agent Mastery List
   if (agentsListEl) {
     agentsListEl.innerHTML = '';
-    agentResults.forEach(agData => {
+    // In-game agent-select style tiles: head bust left, NAME bottom-left, stats top-right
+    agentsListEl.classList.add('agent-tiles-grid');
+    agentResults.forEach((agData, idx) => {
       const fullAg = getFullAgentData(agData.agent) || { displayName: agData.agent || 'Agent', role: 'Agent' };
+      const name = fullAg.displayName || 'Agent';
+      const isMvp = idx === 0 && agentResults.length > 1; // agentResults[0] is the MVP agent
       const item = document.createElement('div');
-      item.className = 'agent-perf-card';
-      item.title = `คลิกเพื่อดูสถิติเจาะลึกและสกิลของ ${fullAg.displayName || 'Agent'}`;
-      const portrait = fullAg.fullPortrait || fullAg.displayIcon || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png';
-      
+      item.className = 'agent-tile' + (isMvp ? ' is-mvp' : '');
+      item.title = `คลิกเพื่อดูสถิติเจาะลึกและสกิลของ ${name}`;
+      // displayIcon = the head-and-shoulders art the game uses on these tiles
+      const bust = fullAg.displayIcon || fullAg.fullPortrait || 'https://media.valorant-api.com/agents/roles/4be47ced-40d3-832a-0ec4-5396661402a6/displayicon.png';
+
       item.innerHTML = `
-        <div class="agent-perf-thumb-box">
-          <img src="${portrait}" class="agent-perf-3d-img" alt="${fullAg.displayName}" loading="lazy">
+        <img src="${bust}" class="agent-tile-bust" alt="${name}" loading="lazy">
+        <div class="agent-tile-top">
+          <span>${agData.games} แมตช์</span>
+          <span class="agent-tile-sep">|</span>
+          <span class="agent-tile-wr">${agData.winRate}% WR</span>
         </div>
-        <div class="agent-perf-details">
-          <div class="agent-perf-name">
-            <span class="ag-name-txt">${fullAg.displayName || 'Agent'}</span>
-            <span class="ag-wr-badge">${agData.winRate}% WR</span>
-          </div>
-          <div class="agent-perf-role-tag">${(fullAg.role || 'Agent').toUpperCase()} • ${agData.games} แมตช์</div>
-          <div class="agent-perf-sub">
-            <span>K/D: <strong class="accent-cyan">${agData.kd}</strong></span>
-            <span>ACS: <strong class="accent-gold">${agData.acs}</strong></span>
-          </div>
+        ${isMvp ? '<span class="agent-tile-mvp">MVP</span>' : ''}
+        <div class="agent-tile-name">${name.toUpperCase()}</div>
+        <div class="agent-tile-stats">
+          <span>K/D <strong>${agData.kd}</strong></span>
+          <span>ACS <strong>${agData.acs}</strong></span>
         </div>
       `;
       item.addEventListener('click', () => openAgentDetailsModal(fullAg, agData));
@@ -4983,6 +5041,7 @@ function closeModalHandler() {
   playTacticalAudio('close');
   resetInspectTransform();
   skinModal?.classList.add('hidden');
+  exitVideoFullscreen();
   const player = document.getElementById('modalVideoPlayer');
   if (player) {
     player.pause();
@@ -5952,6 +6011,7 @@ async function loadPlayerInventory(forceRefresh = false) {
     playerInventoryData = data.inventory;
     populateInventoryWeaponFilter(playerInventoryData);
     renderInventoryView(playerInventoryData);
+    fetchBattlepassProgress();
   } catch (err) {
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">เกิดข้อผิดพลาดในการเชื่อมต่อคลังสกิน: ${escapeHtml(err.message)}</div>`;
   }
@@ -5963,12 +6023,18 @@ function renderInventoryView(inv) {
   const thbOverEl = document.getElementById('invTotalThbOver');
   const thbRiotEl = document.getElementById('invTotalThbRiot');
   const countEl = document.getElementById('invTotalSkinsCount');
+  const radEl = document.getElementById('invTotalRadianite');
+  const maxedEl = document.getElementById('invMaxedSkinsCount');
   const tierBreakdownEl = document.getElementById('invTierBreakdown');
 
   if (vpEl) vpEl.innerHTML = `${(inv.totalVpValue || 0).toLocaleString()} <span class="unit-vp">VP</span>`;
   if (thbOverEl) thbOverEl.textContent = `~${(inv.estimatedThbOverTopup || 0).toLocaleString()} ฿`;
   if (thbRiotEl) thbRiotEl.textContent = `~${(inv.estimatedThbRiotOfficial || 0).toLocaleString()} ฿`;
   if (countEl) countEl.innerHTML = `${(inv.totalSkinsCount || 0).toLocaleString()} <span class="unit-vp">ชิ้น</span>`;
+  if (radEl) radEl.innerHTML = `${(inv.totalRadianiteNeeded || 0).toLocaleString()} <span class="unit-vp">RP</span>`;
+
+  const maxedCount = (inv.skins || []).filter(s => s.isMaxUpgraded && !s.isStandardDefault).length;
+  if (maxedEl) maxedEl.textContent = maxedCount.toLocaleString();
 
   // 2. Render Tier Breakdown Chips
   if (tierBreakdownEl && inv.tierBreakdown) {
@@ -6069,6 +6135,9 @@ function filterAndRenderInventoryGrid() {
     card.style.setProperty('--card-tier-color', tierColor);
     card.style.setProperty('--card-tier-glow', tierColor + '40');
 
+    const radNeeded = skin.radianiteNeeded || 0;
+    const isMax = skin.isMaxUpgraded && !isStandard;
+
     card.innerHTML = `
       ${skin.isEquipped ? '<div class="inv-equipped-badge">EQUIPPED / ใช้งานอยู่</div>' : ''}
       <div class="skin-tier-indicator" style="background-color: ${tierColor};"></div>
@@ -6079,7 +6148,10 @@ function filterAndRenderInventoryGrid() {
           <span class="skin-tier-name">${escapeHtml(tierName)}</span>
         </div>
         <div class="skin-features-badge">
+          ${skin.totalLevels > 1 ? `<span class="badge-feat">Lv. ${skin.unlockedLevels}/${skin.totalLevels}</span>` : ''}
           ${chromasCount > 1 ? `<span class="badge-feat">${chromasCount} สี</span>` : ''}
+          ${radNeeded > 0 ? `<span class="badge-feat" style="background:rgba(181,136,255,0.2); color:#CBB0FF; border:1px solid rgba(181,136,255,0.4);">+${radNeeded} RP</span>` : ''}
+          ${isMax ? `<span class="badge-feat" style="background:rgba(0,245,212,0.2); color:#00F5D4; border:1px solid rgba(0,245,212,0.4);">MAXED ✦</span>` : ''}
           ${hasVideo ? '<span class="badge-feat"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:middle; margin-right:3px;"><polygon points="5 3 19 12 5 21 5 3"/></svg> วิดีโอ VFX</span>' : ''}
         </div>
       </div>
@@ -6497,3 +6569,1058 @@ setTimeout(() => {
   loadAgentsEncyclopedia();
   loadGuestStorePreview();
 }, 100);
+
+// ============================================================================
+// 12-MONTH AUTOMATIC DYNAMIC SEASONAL THEMES ENGINE
+// Seamlessly switches theme based on current month (1-12) without any button needed
+// ============================================================================
+function applyAutomaticMonthlyTheme() {
+  const currentMonth = new Date().getMonth() + 1; // 1 to 12
+  const themeKey = `month-${currentMonth}`;
+  document.body.setAttribute('data-theme', themeKey);
+
+  const MONTH_ACCENTS = {
+    1: '#00F5D4',  // Jan: Frozen Dawn
+    2: '#E61937',  // Feb: Lunar Festival
+    3: '#FF758F',  // Mar: Sakura Bloom
+    4: '#00F5D4',  // Apr: Cyber Splash
+    5: '#9D7BFF',  // May: Midnight Cyberpunk
+    6: '#FF7A1F',  // Jun: Sunset Mirage
+    7: '#00B4D8',  // Jul: Ocean Tides
+    8: '#7209B7',  // Aug: Neon Void
+    9: '#FF9E00',  // Sep: Golden Sunset (Current Month)
+    10: '#FF7A1F', // Oct: Halloween Night
+    11: '#E63946', // Nov: Floating Lanterns
+    12: '#E63946'  // Dec: Winter Wonderland
+  };
+
+  const accent = MONTH_ACCENTS[currentMonth] || '#FF4655';
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+  if (metaThemeColor) metaThemeColor.setAttribute('content', accent);
+}
+
+// Initialize theme immediately on script load
+applyAutomaticMonthlyTheme();
+
+// ============================================================================
+// 1. LIVE STORE RESET COUNTDOWN TIMER TICKER
+// ============================================================================
+function initEnhancedLiveStoreTimer() {
+  window.__dailyTimerManaged = true;
+  const timerEl = document.getElementById('dailyTimer');
+  const cardEl = document.getElementById('storeTimerCard');
+  if (!timerEl) return;
+
+  function update() {
+    const now = new Date();
+    // Daily shop resets at 00:00:00 UTC (07:00:00 Bangkok time)
+    const nextReset = new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + (now.getUTCHours() >= 0 ? 1 : 0),
+      0, 0, 0
+    ));
+
+    const diffMs = nextReset.getTime() - now.getTime();
+    if (diffMs <= 0) {
+      timerEl.textContent = '00:00:00';
+      if (cardEl) {
+        cardEl.style.borderColor = 'var(--val-gold)';
+        cardEl.title = 'ร้านค้ารีเซ็ตแล้ว! กดเพื่อโหลดสกินใหม่';
+      }
+      return;
+    }
+
+    const totalSecs = Math.floor(diffMs / 1000);
+    const h = Math.floor(totalSecs / 3600);
+    const m = Math.floor((totalSecs % 3600) / 60);
+    const s = totalSecs % 60;
+
+    const formatted = [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
+    timerEl.textContent = formatted;
+
+    // Visual warning when less than 1 hour remains
+    if (h === 0) {
+      if (cardEl) cardEl.style.borderColor = '#FF7A1F';
+    } else {
+      if (cardEl) cardEl.style.borderColor = '';
+    }
+  }
+
+  update();
+  setInterval(update, 1000);
+}
+
+// ============================================================================
+// 2. DAILY STORE SHARE CARD CANVAS GENERATOR
+// ============================================================================
+function initShareCardModule() {
+  const btnShare = document.getElementById('btnShareStoreCard');
+  const modal = document.getElementById('shareCardModal');
+  const btnClose = document.getElementById('btnCloseShareCardModal');
+  const btnDownload = document.getElementById('btnDownloadShareCard');
+  const btnCopy = document.getElementById('btnCopyShareCard');
+  const btnCopyLabel = document.getElementById('btnCopyShareCardLabel');
+  const canvas = document.getElementById('shareCardCanvas');
+  const loading = document.getElementById('shareCardLoading');
+
+  if (!btnShare || !modal || !canvas) return;
+
+  btnShare.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+    renderStoreShareCard();
+  });
+
+  window.renderStoreShareCard = renderStoreShareCard;
+
+  btnClose?.addEventListener('click', () => modal.classList.add('hidden'));
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.add('hidden');
+  });
+
+  async function renderStoreShareCard() {
+    if (loading) loading.style.display = 'flex';
+    const ctx = canvas.getContext('2d');
+    const width = 1200;
+    const height = 675;
+    canvas.width = width;
+    canvas.height = height;
+
+    // 1. Tactical Dark Background & Gradient
+    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+    bgGrad.addColorStop(0, '#090B12');
+    bgGrad.addColorStop(0.5, '#0E1321');
+    bgGrad.addColorStop(1, '#07080E');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, width, height);
+
+    // Subtle tactical grid lines
+    ctx.strokeStyle = 'rgba(0, 245, 212, 0.05)';
+    ctx.lineWidth = 1;
+    for (let x = 40; x < width; x += 60) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+    }
+    for (let y = 40; y < height; y += 60) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+    }
+
+    // Border Frame
+    ctx.strokeStyle = 'rgba(0, 245, 212, 0.35)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(20, 20, width - 40, height - 40);
+
+    // Corner tactical accents
+    ctx.fillStyle = '#00F5D4';
+    const cSize = 14;
+    ctx.fillRect(20, 20, cSize, 3); ctx.fillRect(20, 20, 3, cSize);
+    ctx.fillRect(width - 20 - cSize, 20, cSize, 3); ctx.fillRect(width - 23, 20, 3, cSize);
+    ctx.fillRect(20, height - 23, cSize, 3); ctx.fillRect(20, height - 20 - cSize, 3, cSize);
+    ctx.fillRect(width - 20 - cSize, height - 23, cSize, 3); ctx.fillRect(width - 23, height - 20 - cSize, 3, cSize);
+
+    // 2. Header: Logo, Title, Player Name & Date
+    ctx.fillStyle = '#FF4655';
+    ctx.font = '900 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('VALORANT', 50, 68);
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('// DAILY STORE OFFERS', 195, 68);
+
+    // Player tag and Date on top right
+    const playerName = (typeof currentUser !== 'undefined' && currentUser?.gameName ? `${currentUser.gameName}#${currentUser.tagLine || 'TH'}` : 'VALORANT AGENT');
+    const todayStr = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+
+    ctx.textAlign = 'right';
+    ctx.font = '600 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#00F5D4';
+    ctx.fillText(playerName, width - 50, 58);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(`วันที่ ${todayStr} • val-shop-checker.vercel.app`, width - 50, 78);
+    ctx.textAlign = 'left';
+
+    // Horizontal divider
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.beginPath();
+    ctx.moveTo(50, 95);
+    ctx.lineTo(width - 50, 95);
+    ctx.stroke();
+
+    // 3. Render 4 Skin Columns
+    const skins = (window._currentDailySkins && window._currentDailySkins.length > 0)
+      ? window._currentDailySkins.slice(0, 4)
+      : [];
+
+    const colWidth = 260;
+    const colGap = 20;
+    const startX = 50;
+    const startY = 120;
+    const cardHeight = 490;
+
+    // Helper to load image safely with timeout
+    const loadImage = (url) => new Promise((resolve) => {
+      if (!url) return resolve(null);
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      const to = setTimeout(() => resolve(null), 3000);
+      img.onload = () => { clearTimeout(to); resolve(img); };
+      img.onerror = () => { clearTimeout(to); resolve(null); };
+      img.src = url;
+    });
+
+    // Load VP icon once
+    const vpIcon = await loadImage('https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png');
+
+    for (let i = 0; i < 4; i++) {
+      const skin = skins[i];
+      const x = startX + (i * (colWidth + colGap));
+      const y = startY;
+
+      // Skin Box Background
+      ctx.fillStyle = 'rgba(18, 22, 34, 0.8)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(x, y, colWidth, cardHeight, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      if (!skin) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.font = '14px sans-serif';
+        ctx.fillText('ไม่มีข้อมูลสกิน', x + 30, y + 100);
+        continue;
+      }
+
+      // Top color accent bar by tier
+      const tierColor = skin.tier?.highlightColor || '#FF4655';
+      ctx.fillStyle = tierColor;
+      ctx.beginPath();
+      ctx.roundRect(x, y, colWidth, 4, [10, 10, 0, 0]);
+      ctx.fill();
+
+      // Tier Name Badge
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.beginPath();
+      ctx.roundRect(x + 14, y + 16, colWidth - 28, 24, 4);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.font = '600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText((skin.tier?.name || 'EDITION').toUpperCase(), x + 24, y + 32);
+
+      // Wishlist Star badge if favorited
+      if (isWishlisted(skin.uuid)) {
+        ctx.fillStyle = '#FFD700';
+        ctx.font = '12px sans-serif';
+        ctx.fillText('★ WISHLIST', x + colWidth - 95, y + 32);
+      }
+
+      // Skin Weapon Image
+      const skinImg = await loadImage(skin.displayIcon);
+      if (skinImg) {
+        const imgMaxW = colWidth - 30;
+        const imgMaxH = 200;
+        const scale = Math.min(imgMaxW / skinImg.width, imgMaxH / skinImg.height, 1);
+        const dw = skinImg.width * scale;
+        const dh = skinImg.height * scale;
+        const dx = x + (colWidth - dw) / 2;
+        const dy = y + 70 + (imgMaxH - dh) / 2;
+        ctx.drawImage(skinImg, dx, dy, dw, dh);
+      }
+
+      // Skin Name (wrapped or truncated)
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '700 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      const name = skin.name || 'Weapon Skin';
+      if (ctx.measureText(name).width > colWidth - 30) {
+        const short = name.slice(0, 22) + '...';
+        ctx.fillText(short, x + 16, y + 360);
+      } else {
+        ctx.fillText(name, x + 16, y + 360);
+      }
+
+      // Divider inside card
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.beginPath();
+      ctx.moveTo(x + 16, y + 385);
+      ctx.lineTo(x + colWidth - 16, y + 385);
+      ctx.stroke();
+
+      // Price Tag (VP & THB)
+      const price = skin.price || 0;
+      const thb = Math.round(price * 0.238);
+
+      if (vpIcon) {
+        ctx.drawImage(vpIcon, x + 16, y + 400, 20, 20);
+      }
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '800 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText(price.toLocaleString() + ' VP', x + 44, y + 417);
+
+      ctx.fillStyle = '#00F5D4';
+      ctx.font = '600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText(`~${thb.toLocaleString()} ฿ (OverTopup)`, x + 16, y + 445);
+    }
+
+    // 4. Footer Note
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('Generated by VALORANT Shop Checker • https://val-shop-checker.vercel.app', 50, height - 32);
+
+    if (loading) loading.style.display = 'none';
+  }
+
+  // Download Handler
+  btnDownload?.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = `val-daily-shop-${new Date().toISOString().slice(0, 10)}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    playTacticalAudio('click');
+  });
+
+  // Copy to Clipboard Handler
+  btnCopy?.addEventListener('click', async () => {
+    try {
+      canvas.toBlob(async (blob) => {
+        if (!blob) throw new Error('Blob creation failed');
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+        if (btnCopyLabel) btnCopyLabel.textContent = 'คัดลอกรูปแล้ว! ✓';
+        playTacticalAudio('success');
+        setTimeout(() => {
+          if (btnCopyLabel) btnCopyLabel.textContent = 'คัดลอกรูปภาพ (Copy)';
+        }, 2500);
+      }, 'image/png');
+    } catch (err) {
+      console.warn('[ShareCard] Clipboard copy failed, falling back to download:', err.message);
+      btnDownload?.click();
+    }
+  });
+}
+
+// ============================================================================
+// 3. DISCORD WEBHOOK WISHLIST ALERT SYSTEM
+// ============================================================================
+function initDiscordWebhookModule() {
+  const btnOpen = document.getElementById('btnOpenDiscordSettings');
+  const modal = document.getElementById('discordWebhookModal');
+  const btnClose = document.getElementById('btnCloseDiscordModal');
+  const inputUrl = document.getElementById('inputDiscordWebhookUrl');
+  const alertBox = document.getElementById('discordAlertBox');
+  const btnSave = document.getElementById('btnSaveDiscordWebhook');
+  const btnTest = document.getElementById('btnTestDiscordWebhook');
+
+  if (!btnOpen || !modal) return;
+
+  btnOpen.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+    if (inputUrl) {
+      inputUrl.value = localStorage.getItem('val_discord_webhook') || '';
+    }
+    if (alertBox) alertBox.classList.add('hidden');
+  });
+
+  btnClose?.addEventListener('click', () => modal.classList.add('hidden'));
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.add('hidden');
+  });
+
+  function showAlert(msg, isSuccess) {
+    if (!alertBox) return;
+    alertBox.textContent = msg;
+    alertBox.className = `discord-alert-box ${isSuccess ? 'success' : 'error'}`;
+    alertBox.classList.remove('hidden');
+  }
+
+  btnSave?.addEventListener('click', () => {
+    const url = (inputUrl?.value || '').trim();
+    if (!url) {
+      localStorage.removeItem('val_discord_webhook');
+      showAlert('ลบการเชื่อมต่อ Discord Webhook เรียบร้อยแล้ว', true);
+      return;
+    }
+    if (!url.startsWith('https://discord.com/api/webhooks/') && !url.startsWith('https://canary.discord.com/api/webhooks/')) {
+      showAlert('URL ต้องเป็นลิงก์ Discord Webhook ที่ถูกต้อง (ขึ้นต้นด้วย https://discord.com/api/webhooks/)', false);
+      return;
+    }
+    localStorage.setItem('val_discord_webhook', url);
+    showAlert('บันทึกการตั้งค่า Discord Webhook สำเร็จแล้ว!', true);
+    playTacticalAudio('success');
+  });
+
+  btnTest?.addEventListener('click', async () => {
+    const url = (inputUrl?.value || '').trim();
+    if (!url) {
+      showAlert('กรุณากรอก Discord Webhook URL ก่อนกดทดสอบ', false);
+      return;
+    }
+
+    btnTest.disabled = true;
+    showAlert('กำลังส่งข้อความทดสอบเข้า Discord...', true);
+
+    try {
+      const playerName = (typeof currentUser !== 'undefined' && currentUser?.gameName) ? `${currentUser.gameName}#${currentUser.tagLine || 'TH'}` : 'VALORANT Agent';
+      const res = await fetch('/api/notify/discord', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ webhookUrl: url, testOnly: true, playerName })
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'ส่งข้อความไม่สำเร็จ');
+
+      showAlert('ส่งข้อความทดสอบเข้า Discord สำเร็จแล้ว! ตรวจสอบห้องแชทของคุณได้เลย', true);
+      playTacticalAudio('success');
+    } catch (err) {
+      showAlert(`ส่งข้อความล้มเหลว: ${err.message}`, false);
+    } finally {
+      btnTest.disabled = false;
+    }
+  });
+}
+
+// Automatically dispatches alert if wishlist skin appears in daily offers
+async function checkAndTriggerDiscordWishlistAlert(skins) {
+  try {
+    const webhookUrl = localStorage.getItem('val_discord_webhook');
+    if (!webhookUrl) return;
+
+    const wishlist = getWishlist();
+    if (wishlist.size === 0) return;
+
+    const matchedSkins = (skins || []).filter(s => wishlist.has((s.uuid || '').toLowerCase()));
+    if (matchedSkins.length === 0) return;
+
+    // Check last alert date to prevent duplicate spamming in the same 24-hour cycle
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const lastAlertKey = localStorage.getItem('val_last_discord_alert_date');
+    if (lastAlertKey === todayKey) return;
+
+    const playerName = (typeof currentUser !== 'undefined' && currentUser?.gameName) ? `${currentUser.gameName}#${currentUser.tagLine || 'TH'}` : 'VALORANT Agent';
+
+    for (const skin of matchedSkins) {
+      await fetch('/api/notify/discord', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          webhookUrl,
+          testOnly: false,
+          skin: {
+            name: skin.name,
+            price: skin.price,
+            displayIcon: skin.displayIcon,
+            weaponType: skin.weaponType
+          },
+          playerName,
+          remainingDuration: document.getElementById('dailyTimer')?.textContent || 'รีเซ็ต 07:00 น.'
+        })
+      });
+    }
+
+    localStorage.setItem('val_last_discord_alert_date', todayKey);
+    console.log('[Discord Alert] Successfully notified', matchedSkins.length, 'wishlisted skin(s)');
+  } catch (err) {
+    console.warn('[Discord Alert] Failed to auto-dispatch alert:', err.message);
+  }
+}
+
+// ============================================================================
+// 4. BATTLE PASS PROGRESSION TRACKER
+// ============================================================================
+async function fetchBattlepassProgress() {
+  const card = document.getElementById('bpProgressCard');
+  if (!card) return;
+
+  try {
+    const res = await apiFetch('/api/battlepass');
+    const data = await res.json();
+
+    if (!data.ok || !data.battlepass) {
+      card.style.display = 'none';
+      return;
+    }
+
+    const bp = data.battlepass;
+    card.style.display = 'block';
+
+    const nameEl = document.getElementById('bpDisplayName');
+    const tierEl = document.getElementById('bpCurrentTier');
+    const fillEl = document.getElementById('bpProgressBarFill');
+    const percentEl = document.getElementById('bpPercent');
+    const xpEl = document.getElementById('bpXpInfo');
+    const matchesEl = document.getElementById('bpMatchesInfo');
+
+    if (nameEl) nameEl.textContent = bp.displayName || 'Current Act Battle Pass';
+    if (tierEl) tierEl.textContent = `Tier ${bp.currentTier} / ${bp.maxTier}${bp.isCompleted ? ' (COMPLETE!)' : ''}`;
+    if (fillEl) fillEl.style.width = `${bp.levelProgressPercent || 0}%`;
+    if (percentEl) percentEl.textContent = `${bp.levelProgressPercent || 0}%`;
+    if (xpEl) xpEl.textContent = `${(bp.xpIntoCurrentLevel || 0).toLocaleString()} / ${(bp.xpForNextLevel || 0).toLocaleString()} XP`;
+    
+    if (matchesEl) {
+      if (bp.isCompleted) {
+        matchesEl.textContent = 'ปลดล็อกครบทุก Tier แล้ว! ✦';
+      } else {
+        matchesEl.textContent = `~${bp.approxCompMatches || 0} แมตช์ (Competitive) หรือ ~${bp.approxSpikeMatches || 0} แมตช์ (Spike Rush)`;
+      }
+    }
+  } catch (e) {
+    console.warn('[Battlepass] Fetch error:', e.message);
+    if (card) card.style.display = 'none';
+  }
+}
+
+// ============================================================================
+// 5. SKIN VS COMPARATOR MODULE (VISUAL WEAPON & MELEE SELECTOR UI)
+// ============================================================================
+let skinCompareA = null;
+let skinCompareB = null;
+let activeCompareTarget = 'A'; // 'A' or 'B'
+let compareSkinsCache = [];
+let currentCompareWeaponFilter = 'Melee'; // Default to Melee as requested
+
+function initSkinCompareModule() {
+  const btnOpen = document.getElementById('btnOpenSkinCompare');
+  const modal = document.getElementById('skinCompareModal');
+  const btnClose = document.getElementById('btnCloseCompareModal');
+  const targetBtnA = document.getElementById('btnTargetSlotA');
+  const targetBtnB = document.getElementById('btnTargetSlotB');
+  const cardSlotA = document.getElementById('compareCardA');
+  const cardSlotB = document.getElementById('compareCardB');
+  const btnClearA = document.getElementById('btnClearSlotA');
+  const btnClearB = document.getElementById('btnClearSlotB');
+  const quickSearchInput = document.getElementById('compareQuickSearch');
+  const categoriesBar = document.getElementById('compareCategoriesBar');
+  const skinsGrid = document.getElementById('compareSkinsGrid');
+
+  if (!btnOpen || !modal) return;
+
+  btnOpen.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+    playTacticalAudio('tab');
+    if (compareSkinsCache.length === 0) {
+      loadAllCompareSkins();
+    } else {
+      renderCompareSkinsGrid();
+    }
+  });
+
+  btnClose?.addEventListener('click', () => modal.classList.add('hidden'));
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.add('hidden');
+  });
+
+  // Switch target slot to A or B
+  function setActiveTarget(target) {
+    activeCompareTarget = target;
+    if (target === 'A') {
+      targetBtnA?.classList.add('active');
+      targetBtnB?.classList.remove('active');
+      cardSlotA?.classList.add('active-selection-slot');
+      cardSlotB?.classList.remove('active-selection-slot');
+    } else {
+      targetBtnB?.classList.add('active');
+      targetBtnA?.classList.remove('active');
+      cardSlotB?.classList.add('active-selection-slot');
+      cardSlotA?.classList.remove('active-selection-slot');
+    }
+    updateSelectedGridCards();
+  }
+
+  targetBtnA?.addEventListener('click', () => setActiveTarget('A'));
+  targetBtnB?.addEventListener('click', () => setActiveTarget('B'));
+  cardSlotA?.addEventListener('click', (e) => {
+    if (!e.target.closest('#btnClearSlotA')) setActiveTarget('A');
+  });
+  cardSlotB?.addEventListener('click', (e) => {
+    if (!e.target.closest('#btnClearSlotB')) setActiveTarget('B');
+  });
+
+  // Clear slot handlers
+  btnClearA?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    skinCompareA = null;
+    resetSlotCard('A');
+    setActiveTarget('A');
+    checkAndRenderCompareTable();
+    updateSelectedGridCards();
+    playTacticalAudio('click');
+  });
+
+  btnClearB?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    skinCompareB = null;
+    resetSlotCard('B');
+    setActiveTarget('B');
+    checkAndRenderCompareTable();
+    updateSelectedGridCards();
+    playTacticalAudio('click');
+  });
+
+  // Category pills click handler
+  categoriesBar?.querySelectorAll('.category-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      categoriesBar.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      currentCompareWeaponFilter = btn.dataset.weapon;
+      if (quickSearchInput) quickSearchInput.value = '';
+      renderCompareSkinsGrid();
+      playTacticalAudio('hover');
+    });
+  });
+
+  // Quick search filter
+  quickSearchInput?.addEventListener('input', () => {
+    renderCompareSkinsGrid();
+  });
+
+  // Inspect modal "เทียบ VS" button
+  const btnModalCompare = document.getElementById('btnModalCompareSkin');
+  btnModalCompare?.addEventListener('click', () => {
+    if (!currentInspectedSkin) return;
+    const sModal = document.getElementById('skinModal');
+    if (sModal) sModal.classList.add('hidden');
+    modal.classList.remove('hidden');
+    selectSkinForSlot(currentInspectedSkin, 'A');
+    setActiveTarget('B');
+    if (compareSkinsCache.length === 0) loadAllCompareSkins();
+    playTacticalAudio('tab');
+  });
+
+  // Fetch full skin catalog for comparator
+  async function loadAllCompareSkins() {
+    if (!skinsGrid) return;
+    skinsGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:30px; color:rgba(255,255,255,0.4);">กำลังโหลดคลังสกินและรูปปืนทั้งหมด...</div>';
+    try {
+      const res = await fetch('/api/skins/all?limit=2000');
+      const data = await res.json();
+      if (data.ok && data.skins) {
+        compareSkinsCache = data.skins.filter(s => {
+          const n = (s.name || '').toLowerCase();
+          return !n.startsWith('standard ') && n !== 'melee' && s.displayIcon;
+        });
+      }
+    } catch (e) {
+      console.warn('[Compare] Failed to fetch catalog:', e.message);
+    }
+
+    if (compareSkinsCache.length === 0) {
+      // Fallback to cached catalog or player skins
+      compareSkinsCache = (typeof catalogSkins !== 'undefined' && catalogSkins.length > 0)
+        ? catalogSkins
+        : (playerInventoryData?.skins || []);
+    }
+
+    renderCompareSkinsGrid();
+  }
+
+  // Render Visual Gun & Skin Cards Grid
+  function renderCompareSkinsGrid() {
+    if (!skinsGrid) return;
+    const q = quickSearchInput?.value?.trim().toLowerCase() || '';
+    const weaponFilter = currentCompareWeaponFilter;
+
+    let filtered = compareSkinsCache;
+
+    if (weaponFilter !== 'all') {
+      const f = weaponFilter.toLowerCase();
+      filtered = filtered.filter(s => {
+        const wType = (s.weaponType || '').toLowerCase();
+        const wCat = (s.weaponCategory || '').toLowerCase();
+        const wName = (s.name || '').toLowerCase();
+        if (f === 'melee') {
+          return wType === 'melee' || wCat === 'melee';
+        }
+        return wType === f || wName.endsWith(' ' + f);
+      });
+    }
+
+    if (q) {
+      filtered = filtered.filter(s => (s.name || '').toLowerCase().includes(q));
+    }
+
+    if (filtered.length === 0) {
+      skinsGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:rgba(255,255,255,0.4); font-size:13px;">ไม่พบสกินในหมวดนี้</div>';
+      return;
+    }
+
+    skinsGrid.innerHTML = '';
+    filtered.slice(0, 120).forEach(skin => {
+      const card = document.createElement('div');
+      card.className = 'compare-skin-card-item';
+      const tierColor = skin.contentTier?.color || skin.tier?.highlightColor || '#ff4655';
+      const tierName = skin.contentTier?.name || skin.tier?.name || 'Edition';
+      const price = skin.estimatedVpPrice || skin.price || 0;
+      const icon = skin.displayIcon || '/assets/placeholder-skin.svg';
+
+      if (skinCompareA && skinCompareA.uuid === skin.uuid) card.classList.add('selected-in-a');
+      if (skinCompareB && skinCompareB.uuid === skin.uuid) card.classList.add('selected-in-b');
+
+      card.innerHTML = `
+        <div class="compare-skin-tier-line" style="background-color: ${tierColor};"></div>
+        <img src="${icon}" alt="${escapeHtml(skin.name)}" class="compare-item-img" onerror="this.onerror=null; this.src='/assets/placeholder-skin.svg';">
+        <div class="compare-item-name" title="${escapeHtml(skin.name)}">${escapeHtml(skin.name)}</div>
+        <div class="compare-item-footer">
+          <span class="compare-item-tier-badge" style="color:${tierColor};">${escapeHtml(tierName)}</span>
+          <span class="compare-item-price">${price ? price.toLocaleString() + ' VP' : ''}</span>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        selectSkinForSlot(skin, activeCompareTarget);
+        playTacticalAudio('click');
+
+        // Smart Auto-Switch: If other slot is empty, switch to it automatically!
+        if (activeCompareTarget === 'A' && !skinCompareB) {
+          setActiveTarget('B');
+        } else if (activeCompareTarget === 'B' && !skinCompareA) {
+          setActiveTarget('A');
+        }
+      });
+
+      skinsGrid.appendChild(card);
+    });
+  }
+
+  function updateSelectedGridCards() {
+    skinsGrid?.querySelectorAll('.compare-skin-card-item').forEach(card => {
+      card.classList.remove('selected-in-a', 'selected-in-b');
+    });
+    // re-highlight if match
+    if (skinCompareA) {
+      const el = skinsGrid?.querySelector(`.compare-skin-card-item img[alt="${CSS.escape(skinCompareA.name)}"]`)?.closest('.compare-skin-card-item');
+      el?.classList.add('selected-in-a');
+    }
+    if (skinCompareB) {
+      const el = skinsGrid?.querySelector(`.compare-skin-card-item img[alt="${CSS.escape(skinCompareB.name)}"]`)?.closest('.compare-skin-card-item');
+      el?.classList.add('selected-in-b');
+    }
+  }
+
+  function selectSkinForSlot(skin, slot) {
+    if (slot === 'A') {
+      skinCompareA = skin;
+      renderSlotCard('A', skin);
+    } else {
+      skinCompareB = skin;
+      renderSlotCard('B', skin);
+    }
+    checkAndRenderCompareTable();
+    updateSelectedGridCards();
+  }
+
+  function getEstimatedSkinPrice(skin) {
+    if (skin.price && skin.price > 0) return skin.price;
+    if (skin.estimatedVpPrice && skin.estimatedVpPrice > 0) return skin.estimatedVpPrice;
+
+    const tierName = (skin.contentTier?.name || skin.tier?.name || '').toLowerCase();
+    const isMelee = (skin.weaponType || '').toLowerCase() === 'melee' || (skin.weaponCategory || '').toLowerCase() === 'melee' || (skin.name || '').toLowerCase().includes('knife') || (skin.name || '').toLowerCase().includes('blade') || (skin.name || '').toLowerCase().includes('karambit');
+
+    if (isMelee) {
+      if (tierName.includes('ultra')) return 4950;
+      if (tierName.includes('exclusive')) return 4350;
+      if (tierName.includes('premium')) return 3550;
+      if (tierName.includes('deluxe')) return 2550;
+      if (tierName.includes('select')) return 1750;
+    } else {
+      if (tierName.includes('ultra')) return 2475;
+      if (tierName.includes('exclusive')) return 2175;
+      if (tierName.includes('premium')) return 1775;
+      if (tierName.includes('deluxe')) return 1275;
+      if (tierName.includes('select')) return 875;
+    }
+    return 0;
+  }
+
+  function renderSlotCard(slot, skin) {
+    const card = document.getElementById(slot === 'A' ? 'compareCardA' : 'compareCardB');
+    const content = document.getElementById(slot === 'A' ? 'compareContentA' : 'compareContentB');
+    const clearBtn = document.getElementById(slot === 'A' ? 'btnClearSlotA' : 'btnClearSlotB');
+    if (!card || !content || !skin) return;
+
+    card.classList.add('has-skin');
+    clearBtn?.classList.remove('hidden');
+
+    const tierColor = skin.contentTier?.color || skin.tier?.highlightColor || '#ff4655';
+    const tierName = skin.contentTier?.name || skin.tier?.name || 'Edition';
+    const price = getEstimatedSkinPrice(skin);
+    const isBp = !price || price === 0;
+    const thb = price ? Math.round(price * 0.238) : 0;
+    const icon = skin.displayIcon || (skin.chromas && skin.chromas[0]?.displayIcon) || '/assets/placeholder-skin.svg';
+
+    content.innerHTML = `
+      <div style="font-size:11px; font-weight:800; color:${tierColor}; letter-spacing:1px; margin-bottom:2px;">
+        ${escapeHtml(tierName).toUpperCase()}
+      </div>
+      <div class="compare-skin-name">${escapeHtml(skin.name)}</div>
+      <img src="${icon}" alt="${escapeHtml(skin.name)}" class="compare-skin-render">
+      <div class="compare-skin-price">
+        ${isBp 
+          ? '<span style="font-size:13px; color:var(--val-gold); background:rgba(255,215,0,0.15); padding:2px 8px; border-radius:4px;">✦ BATTLE PASS SKIN</span>'
+          : `<img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" width="18" height="18"><span>${price.toLocaleString()} VP</span>`
+        }
+      </div>
+      <div style="font-size:12px; color:var(--val-cyan); margin-top:2px;">
+        ${isBp ? 'สกินพาสปลดล็อกตาม Act' : `~${thb.toLocaleString()} ฿ (OverTopup)`}
+      </div>
+    `;
+  }
+
+  function resetSlotCard(slot) {
+    const card = document.getElementById(slot === 'A' ? 'compareCardA' : 'compareCardB');
+    const content = document.getElementById(slot === 'A' ? 'compareContentA' : 'compareContentB');
+    const clearBtn = document.getElementById(slot === 'A' ? 'btnClearSlotA' : 'btnClearSlotB');
+    if (!card || !content) return;
+
+    card.classList.remove('has-skin');
+    clearBtn?.classList.add('hidden');
+
+    const slotTitle = slot === 'A' ? 'ฝั่งซ้าย (A)' : 'ฝั่งขวา (B)';
+    content.innerHTML = `
+      <div class="compare-placeholder-box">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+        <div class="compare-placeholder-title">คลิกเลือกสกิน${slotTitle}</div>
+        <div class="compare-placeholder-sub">กดเลือกจากรูปปืนด้านล่างได้ทันที</div>
+      </div>
+    `;
+  }
+
+  function checkAndRenderCompareTable() {
+    const wrap = document.getElementById('compareTableWrap');
+    const headA = document.getElementById('compareTableHeadA');
+    const headB = document.getElementById('compareTableHeadB');
+    const tbody = document.getElementById('compareTableBody');
+    if (!wrap || !tbody) return;
+
+    if (!skinCompareA || !skinCompareB) {
+      wrap.style.display = 'none';
+      return;
+    }
+
+    headA.textContent = skinCompareA.name;
+    headB.textContent = skinCompareB.name;
+
+    const priceA = getEstimatedSkinPrice(skinCompareA);
+    const priceB = getEstimatedSkinPrice(skinCompareB);
+    const chromasA = skinCompareA.chromas ? skinCompareA.chromas.length : 1;
+    const chromasB = skinCompareB.chromas ? skinCompareB.chromas.length : 1;
+    const levelsA = skinCompareA.levels ? skinCompareA.levels.length : 1;
+    const levelsB = skinCompareB.levels ? skinCompareB.levels.length : 1;
+    const hasVfxA = skinCompareA.hasVideo || (skinCompareA.levels && skinCompareA.levels.some(l => l.streamedVideo));
+    const hasVfxB = skinCompareB.hasVideo || (skinCompareB.levels && skinCompareB.levels.some(l => l.streamedVideo));
+
+    tbody.innerHTML = `
+      <tr>
+        <td class="${(priceA > 0 && priceA <= priceB) ? 'compare-win-highlight' : ''}">${priceA ? priceA.toLocaleString() + ' VP' : 'Battle Pass Skin'}</td>
+        <td>ราคามาตรฐาน (VP)</td>
+        <td class="${(priceB > 0 && priceB <= priceA) ? 'compare-win-highlight' : ''}">${priceB ? priceB.toLocaleString() + ' VP' : 'Battle Pass Skin'}</td>
+      </tr>
+      <tr>
+        <td class="${(priceA > 0 && priceA <= priceB) ? 'compare-win-highlight' : ''}">${priceA ? '~' + Math.round(priceA * 0.238).toLocaleString() + ' ฿' : 'ปลดล็อกตาม Act'}</td>
+        <td>เทียบเงินจริง (THB)</td>
+        <td class="${(priceB > 0 && priceB <= priceA) ? 'compare-win-highlight' : ''}">${priceB ? '~' + Math.round(priceB * 0.238).toLocaleString() + ' ฿' : 'ปลดล็อกตาม Act'}</td>
+      </tr>
+      <tr>
+        <td>${skinCompareA.contentTier?.name || skinCompareA.tier?.name || 'Edition'}</td>
+        <td>Content Tier</td>
+        <td>${skinCompareB.contentTier?.name || skinCompareB.tier?.name || 'Edition'}</td>
+      </tr>
+      <tr>
+        <td class="${chromasA >= chromasB ? 'compare-win-highlight' : ''}">${chromasA} สี</td>
+        <td>จำนวนสี Chromas</td>
+        <td class="${chromasB >= chromasA ? 'compare-win-highlight' : ''}">${chromasB} สี</td>
+      </tr>
+      <tr>
+        <td class="${levelsA >= levelsB ? 'compare-win-highlight' : ''}">Lv. 1 - ${levelsA}</td>
+        <td>ระดับเลเวลอัปเกรด</td>
+        <td class="${levelsB >= levelsA ? 'compare-win-highlight' : ''}">Lv. 1 - ${levelsB}</td>
+      </tr>
+      <tr>
+        <td class="${hasVfxA ? 'compare-win-highlight' : ''}">${hasVfxA ? 'มี (Finisher + VFX)' : 'ไม่มี'}</td>
+        <td>เอฟเฟกต์ปิดฉาก (Finisher)</td>
+        <td class="${hasVfxB ? 'compare-win-highlight' : ''}">${hasVfxB ? 'มี (Finisher + VFX)' : 'ไม่มี'}</td>
+      </tr>
+    `;
+
+    wrap.style.display = 'block';
+    setTimeout(() => {
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 60);
+  }
+}
+
+// ============================================================================
+// 6. NIGHT MARKET SIMULATOR (AUTHENTIC 3D FLIP CARDS)
+// ============================================================================
+function initNightMarketSimulatorModule() {
+  const btnOpen = document.getElementById('btnOpenNmSimulator');
+  const modal = document.getElementById('nmSimModal');
+  const btnClose = document.getElementById('btnCloseNmSimModal');
+  const grid = document.getElementById('nmSimGrid');
+  const btnFlipAll = document.getElementById('btnFlipAllNm');
+  const btnReroll = document.getElementById('btnRerollNmSim');
+  const summaryBar = document.getElementById('nmSimSummary');
+
+  if (!btnOpen || !modal || !grid) return;
+
+  btnOpen.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+    playTacticalAudio('tab');
+    if (grid.children.length === 0) generateNightMarketCards();
+  });
+
+  btnClose?.addEventListener('click', () => modal.classList.add('hidden'));
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.add('hidden');
+  });
+
+  btnReroll?.addEventListener('click', () => {
+    generateNightMarketCards();
+    playTacticalAudio('click');
+  });
+
+  btnFlipAll?.addEventListener('click', () => {
+    document.querySelectorAll('.nm-card-3d:not(.flipped)').forEach((c, idx) => {
+      setTimeout(() => {
+        c.classList.add('flipped');
+        playTacticalAudio('click');
+        checkSummary();
+      }, idx * 120);
+    });
+  });
+
+  function generateNightMarketCards() {
+    grid.innerHTML = '';
+    if (summaryBar) summaryBar.style.display = 'none';
+
+    // Get eligible pool: Select, Deluxe, Premium (Riot NM rules exclude Ultra & Exclusive)
+    const pool = (typeof allWeaponsList !== 'undefined' && allWeaponsList.length > 0)
+      ? allWeaponsList
+      : (playerInventoryData?.skins || []);
+
+    const eligible = pool.filter(s => {
+      const tier = (s.contentTier?.name || s.tier?.name || '').toLowerCase();
+      const isStarter = (s.name || '').toLowerCase().startsWith('standard ');
+      return !isStarter && (tier.includes('select') || tier.includes('deluxe') || tier.includes('premium'));
+    });
+
+    // Fallback if catalog not loaded
+    const samplePool = eligible.length >= 6 ? eligible : [
+      { name: 'Prime Vandal', price: 1775, displayIcon: 'https://media.valorant-api.com/weaponskins/4b04509e-4e31-50e8-0524-7489f66710b7/displayicon.png', tier: { name: 'Premium', highlightColor: '#B366FF' } },
+      { name: 'Reaver Sheriff', price: 1775, displayIcon: 'https://media.valorant-api.com/weaponskins/572c5750-4822-7772-23c2-26a97858c894/displayicon.png', tier: { name: 'Premium', highlightColor: '#B366FF' } },
+      { name: 'Infantry Guardian', price: 875, displayIcon: 'https://media.valorant-api.com/weaponskins/e6963283-42e1-455b-42ea-a4b51829e5e3/displayicon.png', tier: { name: 'Select', highlightColor: '#3498DB' } },
+      { name: 'Magepunk Spectre', price: 1775, displayIcon: 'https://media.valorant-api.com/weaponskins/c8ba5a51-40c0-1c39-2d1c-22b647f3b8b1/displayicon.png', tier: { name: 'Premium', highlightColor: '#B366FF' } },
+      { name: 'Sakura Classic', price: 1275, displayIcon: 'https://media.valorant-api.com/weaponskins/efdb81ea-42b7-08ca-5ea3-b9be9ef633d7/displayicon.png', tier: { name: 'Deluxe', highlightColor: '#2ECC71' } },
+      { name: 'Ion Phantom', price: 1775, displayIcon: 'https://media.valorant-api.com/weaponskins/9feab683-4a11-827c-65b1-e281bbfe13a8/displayicon.png', tier: { name: 'Premium', highlightColor: '#B366FF' } }
+    ];
+
+    // Pick 6 unique random skins
+    const picked = [];
+    const shuffled = [...samplePool].sort(() => Math.random() - 0.5);
+    for (const s of shuffled) {
+      if (!picked.some(p => p.name === s.name)) {
+        picked.push(s);
+        if (picked.length === 6) break;
+      }
+    }
+
+    picked.forEach((skin, idx) => {
+      // Authentic Riot discount range: 10% to 49%
+      const discountPercent = Math.floor(Math.random() * 38) + 12; // 12% to 49%
+      const origPrice = skin.price || skin.estimatedVpPrice || 1775;
+      const discPrice = Math.round(origPrice * (1 - (discountPercent / 100)));
+      const icon = skin.displayIcon || '/assets/placeholder-skin.svg';
+      const tierColor = skin.contentTier?.color || skin.tier?.highlightColor || '#B366FF';
+
+      const card = document.createElement('div');
+      card.className = 'nm-card-3d';
+      card.dataset.orig = origPrice;
+      card.dataset.disc = discPrice;
+      card.dataset.percent = discountPercent;
+
+      card.innerHTML = `
+        <div class="nm-card-inner">
+          <div class="nm-card-face nm-card-back">
+            <div class="nm-back-emblem">
+              <svg viewBox="0 0 24 24" width="34" height="34" fill="var(--val-gold)"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </div>
+            <div class="nm-back-text">CARD #${idx + 1}</div>
+            <div class="nm-back-hint">คลิกเพื่อเปิดลุ้นสกิน</div>
+          </div>
+          <div class="nm-card-face nm-card-front" style="border-color:${tierColor};">
+            <div class="nm-front-header">
+              <span style="font-size:11px; font-weight:700; color:${tierColor};">${(skin.contentTier?.name || skin.tier?.name || 'EDITION').toUpperCase()}</span>
+              <span class="nm-discount-badge">-${discountPercent}%</span>
+            </div>
+            <img src="${icon}" alt="${escapeHtml(skin.name)}" class="nm-front-img">
+            <div class="nm-front-name">${escapeHtml(skin.name)}</div>
+            <div class="nm-front-prices">
+              <span class="nm-orig-price">${origPrice.toLocaleString()} VP</span>
+              <span class="nm-disc-price">${discPrice.toLocaleString()} VP</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        if (!card.classList.contains('flipped')) {
+          card.classList.add('flipped');
+          playTacticalAudio('star');
+          checkSummary();
+        }
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  function checkSummary() {
+    const flipped = document.querySelectorAll('.nm-card-3d.flipped');
+    if (flipped.length < 6) return;
+
+    let totalSaved = 0;
+    let sumPercent = 0;
+    flipped.forEach(c => {
+      const orig = parseInt(c.dataset.orig, 10) || 0;
+      const disc = parseInt(c.dataset.disc, 10) || 0;
+      const pct = parseInt(c.dataset.percent, 10) || 0;
+      totalSaved += (orig - disc);
+      sumPercent += pct;
+    });
+
+    const avgDisc = Math.round(sumPercent / 6);
+    let luckRating = 'ดวงปานกลาง (Good Luck ★★★)';
+    if (avgDisc >= 36) {
+      luckRating = 'ดวงระดับมหาเทพ! (God Tier Luck ★★★★★)';
+    } else if (avgDisc >= 28) {
+      luckRating = 'ดวงดีคุ้มค่ามาก (Great Market ★★★★)';
+    } else if (avgDisc <= 18) {
+      luckRating = 'ตลาดเกลือตามระเบียบ (Salt Market ★★)';
+    }
+
+    const savedEl = document.getElementById('nmSumVpSaved');
+    const avgEl = document.getElementById('nmSumAvgDiscount');
+    const luckEl = document.getElementById('nmSumLuckScore');
+
+    if (savedEl) savedEl.textContent = `${totalSaved.toLocaleString()} VP (~${Math.round(totalSaved * 0.238).toLocaleString()} ฿)`;
+    if (avgEl) avgEl.textContent = `${avgDisc}%`;
+    if (luckEl) luckEl.textContent = luckRating;
+
+    if (summaryBar) summaryBar.style.display = 'flex';
+  }
+}
+
+// Expose on window for easy external calls
+window.initSkinCompareModule = initSkinCompareModule;
+window.initNightMarketSimulatorModule = initNightMarketSimulatorModule;
+
+// Initialize all features on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  initEnhancedLiveStoreTimer();
+  initShareCardModule();
+  initDiscordWebhookModule();
+  initSkinCompareModule();
+  initNightMarketSimulatorModule();
+});
+

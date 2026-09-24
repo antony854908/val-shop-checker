@@ -94,6 +94,13 @@ class InventoryService {
         }
       }
 
+      // Set of all raw entitlement ItemIDs for precise level & chroma resolution
+      const ownedItemIdsSet = new Set();
+      for (const ent of rawEntitlements) {
+        const id = (ent.ItemID || ent.Item?.ItemID || ent.OfferID || '').toLowerCase();
+        if (id) ownedItemIdsSet.add(id);
+      }
+
       // 3. Resolve all owned skins
       const ownedSkinMap = new Map(); // skinUuid -> skin object
 
@@ -154,6 +161,27 @@ class InventoryService {
               }
             }
 
+            // Radianite Upgrade Breakdown
+            const totalLevels = Array.isArray(skin.levels) ? skin.levels.length : 1;
+            let unlockedLevels = 1;
+            if (Array.isArray(skin.levels) && skin.levels.length > 1) {
+              const matchCount = skin.levels.filter(l => ownedItemIdsSet.has((l.uuid || l.id || '').toLowerCase())).length;
+              if (matchCount > 0) unlockedLevels = matchCount;
+            }
+
+            const totalChromas = (Array.isArray(skin.chromas) && skin.chromas.length > 1) ? skin.chromas.length : 0;
+            let unlockedChromas = 0;
+            if (totalChromas > 0) {
+              unlockedChromas = 1; // default chroma is always included
+              const extraUnlocked = skin.chromas.slice(1).filter(c => ownedItemIdsSet.has((c.uuid || c.id || '').toLowerCase())).length;
+              unlockedChromas += extraUnlocked;
+            }
+
+            const remainingLevels = Math.max(0, totalLevels - unlockedLevels);
+            const remainingChromas = Math.max(0, totalChromas - unlockedChromas);
+            const radianiteNeeded = (remainingLevels * 10) + (remainingChromas * 15);
+            const isMaxUpgraded = remainingLevels === 0 && remainingChromas === 0;
+
             ownedSkinMap.set(skinId, {
               ...skin,
               displayIcon: activeDisplayIcon,
@@ -161,11 +189,16 @@ class InventoryService {
               isStandardDefault,
               isEquipped,
               equippedChromaId,
-              ownedLevelsCount: 1
+              totalLevels,
+              unlockedLevels,
+              totalChromas,
+              unlockedChromas,
+              remainingLevels,
+              remainingChromas,
+              radianiteNeeded,
+              isMaxUpgraded,
+              ownedLevelsCount: unlockedLevels
             });
-          } else {
-            const existing = ownedSkinMap.get(skinId);
-            existing.ownedLevelsCount = (existing.ownedLevelsCount || 1) + 1;
           }
         }
       }
@@ -194,9 +227,11 @@ class InventoryService {
         standard: 0
       };
 
+      let totalRadianiteNeeded = 0;
       for (const s of allOwnedSkins) {
         if (!s.isStandardDefault) {
           totalVpValue += (s.estimatedVpPrice || 0);
+          totalRadianiteNeeded += (s.radianiteNeeded || 0);
         }
 
         const wp = s.weaponType || 'Other';
@@ -224,6 +259,7 @@ class InventoryService {
         totalSkinsCount: premiumOwnedSkins.length > 0 ? premiumOwnedSkins.length : allOwnedSkins.length,
         premiumSkinsCount: premiumOwnedSkins.length,
         totalVpValue,
+        totalRadianiteNeeded,
         estimatedThbOverTopup,
         estimatedThbRiotOfficial,
         weaponBreakdown,
@@ -238,6 +274,7 @@ class InventoryService {
       return {
         totalSkinsCount: 0,
         totalVpValue: 0,
+        totalRadianiteNeeded: 0,
         estimatedThbOverTopup: 0,
         estimatedThbRiotOfficial: 0,
         weaponBreakdown: {},
@@ -246,6 +283,119 @@ class InventoryService {
         allSkinsCount: 0,
         activeShard: region || 'ap'
       };
+    }
+  }
+
+  /**
+   * Fetch Player Battle Pass progression, current Tier, XP requirements, and upcoming rewards
+   */
+  async getPlayerBattlepass(puuid, region, accessToken, entitlementsToken, apiService) {
+    try {
+      // 1. Fetch user contracts
+      const userContractsRes = await apiService.fetchWithShardFallback(
+        puuid,
+        region,
+        '/contracts/v1/contracts/{puuid}',
+        'GET',
+        null,
+        accessToken,
+        entitlementsToken
+      );
+
+      const contracts = userContractsRes.data?.Contracts || [];
+      const userContractMap = new Map();
+      for (const c of contracts) {
+        if (c.ContractDefinitionID) {
+          userContractMap.set(c.ContractDefinitionID.toLowerCase(), c);
+        }
+      }
+
+      // 2. Fetch or use cached Contracts metadata from valorant-api.com
+      if (!this._contractsCache || Date.now() - (this._contractsCacheTime || 0) > 3600000) {
+        try {
+          const res = await fetch('https://valorant-api.com/v1/contracts?language=en-US');
+          const json = await res.json();
+          if (json.data) {
+            this._contractsCache = json.data;
+            this._contractsCacheTime = Date.now();
+          }
+        } catch (e) {
+          console.warn('[InventoryService] Failed to fetch contracts definition:', e.message);
+        }
+      }
+
+      const allDefs = this._contractsCache || [];
+
+      // Find the active Battle Pass contract (usually modern Act contract with multiple chapters)
+      // We look for definition that exists in user contracts with highest progression, or latest Season pass
+      let activeBpDef = null;
+      let userBpData = null;
+
+      // Filter passes that have chapters (Act battlepasses)
+      const actPasses = allDefs.filter(d => 
+        (d.content?.relationType === 'Season' || d.displayName?.includes('Act') || d.displayName?.includes('Season')) &&
+        Array.isArray(d.content?.chapters) && d.content.chapters.length >= 5
+      );
+
+      for (const pass of actPasses) {
+        const u = userContractMap.get(pass.uuid.toLowerCase());
+        if (u) {
+          if (!activeBpDef || (u.ContractProgression?.TotalProgressionEarned || 0) > (userBpData?.ContractProgression?.TotalProgressionEarned || 0)) {
+            activeBpDef = pass;
+            userBpData = u;
+          }
+        }
+      }
+
+      // Fallback to latest definition if user hasn't earned XP yet
+      if (!activeBpDef && actPasses.length > 0) {
+        activeBpDef = actPasses[actPasses.length - 1];
+        userBpData = userContractMap.get(activeBpDef.uuid.toLowerCase()) || {
+          ProgressionLevelReached: 0,
+          ProgressionTowardsNextLevel: 0,
+          ContractProgression: { TotalProgressionEarned: 0, HighestReachedLevel: 0 }
+        };
+      }
+
+      if (!activeBpDef) {
+        return { ok: false, error: 'No active Battle Pass found' };
+      }
+
+      // Calculate levels and tiers
+      const chapters = activeBpDef.content?.chapters || [];
+      const totalTiers = 50; // standard 50 tiers + 5 epilogue
+      const currentLevel = userBpData?.ProgressionLevelReached ?? userBpData?.ContractProgression?.HighestReachedLevel ?? 0;
+      const xpIntoCurrentLevel = userBpData?.ProgressionTowardsNextLevel || 0;
+      const totalXpEarned = userBpData?.ContractProgression?.TotalProgressionEarned || 0;
+
+      // Calculate standard required XP formula for Tier: (tier * 750) + 1250 (or ~20,000 for high tiers)
+      const xpForNextLevel = Math.min(30000, Math.max(2000, 2000 + (currentLevel * 750)));
+      const levelProgressPercent = Math.min(100, Math.round((xpIntoCurrentLevel / xpForNextLevel) * 100));
+
+      const tiersRemaining = Math.max(0, totalTiers - currentLevel);
+      const approxXpRemaining = (tiersRemaining * 20000) - xpIntoCurrentLevel;
+      // Competitive gives ~4000 XP average, Spike Rush ~1000 XP
+      const approxCompMatches = Math.max(0, Math.ceil(approxXpRemaining / 4000));
+      const approxSpikeMatches = Math.max(0, Math.ceil(approxXpRemaining / 1000));
+
+      return {
+        ok: true,
+        displayName: activeBpDef.displayName || 'Current Act Battle Pass',
+        displayIcon: activeBpDef.displayIcon,
+        currentTier: currentLevel,
+        maxTier: totalTiers,
+        isCompleted: currentLevel >= totalTiers,
+        xpIntoCurrentLevel,
+        xpForNextLevel,
+        levelProgressPercent,
+        totalXpEarned,
+        tiersRemaining,
+        approxCompMatches,
+        approxSpikeMatches
+      };
+    } catch (e) {
+      console.error('[InventoryService] Battlepass lookup failed:', e.message);
+      return { ok: false, error: e.message };
     }
   }
 }

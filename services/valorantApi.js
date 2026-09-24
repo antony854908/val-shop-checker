@@ -270,6 +270,10 @@ class ValorantApiService {
     return this.inventoryService.getPlayerInventory(puuid, region, accessToken, entitlementsToken, this);
   }
 
+  async getPlayerBattlepass(puuid, region, accessToken, entitlementsToken) {
+    return this.inventoryService.getPlayerBattlepass(puuid, region, accessToken, entitlementsToken, this);
+  }
+
   async resolvePlayerNames(puuids, region, accessToken, entitlementsToken) {
     return this.matchHistoryService.resolvePlayerNames(puuids, region, accessToken, entitlementsToken, this);
   }

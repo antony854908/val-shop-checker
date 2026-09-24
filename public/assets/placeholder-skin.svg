@@ -1,15 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 256" width="512" height="256" role="img" aria-label="Image unavailable">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 256" width="512" height="256" role="img" aria-label="Weapon preview pending">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1b2030"/>
-      <stop offset="100%" stop-color="#0f1320"/>
+    <linearGradient id="gun" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F2E9DC" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#9A8FA6" stop-opacity="0.35"/>
     </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF7518" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#FF7518" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-  <rect width="512" height="256" rx="12" fill="url(#bg)"/>
-  <g stroke="#ff4655" stroke-width="3" fill="none" opacity="0.75">
-    <path d="M96 168 L188 118 L214 132 L300 92 L416 92"/>
-    <path d="M300 92 L300 116 L214 156 L188 142 L96 190 Z"/>
-  </g>
-  <circle cx="416" cy="92" r="7" fill="#ff4655" opacity="0.9"/>
-  <text x="256" y="226" font-family="Segoe UI, Arial, sans-serif" font-size="20" fill="#7b8499" text-anchor="middle" letter-spacing="2">IMAGE UNAVAILABLE</text>
+  <ellipse cx="256" cy="120" rx="230" ry="90" fill="url(#glow)"/>
+  <!-- Generic assault-rifle silhouette: stock, receiver, magazine, grip, barrel -->
+  <path fill="url(#gun)" stroke="#F2E9DC" stroke-opacity="0.35" stroke-width="1.5" d="M40 104 L118 96 L128 90 L300 90 L306 84 L352 84 L356 90 L420 90 L420 98 L478 98 L478 108 L420 108 L420 118 L352 118 L338 126 L300 126 L292 140 L286 190 L258 186 L262 140 L240 128 L214 128 L206 158 L176 156 L182 128 L128 128 L118 138 L56 150 L40 148 Z"/>
+  <rect x="160" y="98" width="120" height="6" fill="#0B0710" opacity="0.35"/>
+  <rect x="306" y="76" width="44" height="8" rx="2" fill="#F2E9DC" opacity="0.35"/>
+  <text x="256" y="232" font-family="Chakra Petch, Segoe UI, Arial, sans-serif" font-size="17" font-weight="700" fill="#FF9A4D" text-anchor="middle" letter-spacing="3">NEW DROP · PREVIEW PENDING</text>
 </svg>

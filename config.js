@@ -23,6 +23,6 @@ module.exports = {
     SPRAY: 'd5f120f8-ff8c-4aac-92ea-f2b5acbe9e47',
     TITLE: 'de7caa6b-adf7-4588-bbd1-143831e786c6'
   },
-  DEFAULT_CLIENT_VERSION: 'release-13.04-shipping-18-5304478',
+  DEFAULT_CLIENT_VERSION: 'release-13.05-shipping-11-5350494',
   DEFAULT_CLIENT_PLATFORM: 'ew0KCSJwbGF0Zm9ybVR5cGUiOiAiUEMiLA0KCSJwbGF0Zm9ybU9TIjogIldpbmRvd3MiLA0KCSJwbGF0Zm9ybU9TVmVyc2lvbiI6ICIxMC4wLjE5MDQyLjEuMjU2LjY0Yml0IiwNCgkicGxhdGZvcm1DaGlwc2V0IjogIlVua25vd24iDQp9'
 };
