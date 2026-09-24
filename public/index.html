@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Kanit:wght@200;300;400;500;600;700;800&family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=9.0">
+  <link rel="stylesheet" href="style.css?v=9.1">
   <link rel="stylesheet" href="theme-valorant.css?v=1.5">
   <link rel="stylesheet" href="theme-soft.css?v=1.0">
   <link rel="stylesheet" href="theme-halloween.css?v=2.5">
@@ -62,10 +62,6 @@
           <button id="btnOpenSkinCompare" class="btn btn-pill btn-compare-nav" title="เปรียบเทียบสเปกและราคา 2 สกิน (Skin VS Comparison)">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
             <span class="btn-compare-text">เทียบสกิน VS</span>
-          </button>
-          <button id="btnOpenNmSimulator" class="btn btn-pill btn-nmsim-nav" title="จำลองเปิดการ์ดตลาดกาลกิณี (Night Market Simulator)">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            <span class="btn-nmsim-text">จำลอง Night Market</span>
           </button>
           <button id="btnOpenVpCalc" class="btn btn-pill btn-calc" title="ระบบเปรียบเทียบราคาเงินจริงกับ VP ร้านไหนเติมถูกสุด">
             <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" width="15" height="15">
@@ -989,7 +985,7 @@
                 <div class="inspect-shadow-plane"></div>
                 <div class="turntable-hint-badge" id="turntableHint">
                   <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
-                  <span>โชว์รูมสกินแท้จากเกม (เลื่อนเมาส์/สัมผัสเพื่อขยับ 3D)</span>
+                  <span>โชว์รูมสกินแท้จากเกม (ภาพ HD Render &amp; เอฟเฟกต์)</span>
                 </div>
               </div>
             </div>
@@ -2118,55 +2114,6 @@
     </div>
   </div>
 
-  <!-- ================= MODAL: NIGHT MARKET SIMULATOR ================= -->
-  <div id="nmSimModal" class="modal-overlay hidden">
-    <div class="modal-card nm-sim-modal-box">
-      <div class="modal-header">
-        <div class="modal-title-wrap">
-          <span class="modal-badge-tag">GACHA &amp; LUCK SIMULATOR</span>
-          <h3>จำลองเปิดตลาดกาลกิณี (NIGHT MARKET SIMULATOR)</h3>
-        </div>
-        <button type="button" class="btn-close-modal" id="btnCloseNmSimModal" aria-label="ปิด">&times;</button>
-      </div>
-      <div class="modal-body nm-sim-body">
-        <div class="nm-sim-intro-bar">
-          <p>จำลองการสุ่มเปิดการ์ด 6 ใบตามอัลกอริทึมจริงของ Riot Games (สุ่มเฉพาะสกินระดับ Select, Deluxe, Premium พร้อมส่วนลด 10% - 49%) คลิกที่การ์ดเพื่อเปิดลุ้นทีละใบ!</p>
-          <div class="nm-sim-ctrls">
-            <button id="btnFlipAllNm" class="btn btn-secondary btn-sm">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
-              <span>เปิดทั้งหมด (Flip All)</span>
-            </button>
-            <button id="btnRerollNmSim" class="btn btn-primary btn-sm btn-glow">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
-              <span>สุ่มตลาดใหม่ (Reroll)</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 6 Flippable 3D Cards Grid -->
-        <div class="nm-sim-grid" id="nmSimGrid">
-          <!-- Populated by JS with 6 flippable 3D cards -->
-        </div>
-
-        <!-- Luck Summary & Savings Bar -->
-        <div class="nm-sim-summary-bar" id="nmSimSummary" style="display: none;">
-          <div class="nm-summary-item">
-            <span class="nm-sum-k">ประหยัดได้รวม:</span>
-            <span class="nm-sum-v text-gold" id="nmSumVpSaved">0 VP</span>
-          </div>
-          <div class="nm-summary-item">
-            <span class="nm-sum-k">ส่วนลดเฉลี่ย:</span>
-            <span class="nm-sum-v text-cyan" id="nmSumAvgDiscount">0%</span>
-          </div>
-          <div class="nm-summary-item">
-            <span class="nm-sum-k">ระดับดวงของคุณ:</span>
-            <span class="nm-sum-v text-mint" id="nmSumLuckScore">กำลังวิเคราะห์...</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="app.js?v=2.7.0"></script>
+  <script src="app.js?v=2.7.1"></script>
 </body>
 </html>

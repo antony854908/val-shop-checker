@@ -681,7 +681,7 @@ body::after {
    ========================================================================== */
 .badge-tag, .feat-tag, .tier-pill, .modal-badge-tag, .match-mode-badge,
 .timer-tag, .nm-discount-badge, .counter-badge, .catalog-badge-counter,
-.account-active-badge, .inv-equipped-badge, .overtopup-combo-badge,
+.account-active-badge, .inv-equipped-badge,
 .pkg-badge-item, .headshot-badge, .chroma-pill, .match-queue-tag,
 .modal-tier-tag, .playstyle-tag, .ability-slot-tag {
   border-radius: var(--shape-pill, 0) !important;
@@ -693,6 +693,17 @@ body::after {
   padding-right: 12px;
   line-height: 1.4;
   white-space: nowrap;
+}
+.overtopup-combo-badge {
+  border-radius: var(--shape-pill, 6px) !important;
+  clip-path: none !important;
+  font-family: var(--font-tactical);
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.4 !important;
+  max-width: 100%;
 }
 .wallet-chip {
   border-radius: var(--shape-pill, 0) !important;
