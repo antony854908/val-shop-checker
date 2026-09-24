@@ -1,7 +1,18 @@
+const crypto = require('crypto');
+
+// Generate an ephemeral dynamic key for standalone dev if no environment secret is supplied
+let runtimeSecret = process.env.SESSION_SECRET;
+if (!runtimeSecret) {
+  runtimeSecret = 'valstore-' + crypto.randomBytes(32).toString('hex');
+  if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
+    console.warn('[Security Alert] SESSION_SECRET not set in environment! Generated runtime key.');
+  }
+}
+
 module.exports = {
   PORT: process.env.PORT || 3000,
   HOST: process.env.HOST || '0.0.0.0',
-  SESSION_SECRET: process.env.SESSION_SECRET || 'valstore-persistent-session-secret-v2',
+  SESSION_SECRET: runtimeSecret,
   SESSION_TTL_MS: 30 * 24 * 3600 * 1000, // 30 days long-lived persistence
   REGIONS: {
     ap: { name: 'Asia Pacific (AP/TH)', pvp: 'pd.ap.a.pvp.net' },

@@ -16,10 +16,45 @@ let catalogTotal = 0;
 let catalogSearchDebounce = null;
 let allWeaponsList = [];
 
-// Session Storage Utilities (Cross-Platform Persistent 30-Day Auth)
+// Session Storage Utilities (Cross-Platform Persistent 30-Day Auth & Security Hardening)
+function isRememberDeviceEnabled() {
+  try {
+    const chk = document.getElementById('chkRememberDevice');
+    if (chk) return chk.checked;
+    return localStorage.getItem('val_remember_pref') !== 'false';
+  } catch (e) {
+    return true;
+  }
+}
+
+function isClientJwtExpired(token) {
+  if (!token || typeof token !== 'string') return true;
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) return true;
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const jsonStr = decodeURIComponent(escape(atob(base64)));
+    const payload = JSON.parse(jsonStr);
+    if (payload && payload.exp) {
+      // 30 seconds buffer for safety
+      return Date.now() >= (payload.exp * 1000 - 30000);
+    }
+  } catch (e) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload && payload.exp) {
+        return Date.now() >= (payload.exp * 1000 - 30000);
+      }
+    } catch (_) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function getStoredSid() {
   try {
-    return localStorage.getItem('val_sid') || '';
+    return sessionStorage.getItem('val_sid') || localStorage.getItem('val_sid') || '';
   } catch (e) {
     return '';
   }
@@ -28,13 +63,38 @@ function getStoredSid() {
 function setStoredSid(sid) {
   if (!sid) return;
   try {
-    localStorage.setItem('val_sid', sid);
+    if (isRememberDeviceEnabled()) {
+      localStorage.setItem('val_sid', sid);
+      sessionStorage.removeItem('val_sid');
+    } else {
+      sessionStorage.setItem('val_sid', sid);
+      localStorage.removeItem('val_sid');
+    }
   } catch (e) {}
 }
 
 function getStoredAuthPack() {
   try {
-    return localStorage.getItem('val_auth_pack') || '';
+    const raw = sessionStorage.getItem('val_auth_pack') || localStorage.getItem('val_auth_pack') || '';
+    if (!raw) return '';
+
+    // Auto inspect token expiration: if JWT is expired, purge automatically (Zero Stale Token)
+    let parsed = null;
+    try {
+      let str = raw;
+      if (str.startsWith('ey') || str.includes('{')) {
+        str = atob(raw);
+      }
+      parsed = JSON.parse(str);
+    } catch (_) {}
+
+    if (parsed && parsed.accessToken && isClientJwtExpired(parsed.accessToken)) {
+      sessionStorage.removeItem('val_auth_pack');
+      localStorage.removeItem('val_auth_pack');
+      return '';
+    }
+
+    return raw;
   } catch (e) {
     return '';
   }
@@ -47,8 +107,32 @@ function setStoredAuthPack(rawVal) {
     if (!str.startsWith('ey') && typeof rawVal !== 'string') {
       str = btoa(unescape(encodeURIComponent(str)));
     }
-    localStorage.setItem('val_auth_pack', str);
+    if (isRememberDeviceEnabled()) {
+      localStorage.setItem('val_auth_pack', str);
+      sessionStorage.removeItem('val_auth_pack');
+    } else {
+      sessionStorage.setItem('val_auth_pack', str);
+      localStorage.removeItem('val_auth_pack');
+    }
   } catch (e) {}
+}
+
+// Clear all local accounts and authentication tokens from this device (Public Device Sanitizer)
+function clearAllDeviceData() {
+  try {
+    localStorage.removeItem('val_sid');
+    localStorage.removeItem('val_auth_pack');
+    localStorage.removeItem('val_saved_accounts');
+    localStorage.removeItem('val_cached_wallet_vp');
+    sessionStorage.clear();
+    document.cookie = 'val_auth_pack=; Max-Age=0; path=/;';
+    document.cookie = 'val_sid=; Max-Age=0; path=/;';
+  } catch (e) {}
+  currentUser = null;
+  renderSavedAccounts();
+  renderModalSavedAccounts();
+  showLoginView();
+  showAlert(googleAlert, 'ล้างข้อมูลและ Token ทั้งหมดออกจากเครื่องนี้เรียบร้อยแล้ว (ปลอดภัย 100%)', 'success');
 }
 
 // Get User Current VP Credit in Account reliably
@@ -835,6 +919,10 @@ function getSavedAccounts() {
 
 function saveAccountToStorage(user, auth, authPack, type = 'google') {
   if (!user && !auth) return;
+  // If Public Device Mode is active, do not persist to long-lived localStorage
+  if (!isRememberDeviceEnabled()) {
+    return;
+  }
   try {
     const accounts = getSavedAccounts();
     const gameName = (user && user.gameName) || (auth && auth.gameName) || 'Valorant Agent';
@@ -938,8 +1026,11 @@ function renderSavedAccounts() {
   listEl.innerHTML = accounts.map(acc => {
     const isActive = currentPuuid && (currentPuuid === acc.puuid || currentPuuid === `${acc.gameName}#${acc.tagLine}`);
     const isGoogle = acc.type === 'google';
+    const token = acc.auth?.accessToken;
+    const isExpired = isClientJwtExpired(token);
+
     return `
-      <div class="saved-account-card ${isActive ? 'is-active-session' : ''}" data-puuid="${escapeHtml(acc.puuid)}">
+      <div class="saved-account-card ${isActive ? 'is-active-session' : ''} ${isExpired ? 'is-expired-token' : ''}" data-puuid="${escapeHtml(acc.puuid)}">
         <div class="account-card-left" data-action="switch" data-puuid="${escapeHtml(acc.puuid)}">
           <div class="account-avatar-badge ${isGoogle ? 'google-type' : 'riot-type'}">
             ${isGoogle ? `
@@ -960,6 +1051,7 @@ function renderSavedAccounts() {
               <span class="account-player-name">${escapeHtml(acc.gameName)}</span>
               <span class="account-player-tag">#${escapeHtml(acc.tagLine)}</span>
               ${isActive ? '<span class="account-active-badge">กำลังใช้งาน</span>' : ''}
+              ${isExpired ? '<span class="account-expired-badge" title="Token หมดอายุแล้ว แตะเพื่อล็อกอินใหม่">⏳ หมดอายุ</span>' : '<span class="account-ready-badge" title="เซสชันพร้อมใช้งาน">🟢 พร้อมใช้งาน</span>'}
             </div>
             <div class="account-meta-row">
               <span class="account-badge-region">${escapeHtml((acc.region || 'AP').toUpperCase())}</span>
@@ -970,7 +1062,7 @@ function renderSavedAccounts() {
         </div>
         <div class="account-card-right">
           <button type="button" class="btn-account-switch" data-action="switch" data-puuid="${escapeHtml(acc.puuid)}" title="เข้าสู่ระบบด้วยบัญชีนี้">
-            <span class="btn-acc-label">เข้าสู่ระบบ</span>
+            <span class="btn-acc-label">${isExpired ? 'ล็อกอินใหม่' : 'เข้าสู่ระบบ'}</span>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
           <button type="button" class="btn-account-remove" data-action="remove" data-puuid="${escapeHtml(acc.puuid)}" title="ลบบัญชีนี้ออกจากเครื่อง">
@@ -7450,11 +7542,44 @@ function initSkinCompareModule() {
   }
 }
 
+// Public Device Security & Sanitizer Controls
+function initSecurityControls() {
+  const chkRemember = document.getElementById('chkRememberDevice');
+  if (chkRemember) {
+    const savedPref = localStorage.getItem('val_remember_pref');
+    if (savedPref !== null) {
+      chkRemember.checked = (savedPref !== 'false');
+    }
+    chkRemember.addEventListener('change', () => {
+      localStorage.setItem('val_remember_pref', chkRemember.checked ? 'true' : 'false');
+      if (!chkRemember.checked) {
+        showAlert(googleAlert, 'เปิดโหมดเครื่องสาธารณะแล้ว: ระบบจะไม่บันทึก Token ถาวร และจะล้างข้อมูลอัตโนมัติเมื่อปิดแท็บ', 'info');
+      }
+    });
+  }
+
+  const btnClearAll = document.getElementById('btnClearAllSavedAccounts');
+  btnClearAll?.addEventListener('click', () => {
+    if (confirm('คำเตือน: คุณต้องการลบ Token และประวัติทุกบัญชีออกจากเครื่องนี้หรือไม่? (แนะนำสำหรับเครื่องสาธารณะ)')) {
+      clearAllDeviceData();
+    }
+  });
+
+  const btnWipe = document.getElementById('btnWipeDeviceData');
+  btnWipe?.addEventListener('click', () => {
+    if (confirm('คุณต้องการออกจากระบบและลบข้อมูล/Token ทั้งหมดออกจากเครื่องนี้ใช่หรือไม่?')) {
+      clearAllDeviceData();
+    }
+  });
+}
+
 // Expose on window for easy external calls
 window.initSkinCompareModule = initSkinCompareModule;
+window.clearAllDeviceData = clearAllDeviceData;
 
 // Initialize all features on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
+  initSecurityControls();
   initEnhancedLiveStoreTimer();
   initShareCardModule();
   initDiscordWebhookModule();

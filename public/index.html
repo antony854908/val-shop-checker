@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Kanit:wght@200;300;400;500;600;700;800&family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=9.1">
+  <link rel="stylesheet" href="style.css?v=9.2">
   <link rel="stylesheet" href="theme-valorant.css?v=1.5">
   <link rel="stylesheet" href="theme-soft.css?v=1.0">
   <link rel="stylesheet" href="theme-halloween.css?v=2.5">
@@ -169,6 +169,10 @@
             </svg>
             <span>สลับบัญชี</span>
           </button>
+          <button id="btnWipeDeviceData" class="btn btn-outline-secondary btn-sm" title="ล้าง Token และข้อมูลทุกบัญชีออกจากเครื่องนี้ทันที (แนะนำสำหรับเครื่องสาธารณะ)">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/></svg>
+            <span>ล้างเครื่อง</span>
+          </button>
           <button id="btnLogout" class="btn btn-outline-danger btn-sm">
             ออกจากระบบ
           </button>
@@ -208,7 +212,10 @@
                 </svg>
                 <span class="saved-accounts-title">บัญชีในเครื่องนี้</span>
               </div>
-              <span id="savedAccountsCount" class="saved-accounts-count-badge">0 บัญชี</span>
+              <div class="saved-accounts-header-right">
+                <span id="savedAccountsCount" class="saved-accounts-count-badge">0 บัญชี</span>
+                <button type="button" id="btnClearAllSavedAccounts" class="btn-clear-device-data" title="ล้าง Token และข้อมูลทุกบัญชีออกจากเครื่องนี้ทันที">ล้างประวัติทุกบัญชี</button>
+              </div>
             </div>
             <div id="savedAccountsList" class="saved-accounts-list"></div>
             <div class="saved-accounts-divider">
@@ -346,6 +353,18 @@
                 <button type="button" id="btnMfaCancel" class="btn btn-secondary btn-sm">ยกเลิก</button>
               </div>
             </form>
+          </div>
+
+          <!-- Shared Computer / Public Device Security Toggle -->
+          <div class="auth-security-options">
+            <label class="security-remember-toggle" title="ปิดหากคุณกำลังใช้งานบนเครื่องสาธารณะ (ระบบจะลบข้อมูลทันทีเมื่อปิดแท็บ)">
+              <input type="checkbox" id="chkRememberDevice" checked>
+              <span class="chk-custom-box"></span>
+              <span class="chk-label-text">
+                <strong>จำเซสชันในเครื่องนี้ (Remember Session)</strong>
+                <small>ปิดตัวเลือกนี้หากใช้งานบนคอมพิวเตอร์สาธารณะ (ระบบจะล้างข้อมูลอัตโนมัติเมื่อปิดแท็บ)</small>
+              </span>
+            </label>
           </div>
 
           <!-- Minimalist Footer Links -->
@@ -2114,6 +2133,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=2.7.1"></script>
+  <script src="app.js?v=2.7.2"></script>
 </body>
 </html>

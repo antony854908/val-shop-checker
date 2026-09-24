@@ -9239,6 +9239,114 @@ html {
   flex-shrink: 0;
 }
 
+.saved-accounts-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-clear-device-data {
+  background: rgba(255, 70, 85, 0.12);
+  border: 1px solid rgba(255, 70, 85, 0.35);
+  color: var(--val-red, #ff4655);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-clear-device-data:hover {
+  background: rgba(255, 70, 85, 0.25);
+  border-color: var(--val-red, #ff4655);
+  box-shadow: 0 0 10px rgba(255, 70, 85, 0.3);
+}
+
+.account-ready-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.account-expired-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.auth-security-options {
+  margin: 14px 0 6px 0;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  text-align: left;
+}
+
+.security-remember-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.security-remember-toggle input[type="checkbox"] {
+  display: none;
+}
+
+.chk-custom-box {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(var(--cyan-rgb, 0, 245, 212), 0.5);
+  border-radius: 4px;
+  margin-top: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.security-remember-toggle input[type="checkbox"]:checked + .chk-custom-box {
+  background: var(--val-cyan, #00f5d4);
+  border-color: var(--val-cyan, #00f5d4);
+}
+
+.security-remember-toggle input[type="checkbox"]:checked + .chk-custom-box::after {
+  content: '✓';
+  color: #070912;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.chk-label-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chk-label-text strong {
+  font-size: 12.5px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.chk-label-text small {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.4;
+}
+
 .saved-accounts-list {
   display: flex;
   flex-direction: column;
