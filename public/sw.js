@@ -1,4 +1,4 @@
-const CACHE_NAME = 'valstore-v2.7.2';
+const CACHE_NAME = 'valstore-v2.8.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -7,6 +7,7 @@ const STATIC_ASSETS = [
   '/theme-soft.css',
   '/theme-halloween.css',
   '/theme-seasonal.css',
+  '/theme-premium.css',
   '/app.js',
   '/manifest.json',
   '/favicon.ico',

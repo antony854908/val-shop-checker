@@ -163,6 +163,24 @@ function getCurrentWalletVp() {
   return 0;
 }
 
+// Agent card art: in-game gradient colors (RRGGBBAA from valorant-api) + background word-art
+function applyAgentCardTheme(card, ag) {
+  const cols = Array.isArray(ag?.backgroundGradientColors) ? ag.backgroundGradientColors : [];
+  cols.slice(0, 4).forEach((hex, i) => {
+    if (/^[0-9a-f]{6,8}$/i.test(hex)) card.style.setProperty(`--ag-c${i + 1}`, '#' + hex.slice(0, 6));
+  });
+  if (ag?.background && /^https:\/\/media\.valorant-api\.com\//.test(ag.background)) {
+    card.style.setProperty('--ag-bg-art', `url("${ag.background}")`);
+  }
+  card.dataset.role = String(ag?.role || '').toLowerCase();
+}
+
+// Compact tier label for card chips: "Premium Edition" -> "Premium"
+function formatTierLabel(name) {
+  const label = String(name || "").replace(/s*editions*$/i, "").trim();
+  return label || "Standard";
+}
+
 // XSS Sanitizer for dynamic client text rendering
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
@@ -2137,7 +2155,7 @@ function renderDailyShop(skins) {
       <div class="skin-card-header">
         <div class="skin-tier-info">
           ${skin.tier?.displayIcon ? `<img src="${skin.tier.displayIcon}" alt="" class="skin-tier-icon">` : ''}
-          <span class="skin-tier-name">${skin.tier?.name || 'Edition'}</span>
+          <span class="skin-tier-name">${formatTierLabel(skin.tier?.name)}</span>
         </div>
         <div class="skin-features-badge">
           ${chromasCount > 1 ? `<span class="badge-feat">${chromasCount} สี</span>` : ''}
@@ -2560,7 +2578,7 @@ window.openBundleModal = function(b) {
         <div class="skin-card-header">
           <div class="skin-tier-info">
             ${s?.tier?.displayIcon ? `<img src="${s.tier.displayIcon}" alt="" class="skin-tier-icon">` : ""}
-            <span class="skin-tier-name">${s?.tier?.name || item.itemType || "Edition"}</span>
+            <span class="skin-tier-name">${formatTierLabel(s?.tier?.name || item.itemType)}</span>
           </div>
           <div class="skin-features-badge">
             ${chromasCount > 1 ? `<span class="badge-feat">${chromasCount} สี</span>` : ""}
@@ -3521,7 +3539,7 @@ function renderCatalogItems(skins) {
       <div class="skin-card-header">
         <div class="skin-tier-info">
           ${skin.tier?.displayIcon ? `<img src="${skin.tier.displayIcon}" alt="" class="skin-tier-icon">` : ''}
-          <span class="skin-tier-name">${skin.tier?.name || 'Edition'}</span>
+          <span class="skin-tier-name">${formatTierLabel(skin.tier?.name)}</span>
         </div>
         <div class="skin-features-badge">
           ${chromasCount > 1 ? `<span class="badge-feat">${chromasCount} สี</span>` : ''}
@@ -3628,6 +3646,7 @@ function renderAllAgentsGrid(agents) {
     const card = document.createElement('div');
     card.className = 'agent-catalog-card';
     card.style.animationDelay = (Math.min(idx, 20) * 0.04) + 's';
+    applyAgentCardTheme(card, ag);
 
     const matchPct = calculateAgentMatchPercent(ag);
     const matchClass = matchPct >= 90 ? 'match-high' : (matchPct >= 75 ? 'match-mid' : 'match-low');
@@ -6237,7 +6256,7 @@ function filterAndRenderInventoryGrid() {
       <div class="skin-card-header">
         <div class="skin-tier-info">
           ${tierIcon ? `<img src="${tierIcon}" alt="" class="skin-tier-icon">` : ''}
-          <span class="skin-tier-name">${escapeHtml(tierName)}</span>
+          <span class="skin-tier-name">${escapeHtml(formatTierLabel(tierName))}</span>
         </div>
         <div class="skin-features-badge">
           ${skin.totalLevels > 1 ? `<span class="badge-feat">Lv. ${skin.unlockedLevels}/${skin.totalLevels}</span>` : ''}
@@ -7586,3 +7605,27 @@ document.addEventListener('DOMContentLoaded', () => {
   initSkinCompareModule();
 });
 
+
+// Premium card spotlight: light follows the pointer across skin/agent cards.
+// One delegated listener, rAF-batched, fine pointers only, off under reduced motion.
+(function initCardSpotlight() {
+  const fine = window.matchMedia('(pointer: fine)');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const SELECTOR = '.skin-card, .agent-catalog-card, .bundle-display-card';
+  let pending = null;
+  let frame = 0;
+  document.addEventListener('pointermove', (e) => {
+    if (!fine.matches || reduce.matches) return;
+    const card = e.target instanceof Element ? e.target.closest(SELECTOR) : null;
+    if (!card) return;
+    pending = { card, x: e.clientX, y: e.clientY };
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      const { card: c, x, y } = pending;
+      const r = c.getBoundingClientRect();
+      c.style.setProperty('--mx', ((x - r.left) / r.width * 100).toFixed(1) + '%');
+      c.style.setProperty('--my', ((y - r.top) / r.height * 100).toFixed(1) + '%');
+    });
+  }, { passive: true });
+})();

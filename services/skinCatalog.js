@@ -488,6 +488,7 @@ class SkinCatalog {
             displayIcon: ag.displayIcon || ag.displayIconSmall || `https://media.valorant-api.com/agents/${ag.uuid}/displayicon.png`,
             fullPortrait: ag.fullPortrait || ag.displayIcon || `https://media.valorant-api.com/agents/${ag.uuid}/fullportrait.png`,
             background: ag.background || null,
+            backgroundGradientColors: Array.isArray(ag.backgroundGradientColors) ? ag.backgroundGradientColors : null,
             role: roleName,
             roleIcon: ag.role?.displayIcon || null,
             roleDesc: this.getRoleDescription(roleName),
