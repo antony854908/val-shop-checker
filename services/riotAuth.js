@@ -171,9 +171,16 @@ class RiotAuthService {
     if (!res.ok) {
       const errText = await res.text().catch(() => '');
       if (res.status === 401 || errText.includes('CREDENTIALS_EXPIRED') || errText.includes('expired')) {
-        throw new Error('Access Token หมดอายุแล้ว (โทเคนจาก Riot มีอายุ 1 ชั่วโมง) กรุณากดปุ่ม STEP 1 เพื่อเปิดหน้าล็อกอินใหม่อีกครั้ง');
+        throw new Error('ลิงก์หมดอายุแล้ว (ลิงก์จาก Riot ใช้ได้ 1 ชั่วโมง) กรุณาล็อกอินใหม่แล้วคัดลอกลิงก์อีกครั้ง');
       }
-      throw new Error(`ไม่สามารถขอรับ Entitlements Token ได้ (สถานะ: ${res.status})`);
+      // 502/503/504 = Riot's own servers are down; don't blame the user's link
+      if (res.status >= 502 && res.status <= 504) {
+        console.warn(`[RiotAuth] Entitlements endpoint unavailable: HTTP ${res.status}`);
+        throw new Error('เซิร์ฟเวอร์ Riot ไม่ตอบสนองชั่วคราว กรุณาลองใหม่อีกครั้งในอีกสักครู่');
+      }
+      // Riot answers a malformed / forged / truncated token with 400/403/500
+      console.warn(`[RiotAuth] Entitlements rejected token: HTTP ${res.status}`);
+      throw new Error('ลิงก์หมดอายุหรือไม่ถูกต้อง กรุณาล็อกอินใหม่แล้วคัดลอกลิงก์อีกครั้ง');
     }
 
     const data = await res.json();
