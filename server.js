@@ -121,7 +121,9 @@ function getHashedIndexHtml() {
   return hashedIndexHtml;
 }
 app.get(['/', '/index.html'], (req, res) => {
-  res.setHeader('Cache-Control', 'no-cache, s-maxage=600, stale-while-revalidate=86400');
+  res.setHeader('Cache-Control', 'no-cache');
+    // Vercel ignores s-maxage when no-cache is present; this header targets only its edge CDN.
+    res.setHeader('Vercel-CDN-Cache-Control', 'max-age=600, stale-while-revalidate=86400');
   res.type('html').send(getHashedIndexHtml());
 });
 
@@ -136,7 +138,9 @@ app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, filePath) => {
     const req = res.req;
     if (/\.html$|[\\/]sw\.js$|manifest\.json$/.test(filePath)) {
-      res.setHeader('Cache-Control', 'no-cache, s-maxage=600, stale-while-revalidate=86400');
+      res.setHeader('Cache-Control', 'no-cache');
+    // Vercel ignores s-maxage when no-cache is present; this header targets only its edge CDN.
+    res.setHeader('Vercel-CDN-Cache-Control', 'max-age=600, stale-while-revalidate=86400');
     } else if (/\.(css|js)$/.test(filePath) && req && req.query && req.query.v) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     } else {
