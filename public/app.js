@@ -734,56 +734,29 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // ==========================================================
 // SEPARATE MOBILE & PC UI ENGINE WITH INSTANT TOGGLE + AUTO-DETECTION
 // ==========================================================
-function getDeviceModePreference() {
-  return localStorage.getItem('val_ui_mode_pref') || 'auto'; // 'auto' | 'mobile' | 'pc'
-}
+// Automatic device detection (no manual toggle).
+// Phones/tablets get the mobile UI; desktops get the PC UI, falling back to mobile only for very narrow windows.
+localStorage.removeItem("val_ui_mode_pref"); // drop legacy manual override so nobody stays stuck in the wrong UI
 
-function setDeviceModePreference(mode) {
-  if (mode === 'auto') {
-    localStorage.removeItem('val_ui_mode_pref');
-  } else {
-    localStorage.setItem('val_ui_mode_pref', mode);
+function detectMobileDevice() {
+  const ua = navigator.userAgent || "";
+  const isHandheld =
+    navigator.userAgentData?.mobile === true ||
+    /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua) ||
+    (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1); // iPadOS reports a desktop UA
+  if (isHandheld) {
+    const shortSide = Math.min(window.screen?.width || innerWidth, window.screen?.height || innerHeight);
+    return shortSide < 768 || window.innerWidth <= 1024; // phones always; tablets unless wide landscape
   }
-  applyDeviceMode();
+  return window.innerWidth <= 900;
 }
 
 function applyDeviceMode() {
-  const pref = getDeviceModePreference();
-  let isMobile = false;
-  if (pref === 'mobile') {
-    isMobile = true;
-  } else if (pref === 'pc') {
-    isMobile = false;
-  } else {
-    isMobile = window.innerWidth <= 900 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent || '');
-  }
+  const isMobile = detectMobileDevice();
+  if (document.body.classList.contains('ui-mode-mobile') === isMobile && document.body.classList.contains('ui-mode-pc') === !isMobile) return;
 
   document.body.classList.toggle('ui-mode-mobile', isMobile);
   document.body.classList.toggle('ui-mode-pc', !isMobile);
-
-  const toggleBtn = document.getElementById('btnToggleDeviceMode');
-  const iconPc = toggleBtn?.querySelector('.icon-device-pc');
-  const iconMob = toggleBtn?.querySelector('.icon-device-mob');
-  if (isMobile) {
-    iconPc?.classList.add('hidden');
-    iconMob?.classList.remove('hidden');
-  } else {
-    iconPc?.classList.remove('hidden');
-    iconMob?.classList.add('hidden');
-  }
-
-  const labelEl = document.getElementById('deviceModeLabel');
-  if (labelEl) {
-    if (pref === 'mobile') labelEl.textContent = 'โหมด: มือถือ';
-    else if (pref === 'pc') labelEl.textContent = 'โหมด: คอม';
-    else labelEl.textContent = isMobile ? 'โหมด: มือถือ (ออโต้)' : 'โหมด: คอม (ออโต้)';
-  }
-
-  const sheetBtnPc = document.getElementById('btnMobSheetTogglePc');
-  if (sheetBtnPc) {
-    const span = sheetBtnPc.querySelector('span');
-    if (span) span.textContent = isMobile ? 'สลับเป็นโหมดคอม (PC UI)' : 'สลับเป็นโหมดมือถือ (Mobile UI)';
-  }
 
   const mobPanel = document.getElementById('deviceGuideMobile');
   const pcPanel = document.getElementById('deviceGuidePc');
@@ -809,15 +782,13 @@ function applyDeviceMode() {
   }
 }
 
-function toggleDeviceMode() {
-  playTacticalAudio?.('click');
-  const isCurMobile = document.body.classList.contains('ui-mode-mobile');
-  setDeviceModePreference(isCurMobile ? 'pc' : 'mobile');
-}
-
-window.toggleDeviceMode = toggleDeviceMode;
 applyDeviceMode();
-window.addEventListener('resize', applyDeviceMode, { passive: true });
+let deviceModeFrame = 0;
+window.addEventListener('resize', () => {
+  if (deviceModeFrame) return;
+  deviceModeFrame = requestAnimationFrame(() => { deviceModeFrame = 0; applyDeviceMode(); });
+}, { passive: true });
+window.addEventListener('orientationchange', applyDeviceMode, { passive: true });
 
 // Google & Device Tutorial Navigation
 document.querySelectorAll('.btn-device-tab').forEach(btn => {
@@ -3323,20 +3294,10 @@ document.getElementById('btnMobSheetVp')?.addEventListener('click', () => {
   window.openVpCompareModal?.();
 });
 
-document.getElementById('btnMobSheetTogglePc')?.addEventListener('click', () => {
-  closeMobMoreMenu();
-  toggleDeviceMode();
-});
-
 document.getElementById('btnMobSheetLogout')?.addEventListener('click', () => {
   closeMobMoreMenu();
   playTacticalAudio?.('click');
   document.getElementById('btnLogout')?.click();
-});
-
-// Header Device Toggle Button
-document.getElementById('btnToggleDeviceMode')?.addEventListener('click', () => {
-  toggleDeviceMode();
 });
 
 // Load weapons list for dropdown
