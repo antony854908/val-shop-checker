@@ -141,7 +141,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
       res.setHeader('Cache-Control', 'no-cache');
     // Vercel ignores s-maxage when no-cache is present; this header targets only its edge CDN.
     res.setHeader('Vercel-CDN-Cache-Control', 'max-age=600, stale-while-revalidate=86400');
-    } else if (/\.(css|js)$/.test(filePath) && req && req.query && req.query.v) {
+    } else if (/\.woff2$/.test(filePath) || (/\.(css|js)$/.test(filePath) && req && req.query && req.query.v)) {
+      // woff2 files are never edited in place (new font = new file name), so they are immutable too
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     } else {
       res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400');
