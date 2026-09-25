@@ -2,29 +2,41 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#FF7518">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ValStore">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>VALORANT Store & Skin Inspector HD</title>
+  <title>VALORANT Store & Skin Inspector HD — เช็กร้านค้ารายวัน สกินปืน ราคา VP</title>
+  <meta name="description" content="เช็กร้านค้ารายวัน VALORANT, Night Market และบันเดิล ดูสกินปืนกว่า 1,380 สกินพร้อมวิดีโอ Finisher HD, คำนวณมูลค่าไอดี, เป้าเล็งโปร และเทียบราคาเติม VP ที่ถูกที่สุด">
+  <link rel="canonical" href="https://val-shop-checker.vercel.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="VALORANT Store">
+  <meta property="og:locale" content="th_TH">
+  <meta property="og:url" content="https://val-shop-checker.vercel.app/">
+  <meta property="og:title" content="VALORANT Store & Skin Inspector HD">
+  <meta property="og:description" content="เช็กร้านค้ารายวัน, Night Market, สกินปืน 1,380+ สกินพร้อมวิดีโอ Finisher และเทียบราคาเติม VP">
+  <meta property="og:image" content="https://val-shop-checker.vercel.app/assets/og-cover.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" href="/assets/icon-192.png">
   <link rel="shortcut icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/assets/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300..700&family=Barlow:wght@400;500;600&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=9.3">
+  <!-- Fonts load without blocking first paint (display=swap + preload/onload swap) -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300..700&family=Barlow:wght@400;500;600&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300..700&family=Barlow:wght@400;500;600&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,700&display=swap"></noscript>
+  <link rel="preconnect" href="https://media.valorant-api.com">
+  <link rel="stylesheet" href="style.css?v=9.4">
   <link rel="stylesheet" href="theme-valorant.css?v=1.5">
   <link rel="stylesheet" href="theme-soft.css?v=1.0">
   <link rel="stylesheet" href="theme-halloween.css?v=2.5">
-  <link rel="stylesheet" href="theme-seasonal.css?v=2.5">
-  <link rel="stylesheet" href="theme-premium.css?v=1.0">
+  <link rel="stylesheet" href="theme-seasonal.css?v=2.6">
+  <link rel="stylesheet" href="theme-premium.css?v=1.1">
 </head>
 <body>
   <!-- High-Performance Valorant Tactical Background (Zero-Cost GPU Plane) -->
@@ -134,15 +146,15 @@
 
         <div class="wallet-display">
           <div class="wallet-chip vp-chip" title="Valorant Points">
-            <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="cur-icon">
+            <img loading="lazy" decoding="async" src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="cur-icon">
             <span id="walletVp" class="cur-val">0</span>
           </div>
           <div class="wallet-chip rp-chip" title="Radianite Points">
-            <img src="https://media.valorant-api.com/currencies/e59aa87c-4cbf-517a-5983-6e81511be9b7/largeicon.png" alt="RP" class="cur-icon">
+            <img loading="lazy" decoding="async" src="https://media.valorant-api.com/currencies/e59aa87c-4cbf-517a-5983-6e81511be9b7/largeicon.png" alt="RP" class="cur-icon">
             <span id="walletRp" class="cur-val">0</span>
           </div>
           <div class="wallet-chip kc-chip" title="Kingdom Credits">
-            <img src="https://media.valorant-api.com/currencies/85ca954a-41f2-ce94-9b45-8ca3dd39a00d/largeicon.png" alt="KC" class="cur-icon">
+            <img loading="lazy" decoding="async" src="https://media.valorant-api.com/currencies/85ca954a-41f2-ce94-9b45-8ca3dd39a00d/largeicon.png" alt="KC" class="cur-icon">
             <span id="walletKc" class="cur-val">0</span>
           </div>
         </div>
@@ -489,7 +501,7 @@
         <div class="career-summary-card">
           <div class="career-rank-col">
             <div class="rank-badge-wrap">
-              <img id="careerRankIcon" src="https://media.valorant-api.com/competitivetiers/03621f52-342b-cf4e-4f86-9350a49c6d04/0/largeicon.png" alt="Rank" class="career-rank-img">
+              <img loading="lazy" decoding="async" id="careerRankIcon" src="https://media.valorant-api.com/competitivetiers/03621f52-342b-cf4e-4f86-9350a49c6d04/0/largeicon.png" alt="Rank" class="career-rank-img">
             </div>
             <div class="rank-text-info">
               <span class="rank-tagline">CURRENT RANK</span>
@@ -799,7 +811,7 @@
           <div class="valuation-stats-grid">
             <div class="val-stat-card card-glow-gold">
               <div class="stat-icon-wrap">
-                <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" width="28" height="28">
+                <img loading="lazy" decoding="async" src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" width="28" height="28">
               </div>
               <div class="stat-content">
                 <div class="stat-label">มูลค่าสกินรวมในไอดี</div>
@@ -832,7 +844,7 @@
 
             <div class="val-stat-card card-glow-purple">
               <div class="stat-icon-wrap">
-                <img src="https://media.valorant-api.com/currencies/e59aa87c-4cbf-517a-5983-6e81511be9b7/largeicon.png" alt="RP" width="28" height="28">
+                <img loading="lazy" decoding="async" src="https://media.valorant-api.com/currencies/e59aa87c-4cbf-517a-5983-6e81511be9b7/largeicon.png" alt="RP" width="28" height="28">
               </div>
               <div class="stat-content">
                 <div class="stat-label">Radianite เพื่ออัปเกรดให้ตัน</div>
@@ -970,13 +982,13 @@
         
         <div class="modal-dialog-header">
           <div class="modal-tier-tag" id="modalTierBadge">
-            <img id="modalTierIcon" src="" alt="Tier" class="tier-tag-icon">
+            <img loading="lazy" decoding="async" id="modalTierIcon" src="" alt="Tier" class="tier-tag-icon">
             <span id="modalTierName">Premium Edition</span>
           </div>
           <h2 id="modalSkinName" class="modal-skin-heading">Prime Vandal</h2>
           <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
             <div class="modal-price-display" id="modalSkinPrice">
-              <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="modal-vp-icon">
+              <img loading="lazy" decoding="async" src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="modal-vp-icon">
               <span id="modalPriceVal">1,775</span> VP
             </div>
             <button id="btnModalCompareSkin" class="btn btn-secondary btn-sm" title="นำสกินนี้ไปเปรียบเทียบในโหมด VS" style="padding:4px 10px; font-size:12px;">
@@ -994,7 +1006,7 @@
                 <div class="inspect-backdrop-grid"></div>
                 <div class="inspect-spotlight" id="inspectSpotlight"></div>
                 <div class="inspect-weapon-3d-wrap" id="inspectWeaponWrap">
-                  <img id="modalSkinImg" src="" alt="Skin Display" class="main-preview-render in-game-render">
+                  <img loading="lazy" decoding="async" id="modalSkinImg" src="" alt="Skin Display" class="main-preview-render in-game-render">
                   <div class="inspect-hologram-sheen" id="inspectSheen"></div>
                 </div>
                 <div class="inspect-shadow-plane"></div>
@@ -1106,7 +1118,7 @@
           <div class="badge-tag" style="color:var(--val-cyan); background:rgba(0,245,212,0.12);">FEATURED COLLECTION // BUNDLE</div>
           <h2 id="modalBundleName" class="modal-skin-heading">Featured Collection</h2>
           <div class="modal-price-display" id="modalBundlePrice">
-            <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="modal-vp-icon">
+            <img loading="lazy" decoding="async" src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" alt="VP" class="modal-vp-icon">
             <span id="modalBundlePriceVal">9,500</span> VP
           </div>
         </div>
@@ -1115,7 +1127,7 @@
           
           <!-- Cinematic Bundle Artwork Banner -->
           <div class="bundle-modal-hero">
-            <img id="modalBundleHeroImg" src="" alt="Bundle Showcase" class="bundle-modal-hero-img">
+            <img loading="lazy" decoding="async" id="modalBundleHeroImg" src="" alt="Bundle Showcase" class="bundle-modal-hero-img">
             <div class="bundle-modal-hero-overlay">
               <div class="bundle-modal-titles">
                 <h3 id="modalBundleOverlayTitle">Featured Collection</h3>
@@ -1266,7 +1278,7 @@
                 </div>
 
                 <div class="minimap-canvas-wrapper" id="minimapCanvasWrap">
-                  <img id="replayMinimapImg" src="" alt="Minimap" class="minimap-bg-img">
+                  <img loading="lazy" decoding="async" id="replayMinimapImg" src="" alt="Minimap" class="minimap-bg-img">
                   <div id="replayMarkersLayer" class="minimap-markers-layer"></div>
                   <svg id="replayTracerSvg" class="minimap-tracer-layer"></svg>
                 </div>
@@ -1334,11 +1346,11 @@
         
         <div class="agent-modal-hero" id="agentModalHero">
           <div class="agent-modal-portrait-box">
-            <img id="agentModalImg" src="" alt="Agent" class="agent-modal-main-img">
+            <img loading="lazy" decoding="async" id="agentModalImg" src="" alt="Agent" class="agent-modal-main-img">
           </div>
           <div class="agent-modal-titles">
             <div class="agent-role-pill" id="agentModalRole">
-              <img id="agentModalRoleIcon" src="" alt="" class="role-mini-icon">
+              <img loading="lazy" decoding="async" id="agentModalRoleIcon" src="" alt="" class="role-mini-icon">
               <span id="agentModalRoleText">DUELIST</span>
             </div>
             <h2 id="agentModalName" class="agent-modal-heading">JETT</h2>
@@ -1379,7 +1391,7 @@
         <div class="modal-dialog-header">
           <div class="badge-tag" style="color:var(--val-cyan); background:rgba(0,245,212,0.12);">OVERTOPUP.COM VP COMPARISON & SAVINGS</div>
           <h2 class="modal-skin-heading" style="font-size:20px; display:flex; align-items:center; gap:8px;">
-            <img src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" width="22" height="22" alt="VP">
+            <img loading="lazy" decoding="async" src="https://media.valorant-api.com/currencies/85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741/largeicon.png" width="22" height="22" alt="VP">
             <span>เปรียบเทียบราคาเติม OverTopup vs เติมตรงในเกม</span>
           </h2>
           <p style="font-size:12px; color:var(--val-gray); margin-top:2px;">คำนวณเรทราคาจริงจาก <a href="https://www.overtopup.com/th/game-topup/valorant" target="_blank" style="color:var(--val-cyan); text-decoration:underline;">overtopup.com</a> เทียบกับราคาทางการในเกม</p>
@@ -2125,6 +2137,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=2.8.1"></script>
+  <script src="app.js?v=2.9.0"></script>
 </body>
 </html>

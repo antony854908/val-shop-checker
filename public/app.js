@@ -2328,7 +2328,7 @@ function renderSingleBundle(container, b, showOwnTimer) {
   const knownItemIcons = (b.items || []).filter(i => i.displayIcon && !i.isUnreleasedData).map(i => i.displayIcon);
   const officialArt = b.displayIcon || b.verticalPromoImage || null;
   const heroVisual = officialArt
-    ? `<img src="${officialArt}" alt="${b.name}">`
+    ? `<img src="${officialArt}" alt="${escapeHtml(b.name)}" loading="lazy" decoding="async">`
     : knownItemIcons.length > 0
       ? `<div class="bundle-hero-collage" data-count="${Math.min(knownItemIcons.length, 4)}">${knownItemIcons.slice(0, 4).map(src => `<img src="${src}" alt="" loading="lazy" onerror="this.remove()">`).join('')}</div>`
       : `<div class="bundle-hero-fallback"><img src="/assets/placeholder-skin.svg" alt=""><span>บันเดิลใหม่ล่าสุด — รูปภาพจะขึ้นอัตโนมัติเมื่อฐานข้อมูลเกมอัปเดต</span></div>`;

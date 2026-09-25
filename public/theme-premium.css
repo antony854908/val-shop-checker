@@ -626,8 +626,12 @@ body.ui-mode-pc .skin-card:hover .skin-image-box img {
 .agent-card-name-row {
   margin-top: -34px;
   align-items: flex-end !important;
-  gap: 8px;
+  flex-wrap: wrap;
+  column-gap: 8px;
+  row-gap: 0;
 }
+/* Names never break mid-word ("BRIMSTON / E"); the difficulty label wraps under instead */
+.agent-card-name { white-space: nowrap; flex: 0 0 auto; }
 .agent-card-name {
   font-size: 34px !important;
   letter-spacing: 0.03em !important;
@@ -802,4 +806,28 @@ body.ui-mode-pc .skin-card:hover .skin-image-box img {
   .agent-card-portrait-wrap { height: 230px !important; }
   .agent-card-name { font-size: 28px !important; }
   .dash-title h2 .section-title-svg { width: 30px; height: 30px; padding: 6px; }
+}
+
+/* ---------------------------------------------------------------------------
+   9. LEGIBILITY + ACCESSIBILITY (v2.9.0)
+   Lighthouse flagged 81% of text below 12px on mobile. Raise the worst offenders
+   to readable sizes without changing layout rhythm.
+   ------------------------------------------------------------------------- */
+.app-footer,
+.riot-footer-divider { font-size: 11.5px !important; }
+.sec-note,
+.riot-link-btn,
+.riot-guest-link { font-size: 12px !important; }
+.chk-label-text small,
+.btn-nexus-main-login .btn-signin-desc { font-size: 12px !important; line-height: 1.5; }
+.mobile-nav-item span { font-size: 11px !important; }
+body:not(.ui-mode-pc) #btnOpenVpCalc .btn-calc-text { font-size: 12px !important; }
+
+/* Pinch-zoom is allowed again (WCAG 1.4.4). iOS Safari auto-zooms any focused
+   field under 16px, so mobile inputs are pinned to 16px to keep the layout still. */
+@media (max-width: 900px) {
+  input[type="text"], input[type="search"], input[type="url"], input[type="email"],
+  input[type="password"], input[type="number"], input:not([type]), select, textarea {
+    font-size: 16px !important;
+  }
 }

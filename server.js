@@ -100,12 +100,47 @@ app.use(cors({
 app.use(cookieParser(config.SESSION_SECRET));
 app.use(express.json({ limit: '256kb' }));
 app.use(express.urlencoded({ limit: '256kb', extended: false }));
+// index.html with content-hashed asset URLs: every local `x.css?v=...` / `x.js?v=...` reference is
+// rewritten to `?v=<md5 of the file>`, so a changed file always gets a new URL (safe to cache
+// immutably) and nobody has to remember to bump ?v by hand. Built once per cold start.
+const crypto = require('crypto');
+const fs = require('fs');
+let hashedIndexHtml = null;
+function getHashedIndexHtml() {
+  if (hashedIndexHtml && isProd) return hashedIndexHtml; // rebuild on every request in local dev
+  const publicDir = path.join(__dirname, 'public');
+  const html = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
+  hashedIndexHtml = html.replace(/(href|src)="\/?([\w.-]+\.(?:css|js))\?v=[^"]*"/g, (match, attr, file) => {
+    try {
+      const hash = crypto.createHash('md5').update(fs.readFileSync(path.join(publicDir, file))).digest('hex').slice(0, 10);
+      return `${attr}="${file}?v=${hash}"`;
+    } catch (e) {
+      return match; // unknown file: leave the reference untouched
+    }
+  });
+  return hashedIndexHtml;
+}
+app.get(['/', '/index.html'], (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, s-maxage=600, stale-while-revalidate=86400');
+  res.type('html').send(getHashedIndexHtml());
+});
+
+// Static caching strategy (Vercel routes every request through this function, so the
+// Cache-Control we set decides whether the edge CDN can answer without invoking it).
+// Vercel's edge cache is scoped per deployment, so `s-maxage` never serves stale files after a deploy.
+//  - HTML / sw.js / manifest: browser always revalidates (ETag -> 304); edge keeps a copy.
+//    `no-cache` (not `no-store`) keeps the page eligible for the back/forward cache.
+//  - Versioned CSS/JS (?v=...): immutable for a year - index.html bumps ?v on every change.
+//  - Everything else (images, unversioned requests from the service worker): 1 day browser, 7 days edge.
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.html') || filePath.endsWith('sw.js')) {
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
+    const req = res.req;
+    if (/\.html$|[\\/]sw\.js$|manifest\.json$/.test(filePath)) {
+      res.setHeader('Cache-Control', 'no-cache, s-maxage=600, stale-while-revalidate=86400');
+    } else if (/\.(css|js)$/.test(filePath) && req && req.query && req.query.v) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    } else {
+      res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400');
     }
   }
 }));
@@ -866,6 +901,11 @@ app.post('/api/auth/logout', (req, res) => {
 app.use((req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ ok: false, error: 'ไม่พบ API Endpoint ที่คุณเรียก (404 Not Found)' });
+  }
+  // Missing files (images, css, js...) must be a real 404, not the HTML shell -
+  // otherwise a broken asset path silently "loads" 30KB of HTML as an image.
+  if (/\.[a-z0-9]{2,5}$/i.test(req.path)) {
+    return res.status(404).type('text/plain').send('Not Found');
   }
   res.status(404).sendFile(path.join(__dirname, 'public', 'index.html'));
 });

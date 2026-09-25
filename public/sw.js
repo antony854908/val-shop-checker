@@ -1,4 +1,4 @@
-const CACHE_NAME = 'valstore-v2.8.1';
+const CACHE_NAME = 'valstore-v2.9.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -13,33 +13,15 @@ const STATIC_ASSETS = [
   '/favicon.ico',
   '/assets/icon-192.png',
   '/assets/icon-512.png',
-  '/assets/placeholder-skin.svg',
-  '/assets/christmas/bg-winter-desktop.webp',
-  '/assets/christmas/bg-winter-mobile.webp',
-  '/assets/christmas/christmas-tree.webp',
-  '/assets/lunar/bg-lunar-desktop.webp',
-  '/assets/lunar/bg-lunar-mobile.webp',
-  '/assets/lunar/lunar-lanterns.webp',
-  '/assets/sakura/bg-sakura-desktop.webp',
-  '/assets/sakura/bg-sakura-mobile.webp',
-  '/assets/sakura/sakura-branch.webp',
-  '/assets/months/m01/bg-desktop.webp',
-  '/assets/months/m01/bg-mobile.webp',
-  '/assets/months/m01/prop.webp',
-  '/assets/months/m04/bg-desktop.webp',
-  '/assets/months/m04/bg-mobile.webp',
-  '/assets/months/m04/prop.webp',
-  '/assets/months/m05/bg-desktop.webp',
-  '/assets/months/m05/bg-mobile.webp',
-  '/assets/months/m05/prop.webp',
-  '/assets/months/m06/bg-desktop.webp',
-  '/assets/months/m06/bg-mobile.webp'
+  '/assets/placeholder-skin.svg'
+  // Seasonal backgrounds (~3 MB) are NOT precached: the fetch handler caches the
+  // current month's art on first use instead of downloading all 12 months per release.
 ];
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS).catch(() => {}))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS.map(u => new Request(u, { cache: 'reload' }))).catch(() => {}))
   );
 });
 
