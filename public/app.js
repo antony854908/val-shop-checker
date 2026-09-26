@@ -3700,7 +3700,7 @@ async function loadCareer() {
     // 1. Fetch MMR
     const mmrPromise = apiFetch('/api/career/mmr').then(r => r.json()).catch(() => ({ ok: false }));
     // 2. Fetch Matches
-    const queueParam = currentCareerQueue ? `?queue=${encodeURIComponent(currentCareerQueue)}` : '';
+    const queueParam = currentCareerQueue ? `?limit=15&queue=${encodeURIComponent(currentCareerQueue)}` : '?limit=15';
     const matchPromise = apiFetch(`/api/matches${queueParam}`).then(r => r.json()).catch(() => ({ ok: false }));
 
     const [mmrRes, matchRes] = await Promise.all([mmrPromise, matchPromise]);
@@ -3768,30 +3768,35 @@ function renderMatchesList(matches) {
     return;
   }
 
-  // Calculate Aggregates
+  // Calculate Aggregates (Case-insensitive outcome parsing)
   let wins = 0;
   let totalKills = 0;
   let totalDeaths = 0;
   let totalAcs = 0;
 
   matches.forEach(m => {
-    if (m.outcome === 'VICTORY') wins++;
+    const outcome = (m.outcome || '').toUpperCase();
+    if (outcome === 'VICTORY' || outcome === 'WIN') wins++;
     totalKills += m.myStats?.kills || 0;
     totalDeaths += m.myStats?.deaths || 0;
     totalAcs += m.myStats?.acs || 0;
   });
 
   const totalGames = matches.length;
-  const winRate = Math.round((wins / totalGames) * 100);
+  const losses = matches.filter(m => {
+    const o = (m.outcome || '').toUpperCase();
+    return o === 'DEFEAT' || o === 'LOSS';
+  }).length;
+  const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
   const avgKd = totalDeaths > 0 ? (totalKills / totalDeaths).toFixed(2) : totalKills.toFixed(2);
-  const avgAcs = Math.round(totalAcs / totalGames);
+  const avgAcs = totalGames > 0 ? Math.round(totalAcs / totalGames) : 0;
 
   const totalGamesEl = document.getElementById('careerTotalGames');
   const winRateEl = document.getElementById('careerWinRate');
   const avgKdEl = document.getElementById('careerAvgKd');
   const avgAcsEl = document.getElementById('careerAvgAcs');
 
-  if (totalGamesEl) totalGamesEl.textContent = `${totalGames} นัด (${wins}W - ${totalGames - wins}L)`;
+  if (totalGamesEl) totalGamesEl.textContent = `${totalGames} นัด (${wins}W - ${losses}L)`;
   if (winRateEl) winRateEl.textContent = `${winRate}%`;
   if (avgKdEl) avgKdEl.textContent = avgKd;
   if (avgAcsEl) avgAcsEl.textContent = avgAcs.toLocaleString();
@@ -3803,9 +3808,16 @@ function renderMatchesList(matches) {
   matches.forEach((m, idx) => {
     const card = document.createElement('div');
     card.style.animationDelay = (Math.min(idx, 15) * 0.05) + 's';
-    const outcomeClass = m.outcome === 'VICTORY' ? 'outcome-win' : (m.outcome === 'DEFEAT' ? 'outcome-loss' : 'outcome-draw');
-    const outcomeTextClass = m.outcome === 'VICTORY' ? 'outcome-win-text' : (m.outcome === 'DEFEAT' ? 'outcome-loss-text' : 'outcome-draw-text');
-    const outcomeLabel = m.outcome === 'VICTORY' ? 'VICTORY (ชนะ)' : (m.outcome === 'DEFEAT' ? 'DEFEAT (แพ้)' : 'DRAW (เสมอ)');
+    
+    const outcome = (m.outcome || '').toUpperCase();
+    const isWin = outcome === 'VICTORY' || outcome === 'WIN';
+    const isLoss = outcome === 'DEFEAT' || outcome === 'LOSS';
+    const isCompleted = outcome === 'COMPLETED' || (m.queueId || '').toLowerCase() === 'deathmatch';
+
+    const outcomeClass = isWin ? 'outcome-win' : (isLoss ? 'outcome-loss' : 'outcome-draw');
+    const outcomeTextClass = isWin ? 'outcome-win-text' : (isLoss ? 'outcome-loss-text' : 'outcome-draw-text');
+    let outcomeLabel = isWin ? 'VICTORY (ชนะ)' : (isLoss ? 'DEFEAT (แพ้)' : 'DRAW (เสมอ)');
+    if (isCompleted) outcomeLabel = 'COMPLETED (จบเกม)';
 
     card.className = `match-card ${outcomeClass}`;
 
@@ -3840,7 +3852,14 @@ function renderMatchesList(matches) {
       </div>
 
       <div class="match-score-box">
-        <span class="match-outcome-badge ${outcomeTextClass}">${outcomeLabel}</span>
+        <div style="display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap;">
+          <span class="match-outcome-badge ${outcomeTextClass}">${outcomeLabel}</span>
+          ${(m.rrEarned !== null && m.rrEarned !== undefined) ? `
+            <span class="match-outcome-badge" style="background:${m.rrEarned >= 0 ? 'rgba(74,222,128,0.15)' : 'rgba(255,70,85,0.15)'}; color:${m.rrEarned >= 0 ? '#4ade80' : '#ff4655'}; border:1px solid ${m.rrEarned >= 0 ? 'rgba(74,222,128,0.3)' : 'rgba(255,70,85,0.3)'};">
+              ${m.rrEarned > 0 ? '+' : ''}${m.rrEarned} RR
+            </span>
+          ` : ''}
+        </div>
         <span class="match-score-digits">${m.myTeamScore} - ${m.enemyTeamScore}</span>
         ${(friendlyRoster || enemyRoster) ? `
           <div class="match-rosters-preview">
@@ -3919,8 +3938,11 @@ function openMatchScoreboard(match) {
   if (dateEl) dateEl.textContent = formatTimeAgo(match.gameStartMillis);
 
   if (outcomeEl) {
-    outcomeEl.textContent = match.outcome === 'VICTORY' ? 'VICTORY' : (match.outcome === 'DEFEAT' ? 'DEFEAT' : 'DRAW');
-    outcomeEl.className = 'outcome-title ' + (match.outcome === 'VICTORY' ? 'outcome-win' : (match.outcome === 'DEFEAT' ? 'outcome-loss' : 'outcome-draw'));
+    const outcome = (match.outcome || '').toUpperCase();
+    const isWin = outcome === 'VICTORY' || outcome === 'WIN';
+    const isLoss = outcome === 'DEFEAT' || outcome === 'LOSS';
+    outcomeEl.textContent = isWin ? 'VICTORY' : (isLoss ? 'DEFEAT' : (outcome === 'COMPLETED' ? 'COMPLETED' : 'DRAW'));
+    outcomeEl.className = 'outcome-title ' + (isWin ? 'outcome-win' : (isLoss ? 'outcome-loss' : 'outcome-draw'));
   }
 
   if (scoreEl) {
@@ -4129,7 +4151,8 @@ function openAgentDetailsModal(agentData, metricsData) {
     if (agentMatches.length > 0) {
       let wins = 0, kills = 0, deaths = 0, assists = 0, score = 0, damage = 0, rounds = 0, headshots = 0, totalHits = 0, firstBloods = 0, plants = 0, defuses = 0;
       agentMatches.forEach(m => {
-        if (m.outcome === 'VICTORY') wins++;
+        const outcome = (m.outcome || '').toUpperCase();
+        if (outcome === 'VICTORY' || outcome === 'WIN') wins++;
         const st = m.myStats || {};
         kills += st.kills || 0;
         deaths += st.deaths || 0;
@@ -4350,7 +4373,8 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
 
     const item = agentMap.get(agUuid);
     item.games += 1;
-    if (m.outcome === 'VICTORY') item.wins += 1;
+    const outcome = (m.outcome || '').toUpperCase();
+    if (outcome === 'VICTORY' || outcome === 'WIN') item.wins += 1;
     
     const st = m.myStats || {};
     item.kills += (st.kills || 0);
@@ -4461,44 +4485,76 @@ function analyzePlayerPlaystyleAndBestAgent(matches, selectedMode = '') {
     }
   }
 
-  // 2. Playstyle Diagnosis & Recommendation Logic
+  // 2. Playstyle Diagnosis & Recommendation Logic (Data-driven role & tactical analysis)
   const totalMatchesCount = matches.length || 1;
   const avgFbPerMatch = overallFirstBloods / totalMatchesCount;
   const avgAdr = overallRounds > 0 ? (overallDamage / overallRounds) : 0;
   const avgHsRate = overallTotalHits > 0 ? (overallHeadshots / overallTotalHits) : 0;
+  const hsPercentOverall = Math.round(avgHsRate * 100);
   const avgAssistsPerMatch = overallAssists / totalMatchesCount;
   const avgObjectivePerMatch = (overallPlants + overallDefuses) / totalMatchesCount;
 
-  let playstyleTitle = 'DUELIST / ENTRY';
+  // Role distribution & win rates
+  let controllerGames = 0, controllerWins = 0;
+  let initiatorGames = 0, initiatorWins = 0;
+  let duelistGames = 0, duelistWins = 0;
+  let sentinelGames = 0, sentinelWins = 0;
+
+  agentMap.forEach(d => {
+    const role = (d.agent?.role || '').toLowerCase();
+    if (role.includes('controller')) { controllerGames += d.games; controllerWins += d.wins; }
+    else if (role.includes('initiator')) { initiatorGames += d.games; initiatorWins += d.wins; }
+    else if (role.includes('duelist')) { duelistGames += d.games; duelistWins += d.wins; }
+    else if (role.includes('sentinel')) { sentinelGames += d.games; sentinelWins += d.wins; }
+  });
+
+  const utilityGames = controllerGames + initiatorGames;
+  const utilityWins = controllerWins + initiatorWins;
+  const utilityWinRate = utilityGames > 0 ? (utilityWins / utilityGames) : 0;
+  const duelistWinRate = duelistGames > 0 ? (duelistWins / duelistGames) : 0;
+
+  let playstyleTitle = 'FLEX TACTICIAN';
   let playstyleDesc = '';
-  let recomName = 'Jett';
-  let recomRole = 'Duelist';
+  let recomName = 'Harbor';
+  let recomRole = 'Controller';
   let recomAdvice = '';
 
-  if (avgFbPerMatch >= 1.8 || avgAdr >= 140) {
+  if (utilityGames >= duelistGames || utilityWinRate >= duelistWinRate) {
+    if (controllerGames >= initiatorGames) {
+      playstyleTitle = 'FLEX TACTICIAN / CONTROLLER';
+      playstyleDesc = 'คุณเป็นผู้เล่นสายวางแผนและคุมจังหวะทีม (Flex Tactician & Controller) สถิติยืนยันว่าทีมมีอัตราชนะสูงที่สุดเมื่อคุณเล่นตำแหน่งควัน/ม่านน้ำ คอยตัดมุมอันตรายและคุมจังหวะให้เพื่อน';
+      recomName = (bestAgent?.agent?.displayName) || 'Harbor';
+      recomRole = 'Controller';
+      recomAdvice = 'เล่นเป็น Second-man-in เดินคุมหลังเพื่อนคอยเทรดคิล, ใช้ Phantom สเปรย์คุมวิถีกระสุนผ่านม่านน้ำ/ควัน และยกเป้าระดับศีรษะก่อนพีคเสมอ';
+    } else {
+      playstyleTitle = 'TACTICAL INITIATOR & PLAYMAKER';
+      playstyleDesc = 'คุณเป็นผู้เปิดข้อมูลและสนับสนุนเพื่อนร่วมทีม (Recon & Flash Playmaker) สแกนตำแหน่งและเปิดจังหวะเข้ายึดไซต์โดยไม่ต้องเสี่ยงดวงในมุมอับ';
+      recomName = (bestAgent?.agent?.displayName) || 'Tejo';
+      recomRole = 'Initiator';
+      recomAdvice = 'ส่งสกิลสแกนเคลียร์มุมอันตรายก่อนทีมเข้าไซต์ แล้วคอยยิงซ้ำศัตรูที่โดนบีบให้ออกจากที่ซ่อน';
+    }
+  } else if (avgFbPerMatch >= 1.8 && duelistWinRate >= 0.5) {
     playstyleTitle = 'ENTRY FRAGGER / DUELIST';
     playstyleDesc = 'คุณเป็นผู้เล่นสายบุกทะลวง (Aggressive Entry) กล้าเปิดไฟต์เพื่อสร้างความได้เปรียบให้ทีม สปีดการเล่นเร็วและกล้าเสี่ยงเพื่อชิงพื้นที่';
-    recomName = (bestAgent?.agent?.displayName === 'Reyna') ? 'Jett' : 'Reyna';
+    recomName = (bestAgent?.agent?.displayName === 'Iso') ? 'Iso' : (bestAgent?.agent?.displayName || 'Iso');
     recomRole = 'Duelist';
-    recomAdvice = 'ใช้สกิล Dash/Dismiss หลบหนีหลังเปิดคิล และกดดันศัตรูในไซต์ตั้งแต่ช่วง 15 วินาทีแรกของรอบ';
+    recomAdvice = 'เปิดโล่ Double Tap ก่อนเข้าปะทะเพื่อรับความเสียหายฟรี 1 ฮิต และไม่ควรแยกไปเดินเดี่ยวคนเดียว';
   } else if (avgHsRate >= 0.22 || overallFirstDeaths <= 2) {
     playstyleTitle = 'TACTICAL LURKER / SENTINEL';
     playstyleDesc = 'คุณเป็นผู้เล่นสายคุมพื้นที่และลอบสังหาร (Tactical Anchor & Lurker) ใจเย็น ยิงแม่นยำ และอ่านการเคลื่อนไหวของศัตรูได้ขาด';
     recomName = (bestAgent?.agent?.displayName === 'Cypher') ? 'Killjoy' : 'Cypher';
     recomRole = 'Sentinel';
     recomAdvice = 'วาง Spycam และ Trapwire เพื่อล็อกพื้นที่ Flank และดักเก็บศัตรูที่หมุนตำแหน่งช้า';
-  } else if (avgObjectivePerMatch >= 1.2 || avgAssistsPerMatch >= 5) {
+  } else {
     playstyleTitle = 'STRATEGIC CONTROLLER';
     playstyleDesc = 'คุณเป็นมันสมองของทีม (Smoke Specialist) เชี่ยวชาญการใช้สกิลควันปิดวิสัยทัศน์ศัตรูและเปิดพื้นที่ปลอดภัยให้เพื่อนร่วมทีม';
-    recomName = (bestAgent?.agent?.displayName === 'Omen') ? 'Clove' : 'Omen';
+    recomName = (bestAgent?.agent?.displayName) || 'Harbor';
     recomRole = 'Controller';
-    recomAdvice = 'วาง Smoke ปิดมุม Crossfire ล่วงหน้า และใช้สกิลเปิดพื้นที่ปลอดภัยให้เพื่อนร่วมทีม';
-  } else {
-    playstyleTitle = 'TACTICAL INITIATOR';
-    playstyleDesc = 'คุณเป็นผู้เปิดข้อมูลและสนับสนุนเพื่อนร่วมทีม (Recon & Flash Playmaker) สแกนตำแหน่งและเปิดจังหวะเข้ายึดไซต์';
-    recomName = (bestAgent?.agent?.displayName === 'Gekko') ? 'Fade' : 'Gekko';
-    recomRole = 'Initiator';
-    recomAdvice = 'ส่ง Wingman วางหรือกู้สไปก์อัตโนมัติ และใช้ Dizzy แฟลชตรวจจับศัตรูก่อนที่ทีมจะเข้าพื้นที่';
+    recomAdvice = 'วาง Smoke/Wall ปิดมุม Crossfire ล่วงหน้า และใช้สกิลเปิดพื้นที่ปลอดภัยให้เพื่อนร่วมทีม';
+  }
+
+  if (hsPercentOverall > 0 && hsPercentOverall < 15) {
+    recomAdvice += ` (💡 แนะนำ: Headshot % เฉลี่ย ${hsPercentOverall}% ควรเปลี่ยนปืนหลักเป็น Phantom เพื่อความแม่นยำในการสเปรย์)`;
   }
 
   const fullRecom = getFullAgentData(recomName);

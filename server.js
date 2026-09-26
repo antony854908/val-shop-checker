@@ -741,7 +741,7 @@ app.get('/api/matches', async (req, res) => {
   try {
     const parsedLimit = parseInt(req.query.limit, 10);
     // Clamp to a safe range: each match entry triggers a separate Riot API call.
-    const limit = Number.isFinite(parsedLimit) ? Math.min(Math.max(parsedLimit, 1), 20) : 10;
+    const limit = Number.isFinite(parsedLimit) ? Math.min(Math.max(parsedLimit, 1), 20) : 15;
     const queue = typeof req.query.queue === 'string' ? req.query.queue.slice(0, 32) : '';
 
     const history = await valorantApi.getMatchHistory(

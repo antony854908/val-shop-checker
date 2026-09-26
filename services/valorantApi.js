@@ -282,8 +282,8 @@ class ValorantApiService {
     return this.matchHistoryService.getMatchDetails(matchId, region, accessToken, entitlementsToken, this);
   }
 
-  async getMatchHistory(puuid, region, accessToken, entitlementsToken, limit = 10, queue = '') {
-    return this.matchHistoryService.getMatchHistory(puuid, region, accessToken, entitlementsToken, this, limit, queue);
+  async getMatchHistory(puuid, region, accessToken, entitlementsToken, limit = 15, queue = '', myGameName = '', myTagLine = '') {
+    return this.matchHistoryService.getMatchHistory(puuid, region, accessToken, entitlementsToken, this, limit, queue, myGameName, myTagLine);
   }
 
   formatMatchData(puuid, raw, namesMap = new Map()) {

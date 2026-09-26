@@ -94,7 +94,7 @@ class MatchHistoryService {
   }
 
   // Fetch Match History List with Formatted Details
-  async getMatchHistory(puuid, region, accessToken, entitlementsToken, apiService, limit = 10, queue = '', myGameName = '', myTagLine = '') {
+  async getMatchHistory(puuid, region, accessToken, entitlementsToken, apiService, limit = 15, queue = '', myGameName = '', myTagLine = '') {
     try {
       const queueParam = queue ? `&queue=${encodeURIComponent(queue)}` : '';
       const result = await apiService.fetchWithShardFallback(
@@ -110,6 +110,27 @@ class MatchHistoryService {
       const historyData = result.data || {};
       const matchEntries = historyData.History || [];
       const rawMatches = [];
+
+      // Fetch competitive updates (RR changes) in parallel
+      const compUpdateMap = new Map();
+      try {
+        const compRes = await apiService.fetchWithShardFallback(
+          puuid,
+          region,
+          `/mmr/v1/players/{puuid}/competitiveupdates?startIndex=0&endIndex=20`,
+          'GET',
+          null,
+          accessToken,
+          entitlementsToken
+        );
+        if (compRes.data && Array.isArray(compRes.data.Matches)) {
+          for (const cu of compRes.data.Matches) {
+            if (cu.MatchID) compUpdateMap.set(cu.MatchID, cu);
+          }
+        }
+      } catch (e) {
+        // Optional fallback if competitive updates fail
+      }
 
       // Fetch match details in parallel
       const detailPromises = matchEntries.map(async (entry) => {
@@ -147,9 +168,9 @@ class MatchHistoryService {
         apiService
       );
 
-      // Format all matches with real player names
+      // Format all matches with real player names & competitive RR updates
       const formattedMatches = rawMatches
-        .map(raw => this.formatMatchData(puuid, raw, namesMap, myGameName, myTagLine))
+        .map(raw => this.formatMatchData(puuid, raw, namesMap, myGameName, myTagLine, compUpdateMap))
         .filter(Boolean);
 
       return {
@@ -164,7 +185,7 @@ class MatchHistoryService {
   }
 
   // Helper: Format raw match into rich presentation data
-  formatMatchData(puuid, raw, namesMap = new Map(), myGameName = '', myTagLine = '') {
+  formatMatchData(puuid, raw, namesMap = new Map(), myGameName = '', myTagLine = '', compUpdateMap = new Map()) {
     const matchInfo = raw.matchInfo || {};
     const players = raw.players || [];
     const teams = raw.teams || [];
@@ -174,15 +195,16 @@ class MatchHistoryService {
       namesMap.set(puuid.toLowerCase(), { gameName: myGameName, tagLine: myTagLine || 'VAL' });
     }
 
+    const rawQueueId = matchInfo.queueID || matchInfo.queueId || raw.queueID || raw.queueId || '';
     const mapMeta = skinCatalog.getMap(matchInfo.mapId);
-    const queueName = this.formatQueueName(matchInfo.queueId);
+    const queueName = this.formatQueueName(rawQueueId);
 
     // Find target player
     const me = players.find(p => p.subject?.toLowerCase() === puuid.toLowerCase());
     if (!me) return null;
 
     const myTeamId = me.teamId;
-    const isDeathmatch = (matchInfo.queueId || '').toLowerCase() === 'deathmatch';
+    const isDeathmatch = (rawQueueId || '').toLowerCase() === 'deathmatch';
 
     // Player metrics tracker
     const playerMetrics = new Map();
@@ -415,10 +437,10 @@ class MatchHistoryService {
     // Scoreboard teams
     let myTeamScore = 0;
     let enemyTeamScore = 0;
-    let outcome = 'Draw';
+    let outcome = 'DRAW';
 
     if (isDeathmatch) {
-      outcome = 'Completed';
+      outcome = 'COMPLETED';
     } else {
       const myTeam = teams.find(t => t.teamId === myTeamId);
       const enemyTeam = teams.find(t => t.teamId !== myTeamId);
@@ -427,15 +449,15 @@ class MatchHistoryService {
       enemyTeamScore = enemyTeam?.roundsWon ?? 0;
 
       if (myTeam?.won) {
-        outcome = 'Victory';
+        outcome = 'VICTORY';
       } else if (enemyTeam?.won) {
-        outcome = 'Defeat';
+        outcome = 'DEFEAT';
       } else if (myTeamScore > enemyTeamScore) {
-        outcome = 'Victory';
+        outcome = 'VICTORY';
       } else if (myTeamScore < enemyTeamScore) {
-        outcome = 'Defeat';
+        outcome = 'DEFEAT';
       } else {
-        outcome = 'Draw';
+        outcome = 'DRAW';
       }
     }
 
@@ -537,12 +559,18 @@ class MatchHistoryService {
     const friendlyTeam = allPlayers.filter(p => p.teamId === myTeamId);
     const enemyTeam = allPlayers.filter(p => p.teamId !== myTeamId);
 
+    const matchId = matchInfo.matchId || raw.matchId;
+    const compUp = compUpdateMap.get(matchId);
+    const rrEarned = (compUp && compUp.RankedRatingEarned !== undefined) ? compUp.RankedRatingEarned : null;
+    const rrAfter = (compUp && compUp.RankedRatingAfterUpdate !== undefined) ? compUp.RankedRatingAfterUpdate : null;
+    const tierAfter = (compUp && compUp.TierAfterUpdate !== undefined) ? compUp.TierAfterUpdate : null;
+
     return {
-      matchId: matchInfo.matchId,
+      matchId,
       map: mapMeta,
-      queueId: matchInfo.queueId || 'custom',
+      queueId: (rawQueueId || 'custom').toLowerCase(),
       queueName,
-      isRanked: !!matchInfo.isRanked,
+      isRanked: matchInfo.isRanked !== undefined ? !!matchInfo.isRanked : (rawQueueId.toLowerCase() === 'competitive'),
       gameStartMillis: matchInfo.gameStartMillis,
       gameLengthMillis: matchInfo.gameLengthMillis || 0,
       outcome,
@@ -551,6 +579,9 @@ class MatchHistoryService {
       myTeamId,
       myAgent,
       myRank,
+      rrEarned,
+      rrAfter,
+      tierAfter,
       myStats: {
         kills,
         deaths,
@@ -590,6 +621,7 @@ class MatchHistoryService {
       case 'deathmatch': return 'Deathmatch (เดธแมตช์)';
       case 'spikerush': return 'Spike Rush (สไปก์รัช)';
       case 'hurm': return 'Team Deathmatch (TDM)';
+      case 'skirmish2v2': return 'Skirmish 2v2';
       case 'premier': return 'Premier';
       case 'onefa': return 'Replication';
       case 'snowball': return 'Snowball Fight';
