@@ -62,13 +62,59 @@ class RateLimiter {
   }
 }
 
+const net = require('net');
+
 // Dedicated Rate Limiters
 const authLimiter = new RateLimiter(60 * 1000, 10, 5000); // 10 auth attempts per minute per IP
 const apiLimiter = new RateLimiter(60 * 1000, 180, 10000);  // 180 API calls per minute per IP
 
+/**
+ * Safely extracts and normalizes the client IP address.
+ * Prevents IP spoofing and header pollution by strictly validating against net.isIP().
+ */
+function getClientIp(req) {
+  const cfIp = req.headers?.['cf-connecting-ip'];
+  if (cfIp && typeof cfIp === 'string') {
+    const validated = normalizeIp(cfIp.trim());
+    if (validated) return validated;
+  }
+
+  const realIp = req.headers?.['x-real-ip'];
+  if (realIp && typeof realIp === 'string') {
+    const validated = normalizeIp(realIp.trim());
+    if (validated) return validated;
+  }
+
+  const forwarded = req.headers?.['x-forwarded-for'];
+  if (forwarded && typeof forwarded === 'string') {
+    const parts = forwarded.split(',');
+    for (const part of parts) {
+      const candidate = normalizeIp(part.trim());
+      if (candidate) return candidate;
+    }
+  }
+
+  const remote = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress;
+  return normalizeIp(remote) || '127.0.0.1';
+}
+
+function normalizeIp(ip) {
+  if (!ip || typeof ip !== 'string') return null;
+  let clean = ip.trim();
+  // Strip IPv4-mapped IPv6 prefix (e.g. ::ffff:192.168.1.1 -> 192.168.1.1)
+  if (clean.startsWith('::ffff:')) {
+    clean = clean.slice(7);
+  }
+  // Validate strictly with node net.isIP (returns 4 for IPv4, 6 for IPv6, 0 for invalid)
+  if (net.isIP(clean) !== 0) {
+    return clean;
+  }
+  return null;
+}
+
 // Rate Limit Middleware Helpers
 function authRateLimitMiddleware(req, res, next) {
-  const clientIp = req.ip || req.connection?.remoteAddress || '127.0.0.1';
+  const clientIp = getClientIp(req);
   if (!authLimiter.check(clientIp)) {
     return res.status(429).json({
       ok: false,
@@ -79,7 +125,7 @@ function authRateLimitMiddleware(req, res, next) {
 }
 
 function apiRateLimitMiddleware(req, res, next) {
-  const clientIp = req.ip || req.connection?.remoteAddress || '127.0.0.1';
+  const clientIp = getClientIp(req);
   if (!apiLimiter.check(clientIp)) {
     return res.status(429).json({
       ok: false,
@@ -238,6 +284,8 @@ function validateMfaInput(body) {
 
 module.exports = {
   RateLimiter,
+  getClientIp,
+  normalizeIp,
   authRateLimitMiddleware,
   apiRateLimitMiddleware,
   isValidSessionId,
